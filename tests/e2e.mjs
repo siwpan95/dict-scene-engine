@@ -312,10 +312,16 @@ async function finish(g, label) {
   assert(await g.waitFor('⚔ 第 1 回合'), 'J1 进入战斗场景')
   g.send('a')                              // 攻击一轮，产生非满血状态
   assert(await g.waitFor('第 2 回合'), 'J2 战斗回合推进')
+  // #4 修好后全局命令已可安全放行：stats/achievements 应当真正生效
   g.send('stats')
-  assert(await g.waitFor('战斗中不可用：stats'), 'J3 被拦命令明确回显「战斗中不可用」而非静默吞掉')
+  assert(await g.waitFor('ATK'), 'J3 战斗中 stats 可用（已放行且不影响战斗）')
   g.send('achievements')
-  assert(await g.waitFor('战斗中不可用：achievements'), 'J4 achievements 同样明确回显')
+  assert(await g.waitFor('屠狼者'), 'J4 战斗中 achievements 可用')
+  // 关键回归点：放行后敌人血量不得回满
+  assert(await g.waitFor('第 2 回合'), 'J4b 放行未导致战斗重开（回合数未归 1）')
+  // 战斗指令之外的杂项输入仍被明确拒绝，不是静默吞掉
+  g.send('xyzzy')
+  assert(await g.waitFor('战斗中不可用：xyzzy'), 'J4c 杂项输入明确回显「战斗中不可用」')
   // 原「战斗中 quit 进程挂起」缺陷的回归用例：断言的是退出码，不是文本
   await quit(g, 'J5 战斗中 quit')
 }
@@ -339,6 +345,60 @@ async function finish(g, label) {
   const { existsSync } = await import('node:fs')
   assert(!existsSync(join(root, '..', 'evil.json')), 'K6 项目外未产生 evil.json（逃逸失败）')
   assert(existsSync(join(root, 'saves', 'ok-slot.json')), 'K7 合法存档落在 saves/ 内')
+}
+
+// ---------- 路线 L：主循环重放回归（全检报告 #4/#5 三大外挂） ----------
+{
+  console.log('\n[重放回归] onEnter 不得被重放')
+  // 外挂 1：gossip 场景 onEnter:{gold:-5}，反复 stats 不该重复扣金币
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    g.send('3')
+    assert(await g.waitFor('老猎人的木屋'), 'L1 进入 gossip（onEnter 扣 5 金币）')
+    for (let i = 0; i < 3; i++) g.send('stats')
+    assert(await g.waitForCount('金币', 3), 'L1a stats 可执行')
+    await sleep(400)
+    const golds = [...g.output().matchAll(/金币 (-?\d+)/g)].map((m) => Number(m[1]))
+    assert(golds.length >= 2 && golds.slice(1).every((v) => v === 5),
+      `L2 反复 stats 金币稳定在 5（实测 ${golds.join('→')}）`, g.output())
+    await quit(g, 'L3 重放回归1')
+  }
+  // 外挂 2：wolf-win 场景 onEnter:{'items.broken_sword':+1}，反复 stats 不该叠加
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    g.send('1')                              // forest
+    await g.waitFor('林间小路')
+    g.send('1')                              // 战斗胜利 → wolf-win
+    assert(await g.waitFor('狼穴'), 'L4 进入 wolf-win（onEnter 给 1 把断剑）')
+    for (let i = 0; i < 3; i++) g.send('stats')
+    assert(await g.waitForCount('背包', 3), 'L4a stats 可执行')
+    await sleep(400)
+    const swords = [...g.output().matchAll(/broken_sword×(\d+)/g)].map((m) => Number(m[1]))
+    assert(swords.length >= 2 && swords.every((v) => v === 1),
+      `L5 反复 stats 断剑稳定 1 把（实测 ${swords.join('→')}）`, g.output())
+    await quit(g, 'L6 重放回归2')
+  }
+  // 外挂 3：战斗中存档不得让敌人满血重开（e2e 此前从未覆盖战斗中存档）
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    g.send('5')                              // 试炼场
+    assert(await g.waitFor('⚔ 第 1 回合'), 'L7 进入战斗')
+    g.send('a')
+    g.send('a')
+    g.send('a')
+    assert(await g.waitFor('第 4 回合'), 'L8 打掉敌人血量')
+    g.send('save battle')                    // 战斗中存档
+    assert(await g.waitFor('已保存到存档位 battle'), 'L9 战斗中存档成功')
+    await sleep(400)
+    const hp = [...g.output().matchAll(/独眼狼[　 ]+[█░]+ (\d+)\/12/g)].map((m) => Number(m[1]))
+    const last = hp[hp.length - 1]
+    assert(hp.length >= 2 && last < 12,
+      `L10 战斗中存档后敌人未回满血（HP 序列 ${hp.join('→')}）`, g.output())
+    await quit(g, 'L11 重放回归3')
+  }
 }
 
 console.log(`\n结果: ${passed} 通过, ${failed} 失败`)

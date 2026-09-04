@@ -63,12 +63,20 @@ export class EngineService extends Service {
     process.exit(0)
   }
 
-  /** 主循环：渲染 → 过滤选项 → 输入 → 命令分发 → 效果 → 跳转 */
+  /** 主循环：进入场景 → 首次渲染 → 内层输入循环
+   *
+   *  「进入场景」与「重绘场景」是两条独立路径（全检报告 #4）：
+   *    - 进入场景（外层）：emit scene/leave、执行 onEnter、emit scene/enter
+   *      只在 current 真正变化后发生一次
+   *    - 重绘场景（内层）：只重新输出界面，不触碰任何状态
+   *  早先二者共用一条路径，导致每次 rerender 都重放 onEnter —— 表现为
+   *  敲一次 stats 就再扣一次金币、物品无限叠加、战斗中存档让敌人满血复活。
+   */
   async run() {
-    while (this.running) {
-      const scene = this.ctx.scenes.get(this.current)
+    outer: while (this.running) {
+      let scene = this.ctx.scenes.get(this.current)
 
-      // 1. 离开旧场景 / 进入新场景（含 onEnter 效果）
+      // 1. 进入场景：离开旧场景 / 应用 onEnter 效果（每进入一次只做一次）
       this.ctx.emit('scene/leave', this.current)
       const changes = this.ctx.state.apply(scene.onEnter)
       for (const { path, from, to } of changes) {
@@ -81,20 +89,10 @@ export class EngineService extends Service {
       const handled = mode === 'normal' ? false : !!this.ctx.bail('scene/mode', this.current, scene, mode)
       this.ctx.emit('scene/enter', this.current, scene)
 
-      // 2. 文本渲染管道：插值 → waterfall 装饰
-      let text = this.ctx.state.interpolate(scene.text)
-      text = this.ctx.waterfall('text/render', text, (t) => t)
+      // 2. 首次渲染（纯输出，不改状态）
+      let choices = this.render(scene, mode, handled)
 
-      // 3. 过滤选项（条件求值）
-      const choices = (scene.choices ?? []).filter((choice) => this.ctx.state.check(choice.if))
-
-      // 4. 输出场景
-      this.ctx.io.blank()
-      this.ctx.io.print(`── ${scene.title ?? this.current} ──`.padStart(0))
-      this.ctx.io.print(text)
-      this.ctx.io.blank()
-
-      // 5. 结局判定：仅 normal 模式且无选项时算结局（battle 等模式由插件控制流转）
+      // 3. 结局判定：仅 normal 模式且无选项时算结局（battle 等模式由插件控制流转）
       if (mode === 'normal' && !choices.length) {
         this.ctx.emit('engine/end', this.current, scene)
         this.ctx.io.print('（完）')
@@ -102,27 +100,22 @@ export class EngineService extends Service {
         return this.stop()
       }
 
-      // 页面渲染完成：插件可在此补充自己的界面（如战斗血条）
-      this.ctx.emit('scene/rendered', this.current, scene, mode)
-
-      // 选项渲染：normal 模式由引擎渲染；其他模式交给插件（handled 时跳过）
-      if (mode === 'normal' || !handled) {
-        choices.forEach((choice, index) => {
-          this.ctx.io.print(`  [${index + 1}] ${choice.text}`)
-        })
-        this.ctx.io.blank()
+      // 重绘当前场景：重新取场景对象 —— 内容热重载可能已替换字典里的场景定义，
+      // 若沿用进入时捕获的旧对象，改完内容包界面上仍是旧文本
+      const redraw = () => {
+        scene = this.ctx.scenes.get(this.current)
+        return this.render(scene, mode, handled)
       }
 
-      // 6. 内层输入循环：noop 表示「插件已自行处理，继续等下一条输入，不重进场景」
+      // 4. 内层输入循环：只有 choice / scene 才会跳出到外层（重进新场景）
       while (this.running) {
         const input = await this.ctx.io.ask(this.config.prompt ?? '>> ')
-        if (!input) break // 空输入：回到外层重新渲染（回车=刷新，热重载也走这里）
+        if (!input) { choices = redraw(); continue } // 空输入=刷新界面
         const result = await this.ctx.waterfall('engine/command', input, choices, (line, list) => this.defaultCommand(line, list))
 
-        if (!result) break
-        if (result.type === 'noop') continue // 插件已渲染界面，继续等待输入
+        if (!result) { choices = redraw(); continue }
+        if (result.type === 'noop') continue // 插件已自行渲染界面，继续等待输入
 
-        // 7. 按命令协议执行
         switch (result.type) {
           case 'choice': {
             const choice = choices[result.index]
@@ -140,21 +133,53 @@ export class EngineService extends Service {
                 this.goto(target)
               }
             }
-            break
+            break // 跳出内层循环 → 外层重新进入新场景
           }
           case 'scene':
             this.goto(result.id)
-            break
+            break // 同上：场景已切换，交回外层重新进入
           case 'quit':
             return this.stop()
           case 'rerender':
-            break
+            // 只重绘：onEnter 不重放、scene/leave 不触发、战斗状态保留
+            choices = redraw()
+            continue
           default:
             this.ctx.io.print('（未识别的输入，输入 help 查看帮助）')
+            choices = redraw()
+            continue
         }
-        break // 非 noop 一律回到外层重新渲染
+        // choice / scene 走到这里：跳出内层循环，让外层重新进入（可能已切换的）场景
+        break
       }
     }
+  }
+
+  /** 渲染当前场景界面（不产生任何状态变更），返回过滤后的选项列表 */
+  render(scene, mode, handled) {
+    // 文本渲染管道：插值 → waterfall 装饰
+    let text = this.ctx.state.interpolate(scene.text)
+    text = this.ctx.waterfall('text/render', text, (t) => t)
+
+    // 条件求值过滤选项（每次重绘都重新求值，反映最新状态）
+    const choices = (scene.choices ?? []).filter((choice) => this.ctx.state.check(choice.if))
+
+    this.ctx.io.blank()
+    this.ctx.io.print(`── ${scene.title ?? this.current} ──`)
+    this.ctx.io.print(text)
+    this.ctx.io.blank()
+
+    // 页面渲染完成：插件可在此补充自己的界面（如战斗血条）
+    this.ctx.emit('scene/rendered', this.current, scene, mode)
+
+    // 选项渲染：normal 模式由引擎渲染；其他模式交给插件（handled 时跳过）
+    if (mode === 'normal' || !handled) {
+      choices.forEach((choice, index) => {
+        this.ctx.io.print(`  [${index + 1}] ${choice.text}`)
+      })
+      this.ctx.io.blank()
+    }
+    return choices
   }
 
   /** 默认命令处理器：编号选项 + 内置命令 */

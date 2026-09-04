@@ -133,13 +133,25 @@ export class CombatService extends Service {
         this.ctx.io.print('  战斗指令: a 攻击 | d 防御（减伤 50%）| r 逃跑 | help 帮助 | quit 退出')
         this.render()
         return { type: 'noop' }
+      // 全局命令放行（全检报告 #7 方案一）
+      // 前提：#4 已把「重绘」与「重进场景」拆开，这些命令返回的 rerender 不再
+      // 触发 scene/leave → 战斗状态不会被清空，敌人也不会满血重开。
+      // 若回退 #4，下面这些 case 必须一并收回，否则就是「敲个 help 敌人回血」。
       case 'quit':
       case 'exit':
-        // 放行给下游：{ type: 'quit' } 在引擎内层直接 stop()，不会重进场景，
-        // 因此不会触发战斗重置 —— 与 #4 主循环重构解耦，可独立修复
+      case 'stats':
+      case 'status':
+      case 'achievements':
+      case '成就':
+      case 'save':
+      case '存':
+      case 'load':
+      case '读':
+      case 'slots':
+      case '档':
         return next()
       default:
-        // 维持拦截，但把「静默吞掉」变成「明确拒绝」（全检报告 #7 方案二）
+        // 其余输入维持拦截，但把「静默吞掉」变成「明确拒绝」（方案二保底）
         this.ctx.io.print(`  战斗中不可用：${line.trim() || '(空)'}（战斗指令: a 攻击 | d 防御 | r 逃跑 | help 帮助 | quit 退出）`)
         this.render()
         return { type: 'noop' }
