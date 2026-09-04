@@ -401,5 +401,29 @@ async function finish(g, label) {
   }
 }
 
+// ---------- 路线 M：退出竞态与输出完整性（全检报告 #10） ----------
+{
+  console.log('\n[退出竞态] 极速输入 + 重定向输出完整')
+  const { openSync, closeSync, readFileSync, unlinkSync } = await import('node:fs')
+  const logFile = join(root, 'tests', '.exit-race.log')
+  const fd = openSync(logFile, 'w')
+  // stdout/stderr 直接写文件：验证去掉 process.exit() 后输出不再被截断
+  const child = spawn(process.execPath, ['game.js'], { cwd: root, stdio: ['pipe', fd, fd] })
+  const exited = new Promise((resolve) => child.once('exit', (code) => resolve(code)))
+  await sleep(400)
+  child.stdin.write('1\n1\nquit\n') // 一次性灌入：游戏可能在插件 init 完成前就退出
+  const code = await Promise.race([exited, sleep(15000).then(() => 'TIMEOUT')])
+  closeSync(fd)
+  const log = readFileSync(logFile, 'utf8')
+  unlinkSync(logFile)
+
+  assert(code === 0, `M1 极速输入后退出码 0（实测 ${code}）`, log.slice(-1200))
+  assert(log.trimEnd().endsWith('游戏已退出，感谢游玩！'),
+    'M2 重定向到文件时尾部输出完整（不再被截断）', log.slice(-600))
+  assert(!log.includes('INACTIVE_EFFECT'),
+    'M3 无「上下文已失效」崩溃（插件 init 与退出竞态已处理）', log.slice(-800))
+  if (code === 'TIMEOUT') child.kill()
+}
+
 console.log(`\n结果: ${passed} 通过, ${failed} 失败`)
 process.exit(failed ? 1 : 0)

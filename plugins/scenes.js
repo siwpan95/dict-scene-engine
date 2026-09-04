@@ -21,6 +21,7 @@
 //   }
 
 import { Service } from 'cordis'
+import { assertInsideProject } from './lib/safe-path.js'
 
 export const name = 'scenes'
 
@@ -83,6 +84,8 @@ export class SceneService extends Service {
   }
 
   async importPack(path, cacheBust) {
+    // 路径白名单：只加载项目内的内容包（见 plugins/lib/safe-path.js）
+    assertInsideProject(path, this.ctx.root.baseUrl, '内容包路径')
     let url = new URL(path, this.ctx.root.baseUrl).href
     if (cacheBust !== undefined) url += '?t=' + cacheBust
     const exports = await import(url)

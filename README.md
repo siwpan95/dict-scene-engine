@@ -27,7 +27,7 @@ cd dict-scene-engine
 npm install
 npm start          # 开始游戏
 npm run start:hmr  # 开启插件级热重载（官方 HMR，需 --expose-internals）
-npm test           # 端到端验证（52 项断言，spawn 真实进程驱动）
+npm test           # 端到端验证（107 项断言，spawn 真实进程驱动）
 npm run build:hmr  # 从本地 cordis 源码重建官方 HMR 插件
 ```
 
@@ -53,7 +53,10 @@ dict-scene-engine/
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
 ├── scripts/build-hmr.mjs # 从 E:\run and run 的 cordis 源码构建官方 HMR
 ├── tests/
-│   └── e2e.mjs           # 端到端测试：9 组 52 项断言
+│   └── e2e.mjs           # 端到端测试：13 组 107 项断言
+│                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
+│                         #   I 官方 HMR / J 战斗中命令 / K 存档安全
+│                         #   L 重放回归 / M 退出竞态
 └── saves/                # 存档目录（运行时生成，已 gitignore）
 ```
 
@@ -232,5 +235,15 @@ export default class Achievements extends Service {
 3. cordis 4 的 logger 默认只写内存缓冲，需挂 `@cordisjs/plugin-logger-console` 才有终端输出。
 4. 官方 `@cordisjs/plugin-hmr` 未发布到 npm，且要求 `node --expose-internals`（内部 ModuleLoader API）→ 用 esbuild 从本地源码构建到 `vendor/plugin-hmr`；内容级热重载仍用公开 API 自实现（import 时间戳缓存绕过 + 字典重建 + `ctx.io.wake` 注入空输入触发重渲染）。
 5. **插件 init 的执行顺序不保证等于 cordis.yml 声明顺序**（实测最后声明的 hot-reload 第二个执行）→ 插件若在 init 里同步打启动日志，可能早于 logger-console 注册 exporter 而丢失；需先 `await` 让出一个宏任务。
-6. 引擎 `rerender` 会**重新进入场景**（触发 scene/enter）；插件想要"原地等待下一条输入"必须返回 `noop`，否则战斗等状态会被重置。
-7. 管道输入 + `process.exit()` 组合下 stdout 未 flush，后续输出会丢失 —— 排查时表现为"代码执行到一半"，实为测试环境假象，须用 spawn 保持 stdin 打开来验证。
+6. 引擎 `rerender` 会**重新进入场景**（触发 scene/enter）；插件想要"原地等待下一条输入"必须返回 `noop`，否则战斗等状态会被重置。⚠️ **该问题已修**：现在 `rerender` 只重绘、不重进（见上文主循环设计）。
+7. ~~管道输入 + `process.exit()` 组合下 stdout 未 flush，后续输出会丢失 —— 实为测试环境假象。~~ **该结论是错的，已订正**：`npm start > log.txt` 同样丢尾部输出，这是 `process.exit()` 的真实缺陷。现已改为 `process.exitCode = 0` + 主动 dispose 根作用域（见下条）。
+8. **去掉 `process.exit()` 后进程仍可能不退出**：残留句柄会吊住事件循环 —— 实测有两类：① spawn 的音效播放子进程（须 `child.unref()`）；② chokidar 的 `watcher.close()` 是异步的（disposer 必须 `await`）。另需 `process.stdin.pause()` 释放 stdin 句柄。
+9. **插件 init 与退出存在竞态**：极速输入（管道里 `1\n1\nquit` 一闪而过）时游戏可能在插件 init 完成前就 dispose，此时 `ctx.on` 抛 `INACTIVE_EFFECT` → 进程非零退出。事件注册要放在 init 早期，并对该错误码做良性处理。
+
+## 退出机制
+
+游戏退出时不调用 `process.exit()`，而是设置 `process.exitCode = 0` 后主动 dispose 根作用域，由 Node 在句柄清空后自然退出。收益有三：
+
+1. cordis 的清理 effect 得以执行 —— 音效临时 WAV 不再残留在系统临时目录（实测 5 个 → 0 个）
+2. 输出不被截断 —— `npm start > log.txt` 尾部完整
+3. 引擎可嵌入宿主程序，不再强行终结进程

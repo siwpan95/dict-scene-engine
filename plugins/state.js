@@ -6,14 +6,22 @@
 //   { 'flags.metKing': true }  点路径 → 深层赋值
 //   { 'items.sword': +1 } 点路径 + 数值 → 深层计数
 //
-// 条件（if）语义 —— 一个字符串表达式，基于状态作用域求值：
+// 条件（if）语义 —— 一个字符串表达式，用 new Function 求值：
 //   'hp >= 10 && gold > 0'      'items.sword >= 1'      '!flags.doorLocked'
-// 实现为受限作用域的 Function 求值：只暴露状态视图，不暴露 process/fs 等。
-// 信任边界：内容包是本地可信文件（与 Twine 等引擎同级别约束）。
+//
+// ⚠️ 这不是沙箱。new Function 的作用域参数不构成任何隔离 —— 裸标识符
+// `process`、`globalThis.fetch` 等全局对象在表达式里直接可达，无需任何
+// "逃逸"技巧。触发面仅限内容包、cordis.yml 的 when 字段与敌人 drops；
+// 玩家在终端里输入的内容不会进入这里。因此信任边界是：**只运行可信内容包**。
 
 import { Service } from 'cordis'
 
 export const name = 'state'
+
+/** 危险路径段：写入这些段会污染 Object.prototype（原型污染） */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
+const hasUnsafeKey = (path) => String(path).split('.').some((key) => UNSAFE_KEYS.has(key))
 
 export class StateService extends Service {
   static inject = []
@@ -25,13 +33,20 @@ export class StateService extends Service {
     this.data = structuredClone(config.initial ?? {})
   }
 
-  /** 读取点路径，如 'items.sword'；缺失返回 undefined */
+  /** 读取点路径，如 'items.sword'；缺失或危险路径返回 undefined */
   get(path) {
+    if (hasUnsafeKey(path)) return undefined
     return path.split('.').reduce((obj, key) => obj?.[key], this.data)
   }
 
-  /** 写入点路径（自动创建中间对象） */
+  /** 写入点路径（自动创建中间对象）
+   *  @returns {boolean} 是否写入成功（危险路径会被拒绝）
+   */
   set(path, value) {
+    if (hasUnsafeKey(path)) {
+      this.ctx.logger('state').warn('拒绝写入危险路径（原型污染防护）: %s', path)
+      return false
+    }
     const keys = path.split('.')
     let obj = this.data
     while (keys.length > 1) {
@@ -40,9 +55,12 @@ export class StateService extends Service {
       obj = obj[key]
     }
     obj[keys[0]] = value
+    return true
   }
 
-  /** 执行一个效果对象，返回变更记录 [{ path, from, to }] */
+  /** 执行一个效果对象，返回变更记录 [{ path, from, to }]
+   *  被拒绝的路径（如 __proto__）不会产生变更记录，也不会污染状态
+   */
   apply(effects) {
     const changes = []
     if (!effects) return changes
@@ -54,7 +72,7 @@ export class StateService extends Service {
       } else if (typeof value === 'number' && from === undefined) {
         to = value
       }
-      this.set(path, to)
+      if (!this.set(path, to)) continue // 被原型污染防护拒绝
       changes.push({ path, from, to })
     }
     return changes

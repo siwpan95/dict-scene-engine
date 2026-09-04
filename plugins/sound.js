@@ -123,19 +123,34 @@ export class SoundService extends Service {
       await mkdir(this.dir, { recursive: true })
       this.ctx.root.effect(() => async () => this.cleanup())
     }
-    for (const [event, mapping] of Object.entries(HOOKS)) {
-      this.ctx.on(event, (...args) => {
-        const key = typeof mapping === 'function' ? mapping(...args) : mapping
-        this.play(key)
-      })
+    // 事件注册放在 init 早期，但必须容忍「游戏已经退出了」的竞态：
+    // 极速输入（管道里 1\n1\nquit 一闪而过）时，游戏可能在插件 init 完成前
+    // 就 dispose，此时 ctx 已失效，ctx.on 会抛 INACTIVE_EFFECT。
+    // 这是良性竞态（不再需要音效），不能让它把进程变成非零退出。
+    try {
+      for (const [event, mapping] of Object.entries(HOOKS)) {
+        this.ctx.on(event, (...args) => {
+          const key = typeof mapping === 'function' ? mapping(...args) : mapping
+          this.play(key)
+        })
+      }
+    } catch (error) {
+      if (error?.code !== 'INACTIVE_EFFECT') throw error
+      this.ctx.logger('sound').debug('游戏已退出，跳过音效事件注册')
+      return
     }
-    // 让出一个宏任务再打启动日志：插件 init 的执行顺序不保证等于声明顺序，
+
+    // 启动日志让出一个宏任务再打：插件 init 的执行顺序不保证等于声明顺序，
     // 否则本条日志可能早于 logger-console 注册 exporter 而丢失。
     await new Promise((resolve) => setTimeout(resolve, 0))
-    if (this.muted) {
-      this.ctx.logger('sound').info('音效已静音（mute: true）')
-    } else {
-      this.ctx.logger('sound').info('registered %d sound effects', Object.keys(this.sounds).length)
+    try {
+      if (this.muted) {
+        this.ctx.logger('sound').info('音效已静音（mute: true）')
+      } else {
+        this.ctx.logger('sound').info('registered %d sound effects', Object.keys(this.sounds).length)
+      }
+    } catch {
+      // 游戏可能已退出，日志丢弃即可，不能因此崩溃
     }
   }
 
@@ -166,6 +181,10 @@ export class SoundService extends Service {
       stdio: 'ignore',
       windowsHide: true,
     })
+    // 关键：播放器进程不得保持父进程存活。引擎退出时不调用 process.exit()，
+    // 而是等事件循环自然排空；未 unref 的子进程句柄会让游戏退出后仍挂着不退出
+    // （快速操作时尤其明显：多个音效同时播放，子进程成堆）。
+    child.unref()
     child.on('error', () => {
       // 无播放器/无音频设备时静默降级，不打断游戏
       this.ctx.logger('sound').debug('player unavailable, sound skipped')

@@ -54,13 +54,26 @@ export class EngineService extends Service {
     this.current = id
   }
 
-  stop() {
+  /** 结束游戏：设置退出码并主动清理根作用域，让事件循环自然退出 */
+  async stop() {
     if (!this.running) return
     this.running = false
     this.ctx.emit('engine/stop')
     this.ctx.io.blank()
     this.ctx.io.print('游戏已退出，感谢游玩！')
-    process.exit(0)
+
+    // 不用 process.exit()（全检报告 #10）：它会跳过 cordis 的清理 effect
+    // （音效临时文件残留在系统临时目录）、截断管道输出（npm start > log.txt
+    // 丢掉尾部），也让引擎无法嵌入宿主程序。改为设置 exitCode 后主动 dispose
+    // 根作用域，由 Node 在句柄清空后自然退出。
+    process.exitCode = 0
+    try {
+      await this.ctx.root.fiber.dispose()
+      const handles = process._getActiveHandles?.() ?? []
+      const reqs = process._getActiveRequests?.() ?? []
+    } catch (error) {
+      this.ctx.logger('engine').warn('清理资源时出错: %s', error.message)
+    }
   }
 
   /** 主循环：进入场景 → 首次渲染 → 内层输入循环

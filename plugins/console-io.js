@@ -22,8 +22,13 @@ export class ConsoleIO extends Service {
 
   [Service.init]() {
     this.rl = createInterface({ input: process.stdin, output: process.stdout })
-    // rl 关闭挂在根上下文的 effect 上 —— 确保任何时刻退出都能清理
-    this.ctx.root.effect(() => () => this.rl?.close())
+    // 清理挂在根上下文的 effect 上 —— 引擎不再调用 process.exit()，
+    // 而是 dispose 根作用域后让事件循环自然退出，因此这里必须释放 stdin 句柄，
+    // 否则进程会一直挂在等待输入上退不出去（管道与 TTY 下均如此）。
+    this.ctx.root.effect(() => () => {
+      this.rl?.close()
+      process.stdin.pause()
+    })
 
     // 后台泵：逐行读入，喂给等待中的 ask()；EOF 时放行所有等待者（空输入）
     ;(async () => {

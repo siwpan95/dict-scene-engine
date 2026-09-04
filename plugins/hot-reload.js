@@ -14,7 +14,8 @@
 
 import { Service } from 'cordis'
 import { watch } from 'chokidar'
-import { join, relative } from 'node:path'
+import { relative } from 'node:path'
+import { assertInsideProject } from './lib/safe-path.js'
 
 export const name = 'hot-reload'
 
@@ -27,12 +28,15 @@ export class HotReloadService extends Service {
   }
 
   [Service.init]() {
-    const paths = (this.config.paths ?? ['./content']).map((p) => join(process.cwd(), p))
+    // 路径白名单：只监听项目内的目录（见 plugins/lib/safe-path.js）
+    const paths = (this.config.paths ?? ['./content'])
+      .map((p) => assertInsideProject(p, this.ctx.root.baseUrl, '热重载监听路径'))
     const watcher = watch(paths, {
       ignoreInitial: true,
       awaitWriteFinish: { stabilityThreshold: 100, pollInterval: 20 },
     })
-    this.ctx.root.effect(() => () => watcher.close())
+    // close() 是异步的：必须 await，否则 FSWatcher 句柄残留会让进程退出后仍挂住
+    this.ctx.root.effect(() => async () => { await watcher.close() })
 
     let timer = null
     watcher.on('all', (event, file) => {
