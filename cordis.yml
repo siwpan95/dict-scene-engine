@@ -1,0 +1,90 @@
+# 字典场景引擎 · 插件清单
+# 每个条目 = 一个 Cordis 插件实例（id 用于定位，name 是模块路径）
+# 相对路径基于本文件所在目录解析；改这里即可开关插件/换内容包，无需改代码。
+#
+# 依赖注入由 Cordis 自动编排：engine 声明 inject: [scenes, state, io]，
+# 全部就绪后才会启动，无需手动控制加载顺序。
+
+- id: logger
+  name: '@cordisjs/plugin-logger-console'
+  config:
+    colors: false            # Windows 控制台关闭 ANSI 颜色，避免乱码
+    showTime: 'HH:mm:ss '
+
+- id: timer
+  name: '@cordisjs/plugin-timer'   # HMR 插件的防抖依赖（官方 hmr 需要）
+
+- id: scenes
+  name: ./plugins/scenes.js
+  config:
+    packs:                    # 场景字典内容包（支持多个，后者覆盖前者同 ID 场景）
+      - ./content/demo.js
+      - ./content/starport.js
+
+- id: state
+  name: ./plugins/state.js
+  config:
+    initial:                  # 玩家初始状态（战斗属性：atk/def/crit/maxHp）
+      name: 旅人
+      hp: 20
+      maxHp: 20
+      atk: 3                  # 基础攻击（+武器加成 = 实际 ATK）
+      def: 2                  # 防御（每点抵消 defenseFactor 点伤害）
+      crit: 0.15              # 暴击率
+      gold: 10
+      items: {}
+      flags: {}
+
+- id: io
+  name: ./plugins/console-io.js
+
+- id: engine
+  name: ./plugins/engine.js
+  config:
+    entry: start              # 入场场景 ID
+    prompt: '>> '
+
+- id: save
+  name: ./plugins/save.js
+  config:
+    dir: ./saves
+
+- id: achievements
+  name: ./plugins/achievements.js
+  config:
+    list:                     # 成就表（数据驱动，when 为条件表达式，可引用 scene ID）
+      - { id: wolf-slayer,  name: 屠狼者,   desc: 战胜林间的独眼狼,         when: 'scene === "wolf-win"' }
+      - { id: informant,    name: 星际线人, desc: 在星港酒吧买到情报,       when: 'scene === "starport-bar"' }
+      - { id: sword-master, name: 剑主,     desc: 让失落之剑认你为主,       when: 'scene === "ending-win"' }
+
+- id: combat
+  name: ./plugins/combat.js
+  config:
+    formula:                  # 数值公式参数（可选，覆盖默认值）
+      variance: 0.2           # 伤害随机波动 ±20%
+      defenseFactor: 0.5      # 每点防御抵消的伤害
+      critMult: 1.8           # 暴击倍率
+      defendCut: 0.5          # 防御姿态减伤 50%
+      fleeChance: 0.45        # 逃跑成功率
+    weapons:                  # 武器加成（按背包数量累加到玩家 ATK）
+      broken_sword: { name: 断剑, atk: 2 }
+      rusty_sword:  { name: 锈剑, atk: 4 }
+    enemies:                  # 敌人字典（数据驱动，与场景字典同哲学）
+      wolf:  { name: 独眼狼,   hp: 12, atk: 3, def: 0, crit: 0.10, drops: { gold: +5, 'items.wolf_pelt': +1 } }
+      guard: { name: 星港守卫, hp: 20, atk: 4, def: 1, crit: 0.15, drops: { gold: +8 } }
+      golem: { name: 石像鬼,   hp: 26, atk: 5, def: 2, crit: 0.15, drops: { gold: +30, 'items.golem_core': +1 } }
+
+- id: sound
+  name: ./plugins/sound.js
+  config:
+    mute: false               # 静音开关（自动化测试可设为 true）
+    sampleRate: 22050
+    sounds:                   # 覆盖/扩充默认音效库（事件 → 音色）
+      battle-crit: { notes: [330, 440, 587], ms: 70, wave: square, gain: 0.2 }
+
+- id: hot-reload
+  name: ./plugins/hot-reload.js
+  config:
+    paths:                    # 监听的目录（改这些目录下的 .js 即时生效）
+      - ./content
+    debounce: 200             # 防抖毫秒数

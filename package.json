@@ -1,0 +1,31 @@
+{
+  "name": "dict-scene-engine",
+  "version": "0.1.0",
+  "description": "字典场景引擎 —— 基于 Cordis 插件架构的文字冒险游戏引擎",
+  "type": "module",
+  "main": "game.js",
+  "scripts": {
+    "start": "node game.js",
+    "start:hmr": "node --expose-internals game.js",
+    "build:hmr": "node scripts/build-hmr.mjs",
+    "test": "node tests/e2e.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@babel/code-frame": "^8.0.0",
+    "@cordisjs/plugin-include": "1.0.5",
+    "@cordisjs/plugin-loader": "1.0.0-rc.6",
+    "@cordisjs/plugin-logger-console": "^1.0.0",
+    "@cordisjs/plugin-timer": "^1.1.3",
+    "chokidar": "^4.0.3",
+    "cordis": "4.0.0-rc.9",
+    "picomatch": "^4.0.7",
+    "schemastery": "^3.18.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}
