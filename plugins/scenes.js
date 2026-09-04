@@ -1,5 +1,9 @@
 // 场景字典服务（引擎核心）：把「场景」抽象为一个字典（Dict<Scene>）
-// 内容包只需导出一个纯数据/纯函数字典，即可被引擎解释执行。
+// 内容包导出一个场景字典对象即可被引擎解释执行。
+//
+// ⚠️ 安全说明：内容包是 ESM 模块，加载 = 执行（模块顶层代码立即运行，拥有完整
+// Node 权限）。下面的 validate() 只用于发现字段拼写错误等开发期问题，**不是安全
+// 控制** —— import() 先于 validate() 执行，不可信内容包无法靠校验拦截。
 //
 // 场景 Schema：
 //   {
@@ -50,19 +54,30 @@ export class SceneService extends Service {
     return pack
   }
 
-  /** 热重载一个内容包：绕过 ESM 缓存重新导入并重建字典 */
+  /** 热重载一个内容包：绕过 ESM 缓存重新导入并重建字典
+   *  @returns {Promise<boolean>} true=已替换；false=被拒绝（字典保持原样）
+   */
   async reload(path) {
     if (!this.loaded.has(path)) {
       this.ctx.logger('scenes').warn('reload skipped: 内容包 %s 不在配置中', path)
       return false
     }
+    const previous = this.loaded.get(path)
+    let pack
     try {
-      const pack = await this.importPack(path, Date.now())
-      this.loaded.set(path, pack)
+      pack = await this.importPack(path, Date.now())
+    } catch (error) {
+      this.ctx.logger('scenes').error('reload rejected: %s（保留旧内容）', error.message)
+      return false
+    }
+    this.loaded.set(path, pack)
+    try {
       this.rebuild()
       return true
     } catch (error) {
-      this.ctx.logger('scenes').error('reload failed: %s（保留旧内容）', error.message)
+      // rebuild 走双缓冲，此处 this.dict 未被污染；只需回滚内容缓存保持一致
+      this.loaded.set(path, previous)
+      this.ctx.logger('scenes').error('reload rejected: %s（保留旧内容）', error.message)
       return false
     }
   }
@@ -82,26 +97,39 @@ export class SceneService extends Service {
     return pack
   }
 
-  /** 按 packs 顺序重建场景字典，并校验 goto 引用 */
+  /** 按 packs 顺序重建场景字典（双缓冲）：先在临时 dict 上全量校验，
+   *  通过后才原子替换 this.dict —— 保证「校验失败 = 旧字典毫发无损」，
+   *  不会出现日志宣称回滚、实际字典已被污染的情况。
+   */
   rebuild() {
-    this.dict = Object.create(null)
+    const next = Object.create(null)
     for (const path of this.packs) {
       for (const [id, scene] of Object.entries(this.loaded.get(path) ?? {})) {
-        this.dict[id] = scene
+        next[id] = scene
       }
     }
+    const dangling = this.findDangling(next)
+    if (dangling.length) {
+      throw new Error(`存在未定义的场景跳转:\n${dangling.join('\n')}`)
+    }
+    this.dict = next
+    return true
+  }
+
+  /** 检查悬空 goto 引用，返回错误列表（空数组 = 通过）
+   *  '@' 开头的特殊目标（如 @restart）免检
+   */
+  findDangling(dict) {
     const dangling = []
-    for (const [id, scene] of Object.entries(this.dict)) {
+    for (const [id, scene] of Object.entries(dict)) {
       for (const [i, choice] of (scene.choices ?? []).entries()) {
         const target = choice?.goto
-        if (target !== undefined && !String(target).startsWith('@') && !(target in this.dict)) {
+        if (target !== undefined && !String(target).startsWith('@') && !(target in dict)) {
           dangling.push(`  - #${id} 第 ${i + 1} 个选项 -> "${target}"`)
         }
       }
     }
-    if (dangling.length) {
-      throw new Error(`存在未定义的场景跳转:\n${dangling.join('\n')}`)
-    }
+    return dangling
   }
 
   /** 校验字典结构，返回错误列表（空数组 = 通过） */

@@ -1,7 +1,7 @@
 {
   "name": "dict-scene-engine",
   "version": "0.1.0",
-  "description": "字典场景引擎 —— 基于 Cordis 插件架构的文字冒险游戏引擎",
+  "description": "字典场景引擎 —— 基于 Cordis 4.0 插件架构的文字冒险游戏引擎（场景即字典，能力即插件）",
   "type": "module",
   "main": "game.js",
   "scripts": {
@@ -12,6 +12,34 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "files": [
+    "game.js",
+    "cordis.yml",
+    "content/",
+    "plugins/",
+    "vendor/",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "cordis",
+    "text-adventure",
+    "interactive-fiction",
+    "game-engine",
+    "plugin-architecture",
+    "文字冒险",
+    "游戏引擎"
+  ],
+  "author": "全哥 (siwpan)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/siwpan/dict-scene-engine"
+  },
+  "homepage": "https://gitee.com/siwpan/dict-scene-engine",
+  "bugs": {
+    "url": "https://gitee.com/siwpan/dict-scene-engine/issues"
   },
   "dependencies": {
     "@babel/code-frame": "^8.0.0",
@@ -24,8 +52,8 @@
     "picomatch": "^4.0.7",
     "schemastery": "^3.18.0"
   },
-  "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "js-yaml": "^4.1.0"
   }
 }

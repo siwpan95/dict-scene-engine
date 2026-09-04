@@ -130,11 +130,17 @@ export class CombatService extends Service {
         return this.playerTurn('flee')
       case 'help':
       case '?':
-        this.ctx.io.print('  战斗指令: a 攻击 | d 防御（减伤 50%）| r 逃跑 | help 帮助')
+        this.ctx.io.print('  战斗指令: a 攻击 | d 防御（减伤 50%）| r 逃跑 | help 帮助 | quit 退出')
         this.render()
         return { type: 'noop' }
+      case 'quit':
+      case 'exit':
+        // 放行给下游：{ type: 'quit' } 在引擎内层直接 stop()，不会重进场景，
+        // 因此不会触发战斗重置 —— 与 #4 主循环重构解耦，可独立修复
+        return next()
       default:
-        this.ctx.io.print('  （战斗指令: a 攻击 | d 防御 | r 逃跑）')
+        // 维持拦截，但把「静默吞掉」变成「明确拒绝」（全检报告 #7 方案二）
+        this.ctx.io.print(`  战斗中不可用：${line.trim() || '(空)'}（战斗指令: a 攻击 | d 防御 | r 逃跑 | help 帮助 | quit 退出）`)
         this.render()
         return { type: 'noop' }
     }

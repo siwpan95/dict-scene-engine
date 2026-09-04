@@ -1,11 +1,11 @@
 // 端到端验证：spawn 真实游戏进程，逐步输入并断言输出
 // 运行：node tests/e2e.mjs
 //
-// 场景覆盖：
-//   路线 A（情报+还价）：start -> gossip -> road(还价) -> castle -> ending-win
-//   路线 B（战斗+断剑）：start -> forest -> wolf-win -> castle -> ending-win
-//   存档链路：save a -> quit -> 重新启动 -> load a -> 场景恢复
-//   结局判定：ending-win 输出（完）
+// 三组断言，缺一不可（全检报告 #9：原测试只断言文本，对「崩溃」与「挂起」结构性失明）：
+//   1. 输出文本断言（waitFor）
+//   2. 退出码断言（exit() 返回后 assert code === 0）
+//   3. stderr 扫描（任何 stderr 输出都视为失败）
+// 另：每轮 exit 都有 Promise.race 硬超时 —— 进程挂起时判失败，而不是让 await 无限等待
 
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -26,7 +26,9 @@ function assert(ok, label, output = '') {
   }
 }
 
-/** 启动游戏进程，返回 { send, waitFor, kill, exit, output() }
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+/** 启动游戏进程，返回 { send, waitFor, waitForCount, output, stderr, exit, kill }
  *  @param {{ internals?: boolean, env?: object }} options
  *         internals: 加 --expose-internals（官方 HMR 需要）
  */
@@ -34,35 +36,64 @@ function launch(options = {}) {
   const args = options.internals ? ['--expose-internals', 'game.js'] : ['game.js']
   const child = spawn(process.execPath, args, { cwd: root, env: { ...process.env, ...(options.env ?? {}) } })
   const exitPromise = new Promise((resolve) => child.once('exit', (code, signal) => resolve({ code, signal })))
-  let buffer = ''
-  child.stdout.on('data', (chunk) => { buffer += chunk.toString() })
-  child.stderr.on('data', (chunk) => { buffer += chunk.toString() })
+  let out = ''
+  let err = ''
+  child.stdout.on('data', (chunk) => { out += chunk.toString() })
+  child.stderr.on('data', (chunk) => { err += chunk.toString() })
+  const buffer = () => out + err
+
+  const poll = (predicate, timeout) => new Promise((resolve) => {
+    const start = Date.now()
+    const timer = setInterval(() => {
+      if (predicate()) { clearInterval(timer); return resolve(true) }
+      if (Date.now() - start > timeout) { clearInterval(timer); return resolve(false) }
+    }, 50)
+  })
+
   return {
     send: (line) => child.stdin.write(line + '\n'),
     // 轮询检查：避免中文被 chunk 边界拆开导致单次 includes 漏检
-    waitFor: (text, timeout = 8000) => new Promise((resolve) => {
-      const start = Date.now()
-      const timer = setInterval(() => {
-        if (buffer.includes(text)) { clearInterval(timer); return resolve(true) }
-        if (Date.now() - start > timeout) { clearInterval(timer); return resolve(false) }
-      }, 50)
-    }),
-    output: () => buffer,
+    waitFor: (text, timeout = 8000) => poll(() => buffer().includes(text), timeout),
     // 轮询等待某文本出现 N 次（用于判断插件被重新初始化等计数场景）
-    waitForCount: (text, count, timeout = 8000) => new Promise((resolve) => {
-      const start = Date.now()
-      const timer = setInterval(() => {
-        const hits = buffer.split(text).length - 1
-        if (hits >= count) { clearInterval(timer); return resolve(true) }
-        if (Date.now() - start > timeout) { clearInterval(timer); return resolve(false) }
-      }, 50)
-    }),
+    waitForCount: (text, count, timeout = 8000) => poll(() => buffer().split(text).length - 1 >= count, timeout),
+    output: () => buffer(),
+    stderr: () => err,
+    /** 等待进程退出，带硬超时；返回 { ok, code, signal, reason }
+     *  ok=false 表示进程在超时内未退出（疑似挂起），此时判失败而非卡死
+     */
+    exit: async (timeout = 10000) => {
+      const res = await Promise.race([
+        exitPromise.then((r) => ({ ok: true, ...r })),
+        sleep(timeout).then(() => ({ ok: false, code: null, signal: null, reason: `进程在 ${timeout}ms 内未退出（疑似挂起）` })),
+      ])
+      if (!res.ok) child.kill()
+      return res
+    },
     kill: () => child.kill(),
-    exit: () => exitPromise,
   }
 }
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+/** 断言游戏正常退出：退出码 0 且 stderr 干净 */
+function assertExit(res, label, g) {
+  const detail = `退出码=${res?.code} 信号=${res?.signal} ${res?.reason ?? ''}\n${(g?.stderr() ?? '').slice(-1500)}`
+  assert(res.ok && res.code === 0, label, detail)
+  const stderr = (g?.stderr() ?? '').trim()
+  assert(stderr === '', `${label}（stderr 干净：无未捕获异常/警告）`, stderr.slice(-1500))
+}
+
+/** 发送 quit 并断言：进程退出码 0、stderr 干净、未挂起 */
+async function quit(g, label) {
+  g.send('quit')
+  const res = await g.exit()
+  assertExit(res, label + '（退出码 0）', g)
+}
+
+/** 结局场景收尾：补一个空输入（对应「按回车结束游戏」），再断言退出结果 */
+async function finish(g, label) {
+  g.send('')
+  const res = await g.exit()
+  assertExit(res, label + '（退出码 0）', g)
+}
 
 // ---------- 路线 A：情报 → 还价 → 胜利 ----------
 {
@@ -87,8 +118,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   g.send('1')                              // 亮出武器
   assert(await g.waitFor('结局 · 剑之认主'), 'A10 有剑 → 胜利结局')
   assert(await g.waitFor('（完）'), 'A11 无选项场景判定为结局')
-  g.send('')
-  await g.exit()
+  await finish(g, '路线A 结局收尾')
 }
 
 // ---------- 路线 B：战斗 → 断剑 → 胜利 ----------
@@ -106,8 +136,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   await g.waitFor('古堡 · 大门')
   g.send('1')                              // 亮出断剑
   assert(await g.waitFor('结局 · 剑之认主'), 'B4 断剑同样通关（多条件 || 求值）')
-  g.send('')
-  await g.exit()
+  await finish(g, '路线B 结局收尾')
 }
 
 // ---------- 存档 / 读档 ----------
@@ -130,8 +159,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   g2.send('load a')
   assert(await g2.waitFor('已读取存档位 a（场景: forest）'), 'C4 重启后 load 恢复存档')
   assert(await g2.waitFor('林间小路'), 'C5 读档后回到 forest 场景')
-  g2.send('quit')
-  await g2.exit()
+  await quit(g2, '存档链路 退出')
 }
 
 // ---------- 路线 D：DLC 星港（跨包跳转 + 成就） ----------
@@ -152,8 +180,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   await g.waitFor('星港 · 货舱区')
   g.send('2')                              // 通风管道（需情报）
   assert(await g.waitFor('结局 · 数据核心'), 'D6 情报解锁隐藏路线（条件选项）')
-  g.send('quit')
-  await g.exit()
+  await quit(g, '路线D 退出')
 }
 
 // ---------- 路线 E：成就命令 ----------
@@ -171,8 +198,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   assert(await g.waitFor('[✓] 屠狼者'), 'E2 achievements 命令列出已解锁成就')
   const list = g.output()
   assert(list.includes('[ ] 剑主'), 'E3 未解锁成就显示为空')
-  g.send('quit')
-  await g.exit()
+  await quit(g, '成就系统 退出')
 }
 
 // ---------- 路线 F：内容热重载（改字典即时生效） ----------
@@ -197,8 +223,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
     await g.waitFor('⚡ 内容已热更新')
     await g.waitFor('你在晨雾中醒来')
   }
-  g.send('quit')
-  await g.exit()
+  await quit(g, '热重载 退出')
 }
 
 // ---------- 路线 G：音效（事件订阅 → 程序化合成 WAV） ----------
@@ -219,8 +244,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   assert(files.some((f) => f.includes('scene-enter')), 'G2 进入场景事件触发音效')
   const sizes = await Promise.all(files.map(async (f) => (await stat(join(dir, f))).size))
   assert(sizes.length > 0 && sizes.every((s) => s > 44), 'G3 WAV 产物含有效 PCM 数据（>44 字节头）')
-  g.send('quit')
-  await g.exit()
+  await quit(g, '音效 退出')
 
   // 静音模式（DSE_MUTE=1）不应产生任何文件
   await rm(dir, { recursive: true, force: true })
@@ -232,8 +256,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   await sleep(600)
   const mutedFiles = await readdir(dir).catch(() => [])
   assert(mutedFiles.length === 0, 'G5 静音模式不生成任何音频文件')
-  g2.send('quit')
-  await g2.exit()
+  await quit(g2, '音效 退出')
 }
 
 // ---------- 路线 H：战斗系统 ----------
@@ -253,8 +276,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   for (let i = 0; i < 10; i++) g.send('a') // 持续攻击直到分出胜负
   assert(await g.waitFor('你击败了独眼狼') || await g.waitFor('你被独眼狼击倒'), 'H7 战斗分出胜负')
   assert(await g.waitFor('战利品') || await g.waitFor('试炼场之殇'), 'H8 结算掉落或进入失败结局')
-  g.send('quit')
-  await g.exit()
+  await quit(g, '战斗系统 退出')
 }
 
 // ---------- 路线 I：官方 HMR（插件级热重载） ----------
@@ -278,8 +300,45 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   }
   g.send('stats')
   assert(await g.waitFor('ATK'), 'I4 重载后游戏仍可正常交互')
-  g.send('quit')
-  await g.exit()
+  await quit(g, '官方 HMR 退出')
+}
+
+// ---------- 路线 J：战斗中命令拦截与可退出性（全检报告 #7/#10 盲区覆盖） ----------
+{
+  console.log('\n[战斗中命令] 拦截回显 + quit 可退出')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  g.send('5')                              // 试炼场
+  assert(await g.waitFor('⚔ 第 1 回合'), 'J1 进入战斗场景')
+  g.send('a')                              // 攻击一轮，产生非满血状态
+  assert(await g.waitFor('第 2 回合'), 'J2 战斗回合推进')
+  g.send('stats')
+  assert(await g.waitFor('战斗中不可用：stats'), 'J3 被拦命令明确回显「战斗中不可用」而非静默吞掉')
+  g.send('achievements')
+  assert(await g.waitFor('战斗中不可用：achievements'), 'J4 achievements 同样明确回显')
+  // 原「战斗中 quit 进程挂起」缺陷的回归用例：断言的是退出码，不是文本
+  await quit(g, 'J5 战斗中 quit')
+}
+
+// ---------- 路线 K：存档安全（全检报告 #6 路径遍历 + 输出注入） ----------
+{
+  console.log('\n[存档安全] 路径遍历与非法存档位')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  g.send('save ../../evil')
+  assert(await g.waitFor('存档位名称非法'), 'K1 ../ 路径遍历被 slot 白名单拒绝')
+  g.send('save ok-slot')
+  assert(await g.waitFor('已保存到存档位 ok-slot'), 'K2 合法存档位正常保存')
+  g.send('load ../../evil')
+  assert(await g.waitFor('存档位名称非法'), 'K3 读档同样拒绝路径遍历')
+  g.send('load ok-slot')
+  assert(await g.waitFor('已读取存档位 ok-slot'), 'K4 合法存档位正常读档')
+  await quit(g, 'K5 存档安全链路')
+
+  // 断言没有文件被写到 saves/ 之外
+  const { existsSync } = await import('node:fs')
+  assert(!existsSync(join(root, '..', 'evil.json')), 'K6 项目外未产生 evil.json（逃逸失败）')
+  assert(existsSync(join(root, 'saves', 'ok-slot.json')), 'K7 合法存档落在 saves/ 内')
 }
 
 console.log(`\n结果: ${passed} 通过, ${failed} 失败`)
