@@ -46,12 +46,12 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
 
-// ../cordis-4.0.0-rc.9/packages/hmr/src/index.ts
+// <cordis-src>/index.ts
 import { Inject, Service } from "cordis";
 import { watch } from "chokidar";
 import { relative, resolve } from "node:path";
 
-// ../cordis-4.0.0-rc.9/packages/hmr/src/error.ts
+// <cordis-src>/error.ts
 import { codeFrameColumns } from "@babel/code-frame";
 import { readFileSync } from "node:fs";
 function isBuildFailure(e) {
@@ -84,18 +84,18 @@ function handleError(ctx, e) {
   }
 }
 
-// ../cordis-4.0.0-rc.9/packages/hmr/src/index.ts
+// <cordis-src>/index.ts
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import picomatch from "picomatch";
 
-// ../cordis-4.0.0-rc.9/packages/hmr/src/locales/en-US.yml
+// <cordis-src>/locales/en-US.yml
 var en_US_default = { "base": "The root directory of the displayed path, defaults to the current working directory.", "root": "List of files or directories to listen to, relative to the `base` path.", "ignored": "Files or directories to ignore. Supports [Glob Patterns](https://github.com/micromatch/micromatch) syntax.", "debounce": "Debounce updates in milliseconds." };
 
-// ../cordis-4.0.0-rc.9/packages/hmr/src/locales/zh-CN.yml
+// <cordis-src>/locales/zh-CN.yml
 var zh_CN_default = { "base": "\u7528\u6237\u663E\u793A\u8DEF\u5F84\u7684\u6839\u76EE\u5F55\uFF0C\u9ED8\u8BA4\u4E3A\u5F53\u524D\u5DE5\u4F5C\u8DEF\u5F84\u3002", "root": "\u8981\u76D1\u542C\u7684\u6587\u4EF6\u6216\u76EE\u5F55\u5217\u8868\uFF0C\u76F8\u5BF9\u4E8E `base` \u8DEF\u5F84\u3002", "ignored": "\u8981\u5FFD\u7565\u7684\u6587\u4EF6\u6216\u76EE\u5F55\u3002\u652F\u6301 [Glob Patterns](https://github.com/micromatch/micromatch) \u8BED\u6CD5\u3002", "debounce": "\u5EF6\u8FDF\u89E6\u53D1\u66F4\u65B0\u7684\u7B49\u5F85\u65F6\u95F4\u3002" };
 
-// ../cordis-4.0.0-rc.9/packages/hmr/src/index.ts
+// <cordis-src>/index.ts
 import z from "schemastery";
 async function loadDependencies(job, ignored = /* @__PURE__ */ new Set()) {
   const dependencies = /* @__PURE__ */ new Set();

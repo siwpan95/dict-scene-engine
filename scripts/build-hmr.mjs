@@ -14,7 +14,7 @@
 //   - .yml 语言文件通过插件转成 JS 对象导出（esbuild 不认识 yaml）
 
 import { build } from 'esbuild'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { load } from 'js-yaml'
 import { dirname, join } from 'node:path'
@@ -71,5 +71,13 @@ await build({
   plugins: [yamlPlugin],
   logLevel: 'info',
 })
+
+// esbuild 会在每个模块前插入来源路径注释，形态随 entry point 写法而变
+// （相对路径 → ../cordis-4.0.0-rc.9/...；绝对路径 → G:/xxx/...）。
+// 不同人、不同盘符构建就会得到"功能一致但字节不同"的产物，产生 diff 噪音。
+// 这里把注释里的源码目录统一成占位符，保证任何环境下产物字节一致（可复现）。
+const raw = await readFile(OUT, 'utf8')
+const stable = raw.replace(/^\/\/.*?packages[\\/]hmr[\\/]src[\\/]/gm, '// <cordis-src>/')
+if (stable !== raw) await writeFile(OUT, stable, 'utf8')
 
 console.log('built ->', OUT)
