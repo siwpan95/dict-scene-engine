@@ -8,6 +8,7 @@
     "start": "node game.js",
     "start:hmr": "node --expose-internals game.js",
     "build:hmr": "node scripts/build-hmr.mjs",
+    "lint:content": "node scripts/lint-content.mjs",
     "test": "node tests/e2e.mjs"
   },
   "engines": {

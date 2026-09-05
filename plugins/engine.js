@@ -177,8 +177,11 @@ export class EngineService extends Service {
     // 条件求值过滤选项（每次重绘都重新求值，反映最新状态）
     const choices = (scene.choices ?? []).filter((choice) => this.ctx.state.check(choice.if))
 
+    // 标题与选项文本同样走插值（E1）：可写"需 10 金币（你有 {gold}）"
+    const title = this.ctx.state.interpolate(scene.title ?? this.current)
+
     this.ctx.io.blank()
-    this.ctx.io.print(`── ${scene.title ?? this.current} ──`)
+    this.ctx.io.print(`── ${title} ──`)
     this.ctx.io.print(text)
     this.ctx.io.blank()
 
@@ -188,7 +191,7 @@ export class EngineService extends Service {
     // 选项渲染：normal 模式由引擎渲染；其他模式交给插件（handled 时跳过）
     if (mode === 'normal' || !handled) {
       choices.forEach((choice, index) => {
-        this.ctx.io.print(`  [${index + 1}] ${choice.text}`)
+        this.ctx.io.print(`  [${index + 1}] ${this.ctx.state.interpolate(choice.text)}`)
       })
       this.ctx.io.blank()
     }

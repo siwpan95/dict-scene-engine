@@ -27,7 +27,8 @@ cd dict-scene-engine
 npm install
 npm start          # 开始游戏
 npm run start:hmr  # 开启插件级热重载（官方 HMR，需 --expose-internals）
-npm test           # 端到端验证（107 项断言，spawn 真实进程驱动）
+npm test           # 端到端验证（116 项断言，spawn 真实进程驱动）
+npm run lint:content  # 内容校验：悬空 goto / 不可达场景 / 结局可达 / 死变量
 npm run build:hmr  # 从本地 cordis 源码重建官方 HMR 插件
 ```
 
@@ -53,12 +54,33 @@ dict-scene-engine/
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
 ├── scripts/build-hmr.mjs # 从 E:\run and run 的 cordis 源码构建官方 HMR
 ├── tests/
-│   └── e2e.mjs           # 端到端测试：13 组 107 项断言
+│   └── e2e.mjs           # 端到端测试：14 组 116 项断言
 │                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
 │                         #   I 官方 HMR / J 战斗中命令 / K 存档安全
-│                         #   L 重放回归 / M 退出竞态
+│                         #   L 重放回归 / M 退出竞态 / N 内容校验
+├── docs/
+│   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～3）
+│   └── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
 └── saves/                # 存档目录（运行时生成，已 gitignore）
 ```
+
+## 当前内容规模
+
+| 指标 | 数值 |
+| --- | --- |
+| 场景 | 28（主线 24 + 星港 DLC 4） |
+| 正文字数 | 4,347（均长 155 字/场景） |
+| 结局 | 4（全部可达） |
+| 状态变量 | flags 5 / items 5（无死变量） |
+| 结构 | branch-and-bottleneck + 村庄枢纽可重访 |
+
+内容校验：
+
+```bash
+npm run lint:content
+```
+
+检查悬空 goto、不可达场景、结局可达性、叙事账本一致性（未声明引用与死变量）、场景厚度、疑似假选择、ID 命名。当前 **0 错误 0 警告**。
 
 ## 架构
 
@@ -97,7 +119,8 @@ dict-scene-engine/
 export default {
   start: {
     title: '村庄 · 晨雾',
-    text: '{name}，你的 HP 是 {hp}。',   // 支持状态插值
+    text: '{name}，你的 HP 是 {hp}。',   // 状态插值
+    // title 与 choice.text 同样支持插值：'需 10 金币（你有 {gold}）'
     onEnter: { gold: -5 },                // 进入场景时执行的效果
     choices: [                            // 无 choices = 结局场景
       {
@@ -110,6 +133,8 @@ export default {
   },
 }
 ```
+
+**状态插值**作用于三处：`scene.text`、`scene.title`、`choice.text`，写法 `{path}`（点路径，如 `{gold}`、`{items.rusty_sword}`）；路径不存在时原样保留 `{path}`。
 
 ### 效果（effects）语义
 

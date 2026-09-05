@@ -101,20 +101,25 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 17 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 试炼场，logger-console 生效）')
-  g.send('3')                              // 花 5 金币打听情报
-  assert(await g.waitFor('老猎人的木屋'), 'A4 条件选项跳转 gossip')
-  assert(await g.waitFor('effect gold: 10 -> 5'), 'A5 onEnter 效果执行并记录日志')
+  assert(await g.waitFor('loaded 28 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  g.send('1')                              // 走进村庄
+  assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
+  g.send('5')                              // 花 5 金币向老猎人打听情报
+  assert(await g.waitFor('老猎人的木屋'), 'A5 条件选项跳转 gossip')
+  assert(await g.waitFor('effect gold: 10 -> 5'), 'A6 onEnter 效果执行并记录日志')
   g.send('1')                              // 前往官道
-  assert(await g.waitFor('官道 · 驿站'), 'A6 进入 road')
+  assert(await g.waitFor('青石大路'), 'A7 进入 road')
+  g.send('1')                              // 上前看篷车
+  assert(await g.waitFor('篷车商人'), 'A8 进入 road.merchant')
   await sleep(200)
   const roadText = g.output()
-  assert(!roadText.includes('[1] 10 金币，成交'), 'A7 gold<10 时原价选项被条件过滤')
-  assert(roadText.includes('讨价还价'), 'A8 flags.knowWeakness 解锁还价选项')
-  g.send('1')                              // 讨价还价（原价选项被过滤后升为第 1 项）
-  assert(await g.waitFor('effect gold: 5 -> 0'), 'A9a 还价扣款生效')
-  assert(await g.waitFor('effect items.rusty_sword: undefined -> 1'), 'A9b 获得锈剑')
-  assert(await g.waitFor('古堡 · 大门'), 'A9 到达城堡')
+  assert(!roadText.includes('十枚金币，成交（你有 5 枚）'), 'A9 gold<10 时原价选项被条件过滤')
+  assert(roadText.includes('吃准他怕还价'), 'A10 flags.knowWeakness 解锁还价选项')
+  g.send('1')                              // 五枚还价（原价选项被过滤后升为第 1 项）
+  assert(await g.waitFor('effect gold: 5 -> 0'), 'A10a 还价扣款生效')
+  assert(await g.waitFor('effect items.rusty_sword: undefined -> 1'), 'A10b 获得锈剑')
+  g.send('1')                              // 不买，继续往古堡走（金币归零后此项升为第 1 项）
+  assert(await g.waitFor('古堡 · 大门'), 'A11 到达城堡（瓶颈节点）')
   g.send('1')                              // 亮出武器
   assert(await g.waitFor('结局 · 剑之认主'), 'A10 有剑 → 胜利结局')
   assert(await g.waitFor('（完）'), 'A11 无选项场景判定为结局')
@@ -126,13 +131,19 @@ async function finish(g, label) {
   console.log('\n[路线B] 战斗 → 断剑 → 胜利')
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  g.send('1')                              // 林间小路
+  g.send('2')                              // 直接出发，走林间小路
   await g.waitFor('林间小路')
+  g.send('1')                              // 探林子深处
+  assert(await g.waitFor('岔路深处'), 'B0 进入 forest.path')
   g.send('1')                              // 正面迎战
   assert(await g.waitFor('effect hp: 20 -> 12'), 'B1 战斗扣血效果生效')
   assert(await g.waitFor('狼穴'), 'B2 战胜独眼狼')
   assert(await g.waitFor('effect items.broken_sword: undefined -> 1'), 'B3 拾取断剑（深层计数）')
-  g.send('1')                              // 继续赶路
+  g.send('1')                              // 收起断剑，继续前往官道
+  await g.waitFor('青石大路')
+  g.send('1')                              // 上前看篷车
+  await g.waitFor('篷车商人')
+  g.send('2')                              // 不买，继续往古堡走
   await g.waitFor('古堡 · 大门')
   g.send('1')                              // 亮出断剑
   assert(await g.waitFor('结局 · 剑之认主'), 'B4 断剑同样通关（多条件 || 求值）')
@@ -144,7 +155,7 @@ async function finish(g, label) {
   console.log('\n[存档链路] save → quit → 重启 → load')
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  g.send('1')                              // 去 forest
+  g.send('2')                              // 直接出发，走林间小路
   await g.waitFor('林间小路')
   g.send('save a')
   assert(await g.waitFor('已保存到存档位 a'), 'C1 save 命令被 save 插件拦截并落盘')
@@ -167,8 +178,8 @@ async function finish(g, label) {
   console.log('\n[路线D] 星港 DLC → 情报 → 通风管道 → 胜利')
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  assert(await g.waitFor('[4] 登船前往第七星港（DLC）'), 'D1 入口场景跨包跳转选项可见')
-  g.send('4')
+  assert(await g.waitFor('[5] 登船前往第七星港（DLC）'), 'D1 入口场景跨包跳转选项可见')
+  g.send('5')
   assert(await g.waitFor('星港 · 空港大厅'), 'D2 跨包跳转到 DLC 场景')
   g.send('2')                              // 去酒吧（消耗 1 金币）
   assert(await g.waitFor('effect gold: 10 -> 9'), 'D3 消耗型效果生效')
@@ -188,11 +199,17 @@ async function finish(g, label) {
   console.log('\n[成就系统] 解锁与查看')
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  g.send('1')                              // forest
+  g.send('2')                              // 走林间小路
   await g.waitFor('林间小路')
-  g.send('1')                              // 战斗胜利 → wolf-win 场景
+  g.send('1')                              // 探林子深处
+  await g.waitFor('岔路深处')
+  g.send('1')                              // 正面迎战 → 战斗胜利 → wolf-win
   assert(await g.waitFor('★ 成就解锁：屠狼者'), 'E1 战斗胜利场景触发成就')
-  g.send('1')                              // 继续 → castle
+  g.send('1')                              // 继续 → road
+  await g.waitFor('青石大路')
+  g.send('1')
+  await g.waitFor('篷车商人')
+  g.send('3')                              // 不买，继续往古堡走
   await g.waitFor('古堡 · 大门')
   g.send('achievements')
   assert(await g.waitFor('[✓] 屠狼者'), 'E2 achievements 命令列出已解锁成就')
@@ -236,7 +253,7 @@ async function finish(g, label) {
 
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  g.send('1')                              // 选择 → choice 音效；进入 forest → scene-enter 音效
+  g.send('2')                              // 选择 → choice 音效；进入 forest → scene-enter 音效
   assert(await g.waitFor('林间小路'), 'G0 场景跳转正常')
   await sleep(600)
   const files = await readdir(dir).catch(() => [])
@@ -251,7 +268,7 @@ async function finish(g, label) {
   const g2 = launch({ env: { DSE_MUTE: '1' } })
   assert(await g2.waitFor('音效已静音'), 'G4 DSE_MUTE=1 时插件进入静音模式')
   await g2.waitFor('村庄 · 晨雾')
-  g2.send('1')
+  g2.send('2')
   await g2.waitFor('林间小路')
   await sleep(600)
   const mutedFiles = await readdir(dir).catch(() => [])
@@ -264,7 +281,7 @@ async function finish(g, label) {
   console.log('\n[战斗系统] 试炼场对局')
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  g.send('5')                              // 试炼场
+  g.send('4')                              // 试炼场
   assert(await g.waitFor('⚔ 第 1 回合'), 'H1 战斗模式场景由 combat 插件接管')
   assert(await g.waitFor('独眼狼'), 'H2 渲染敌人血条')
   assert(await g.waitFor('20/20'), 'H3 玩家满血进入战斗')
@@ -308,7 +325,7 @@ async function finish(g, label) {
   console.log('\n[战斗中命令] 拦截回显 + quit 可退出')
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  g.send('5')                              // 试炼场
+  g.send('4')                              // 试炼场
   assert(await g.waitFor('⚔ 第 1 回合'), 'J1 进入战斗场景')
   g.send('a')                              // 攻击一轮，产生非满血状态
   assert(await g.waitFor('第 2 回合'), 'J2 战斗回合推进')
@@ -354,7 +371,9 @@ async function finish(g, label) {
   {
     const g = launch()
     await g.waitFor('村庄 · 晨雾')
-    g.send('3')
+    g.send('1')                            // 走进村庄
+    assert(await g.waitFor('十字路口'), 'L0 进入村庄枢纽')
+    g.send('5')                            // 老猎人情报
     assert(await g.waitFor('老猎人的木屋'), 'L1 进入 gossip（onEnter 扣 5 金币）')
     for (let i = 0; i < 3; i++) g.send('stats')
     assert(await g.waitForCount('金币', 3), 'L1a stats 可执行')
@@ -368,8 +387,10 @@ async function finish(g, label) {
   {
     const g = launch()
     await g.waitFor('村庄 · 晨雾')
-    g.send('1')                              // forest
+    g.send('2')                              // 走林间小路
     await g.waitFor('林间小路')
+    g.send('1')                              // 探深处
+    await g.waitFor('岔路深处')
     g.send('1')                              // 战斗胜利 → wolf-win
     assert(await g.waitFor('狼穴'), 'L4 进入 wolf-win（onEnter 给 1 把断剑）')
     for (let i = 0; i < 3; i++) g.send('stats')
@@ -384,12 +405,12 @@ async function finish(g, label) {
   {
     const g = launch()
     await g.waitFor('村庄 · 晨雾')
-    g.send('5')                              // 试炼场
+    g.send('4')                              // 试炼场
     assert(await g.waitFor('⚔ 第 1 回合'), 'L7 进入战斗')
     g.send('a')
     g.send('a')
-    g.send('a')
-    assert(await g.waitFor('第 4 回合'), 'L8 打掉敌人血量')
+    // 伤害有随机性，3 连击可能直接结束战斗；断言"回合有推进"而非固定回合数
+    assert(await g.waitFor('第 2 回合') && await g.waitFor('第 3 回合'), 'L8 战斗回合逐次推进')
     g.send('save battle')                    // 战斗中存档
     assert(await g.waitFor('已保存到存档位 battle'), 'L9 战斗中存档成功')
     await sleep(400)
@@ -423,6 +444,26 @@ async function finish(g, label) {
   assert(!log.includes('INACTIVE_EFFECT'),
     'M3 无「上下文已失效」崩溃（插件 init 与退出竞态已处理）', log.slice(-800))
   if (code === 'TIMEOUT') child.kill()
+}
+
+// ---------- 路线 N：内容校验器（lint:content） ----------
+{
+  console.log('\n[内容校验] lint:content')
+  const { execFile } = await import('node:child_process')
+  const { promisify } = await import('node:util')
+  const run = promisify(execFile)
+  const { stdout } = await run(process.execPath, ['scripts/lint-content.mjs', '--json'], { cwd: root })
+  const report = JSON.parse(stdout)
+
+  // 结构性错误必须为零；厚度不足属内容建设进度，单独统计并设定下限
+  const structural = report.errors.filter((e) => !e.startsWith('[厚度]'))
+  assert(structural.length === 0, 'N1 无结构性内容错误（悬空 goto / 不可达 / 结局）', structural.join('\n'))
+  assert(report.stats.endingsReachable === report.stats.endings && report.stats.endings > 0,
+    `N2 所有结局可达（${report.stats.endingsReachable}/${report.stats.endings}）`)
+  assert(report.stats.scenes >= 25, `N3 场景数达 Phase 1 阶段目标（当前 ${report.stats.scenes}，M1 目标 ≥ 25）`)
+  assert(report.stats.avgChars >= 120, `N4 场景均长达标（当前 ${report.stats.avgChars} 字，目标 ≥ 120）`)
+  const dead = report.warnings.filter((w) => w.startsWith('[死变量]'))
+  assert(dead.length === 0, 'N5 无死变量（账本声明但内容从不读写）', dead.join('\n'))
 }
 
 console.log(`\n结果: ${passed} 通过, ${failed} 失败`)
