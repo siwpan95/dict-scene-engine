@@ -28,6 +28,44 @@ function assert(ok, label, output = '') {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+/** 取出输出里最近渲染的那组选项行（形如 "  [1] xxx"） */
+function currentOptions(output) {
+  const lines = output.split('\n')
+  const block = []
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (/^ {2}\[\d+\]/.test(lines[i])) block.unshift(lines[i])
+    else if (block.length) break
+  }
+  return block
+}
+
+/** 按选项文本关键字发送，而非硬编码序号 —— 选项会随状态过滤而顺位变化，
+ *  硬编码序号在内容调整后极易错位。
+ *  异步轮询：waitFor 往往在选项渲染完成前就返回，直接取可能读到上一场景的选项块。
+ */
+async function choose(g, keyword, timeout = 4000) {
+  const start = Date.now()
+  while (Date.now() - start < timeout) {
+    const hit = currentOptions(g.output()).find((line) => line.includes(keyword))
+    if (hit) {
+      g.send(hit.match(/\[(\d+)\]/)[1])
+      return true
+    }
+    await sleep(80)
+  }
+  return false
+}
+
+/** 战斗直到结束：连续攻击，直到出现目标场景或回合不再推进 */
+async function fightUntil(g, keyword, maxTurns = 12) {
+  for (let i = 0; i < maxTurns; i++) {
+    if (g.output().includes(keyword)) return true
+    g.send('a')
+    await sleep(350)
+  }
+  return g.output().includes(keyword)
+}
+
 /** 启动游戏进程，返回 { send, waitFor, waitForCount, output, stderr, exit, kill }
  *  @param {{ internals?: boolean, env?: object }} options
  *         internals: 加 --expose-internals（官方 HMR 需要）
@@ -101,7 +139,7 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 28 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  assert(await g.waitFor('loaded 39 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
   g.send('1')                              // 走进村庄
   assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
   g.send('5')                              // 花 5 金币向老猎人打听情报
@@ -120,9 +158,16 @@ async function finish(g, label) {
   assert(await g.waitFor('effect items.rusty_sword: undefined -> 1'), 'A10b 获得锈剑')
   g.send('1')                              // 不买，继续往古堡走（金币归零后此项升为第 1 项）
   assert(await g.waitFor('古堡 · 大门'), 'A11 到达城堡（瓶颈节点）')
-  g.send('1')                              // 亮出武器
-  assert(await g.waitFor('结局 · 剑之认主'), 'A10 有剑 → 胜利结局')
-  assert(await g.waitFor('（完）'), 'A11 无选项场景判定为结局')
+  g.send('1')                              // 亮出武器，正门直入 → 大厅（瓶颈分流）
+  assert(await g.waitFor('古堡 · 大厅'), 'A10 瓶颈节点分流至古堡内部')
+  assert(await choose(g, '下地牢'), 'A10a 进入地牢（守卫战）')
+  await g.waitFor('古堡 · 地牢')
+  assert(await fightUntil(g, '阶梯口'), 'A10b 战胜守卫')
+  assert(await choose(g, '登上圣所'), 'A10c 登上圣所')
+  await g.waitFor('古堡 · 圣所')
+  assert(await choose(g, '举起你的剑'), 'A10d 举起锈剑')
+  assert(await g.waitFor('结局 · 剑之认主'), 'A11 有剑 → 胜利结局')
+  assert(await g.waitFor('（完）'), 'A12 无选项场景判定为结局')
   await finish(g, '路线A 结局收尾')
 }
 
@@ -139,14 +184,32 @@ async function finish(g, label) {
   assert(await g.waitFor('effect hp: 20 -> 12'), 'B1 战斗扣血效果生效')
   assert(await g.waitFor('狼穴'), 'B2 战胜独眼狼')
   assert(await g.waitFor('effect items.broken_sword: undefined -> 1'), 'B3 拾取断剑（深层计数）')
-  g.send('1')                              // 收起断剑，继续前往官道
+  // 受伤进堡必败，先回村补给：wolf-win → 酒馆 → 十字路口 → 杂货铺
+  g.send('2')
+  await g.waitFor('老橡木酒馆')
+  assert(await choose(g, '回十字路口'), 'B3a 从酒馆返回村庄枢纽（可重访）')
+  await g.waitFor('十字路口')
+  assert(await choose(g, '杂货铺'), 'B3a2 进入杂货铺')
+  await g.waitFor('杂货铺')
+  assert(await choose(g, '买伤药'), 'B3a3 选择买伤药')
+  assert(await g.waitFor('effect hp: 12 -> 20'), 'B3b 商店治疗生效（枢纽可重访的价值）')
+  assert(await choose(g, '回十字路口'), 'B3b2 返回十字路口')
+  await g.waitFor('十字路口')
+  assert(await choose(g, '走官道大路'), 'B3b3 出村走官道')
   await g.waitFor('青石大路')
   g.send('1')                              // 上前看篷车
   await g.waitFor('篷车商人')
-  g.send('2')                              // 不买，继续往古堡走
+  assert(await choose(g, '不买'), 'B3b4 不买剑')
   await g.waitFor('古堡 · 大门')
-  g.send('1')                              // 亮出断剑
-  assert(await g.waitFor('结局 · 剑之认主'), 'B4 断剑同样通关（多条件 || 求值）')
+  g.send('1')                              // 亮出断剑，正门直入
+  await g.waitFor('古堡 · 大厅')
+  assert(await choose(g, '下地牢'), 'B3c 进入地牢')
+  await g.waitFor('古堡 · 地牢')
+  assert(await fightUntil(g, '阶梯口'), 'B3d 战胜地牢守卫')
+  assert(await choose(g, '登上圣所'), 'B3e 登上圣所')
+  await g.waitFor('古堡 · 圣所')
+  assert(await choose(g, '举起你的剑'), 'B4a 断剑被石像认可（多条件 || 求值）')
+  assert(await g.waitFor('结局 · 剑之认主'), 'B4 断剑同样通关')
   await finish(g, '路线B 结局收尾')
 }
 
@@ -209,12 +272,12 @@ async function finish(g, label) {
   await g.waitFor('青石大路')
   g.send('1')
   await g.waitFor('篷车商人')
-  g.send('3')                              // 不买，继续往古堡走
+  g.send('2')                              // 不买，继续往古堡走
   await g.waitFor('古堡 · 大门')
   g.send('achievements')
   assert(await g.waitFor('[✓] 屠狼者'), 'E2 achievements 命令列出已解锁成就')
-  const list = g.output()
-  assert(list.includes('[ ] 剑主'), 'E3 未解锁成就显示为空')
+  // 输出是流式的：waitFor 匹配到首行时后续行可能还没到达，必须逐条等待
+  assert(await g.waitFor('[ ] 剑主'), 'E3 未解锁成就显示为空')
   await quit(g, '成就系统 退出')
 }
 
@@ -444,6 +507,73 @@ async function finish(g, label) {
   assert(!log.includes('INACTIVE_EFFECT'),
     'M3 无「上下文已失效」崩溃（插件 init 与退出竞态已处理）', log.slice(-800))
   if (code === 'TIMEOUT') child.kill()
+}
+
+// ---------- 路线 O：M2 古堡内部探索与分支结局 ----------
+{
+  console.log('\n[古堡探索] 大厅 → 壁画 → 藏书阁 → BEST END')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  g.send('2')                              // 走林间小路
+  await g.waitFor('林间小路')
+  g.send('1')                              // 探深处
+  await g.waitFor('岔路深处')
+  g.send('1')                              // 正面迎战 → wolf-win（得断剑）
+  assert(await g.waitFor('狼穴'), 'O1 取得断剑')
+  g.send('1')                              // 前往官道
+  await g.waitFor('青石大路')
+  g.send('1')                              // 篷车
+  await g.waitFor('篷车商人')
+  assert(await choose(g, '不买'), 'O2 不买剑')
+  await g.waitFor('古堡 · 大门')
+  assert(await choose(g, '亮出武器'), 'O3 瓶颈：亮兵器正门直入')
+  await g.waitFor('古堡 · 大厅')
+  assert(await choose(g, '细看壁画'), 'O4 大厅：细看壁画')
+  assert(await g.waitFor('大厅 · 壁画'), 'O4a 壁画揭示被刮掉的线索')
+  assert(await choose(g, '记在心里'), 'O5 记下线索')
+  await g.waitFor('古堡 · 大厅')
+  assert(await choose(g, '推开右手的门'), 'O6 壁画线索解锁藏书阁（状态驱动的门）')
+  await g.waitFor('藏书阁')
+  assert(await choose(g, '把手记读完'), 'O7 读完手记')
+  assert(await g.waitFor('effect flags.swordLore: undefined -> true'), 'O7a 获得剑之真相')
+  assert(await choose(g, '去圣所'), 'O8 前往圣所')
+  await g.waitFor('古堡 · 地牢')
+  assert(await fightUntil(g, '阶梯口'), 'O9 战胜地牢守卫')
+  assert(await choose(g, '登上圣所'), 'O10 登上圣所')
+  await g.waitFor('古堡 · 圣所')
+  assert(await choose(g, '让它们合二为一'), 'O11 知道真相才能拼剑（BEST END 分支）')
+  assert(await g.waitFor('结局 · 完整的剑'), 'O12 BEST END 达成')
+  // 带"再玩一次"选项的结算场景不触发结局流程，用 quit 收尾
+  await quit(g, 'O13 古堡探索收尾')
+}
+
+// ---------- 路线 P：商人结局分支 ----------
+{
+  console.log('\n[商人结局] 持剑退出而非拼剑')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  g.send('2')
+  await g.waitFor('林间小路')
+  g.send('1')
+  await g.waitFor('岔路深处')
+  g.send('1')
+  await g.waitFor('狼穴')
+  g.send('1')
+  await g.waitFor('青石大路')
+  g.send('1')
+  await g.waitFor('篷车商人')
+  assert(await choose(g, '不买'), 'P1 不买剑')
+  await g.waitFor('古堡 · 大门')
+  assert(await choose(g, '亮出武器'), 'P2 进入大厅')
+  await g.waitFor('古堡 · 大厅')
+  assert(await choose(g, '下地牢'), 'P3 下地牢')
+  await g.waitFor('古堡 · 地牢')
+  assert(await fightUntil(g, '阶梯口'), 'P4 战胜守卫')
+  assert(await choose(g, '登上圣所'), 'P5 登上圣所')
+  await g.waitFor('古堡 · 圣所')
+  assert(await choose(g, '悄悄退回去'), 'P6 选择把秘密卖掉')
+  assert(await g.waitFor('结局 · 好价钱'), 'P7 商人结局达成')
+  await quit(g, 'P8 商人结局收尾')
 }
 
 // ---------- 路线 N：内容校验器（lint:content） ----------

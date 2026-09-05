@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 日期 | 2026-09-05 |
-| 状态 | **M0 已完成，M1 已完成；待评估是否冲 Phase 2** |
+| 状态 | **M0 / M1 / M2 均已完成；M3 待做，再评估是否冲 Phase 2** |
 | 目标档位 | Phase 1（可玩短篇），Phase 2 视 Phase 1 结果评估 |
 | 主线题材 | 沿用《古堡寻剑》世界观扩写 |
 | Mod 题材 | 侦探调查（推荐）／城镇经营（备选），先做 **侦探调查** |
@@ -324,7 +324,7 @@ items.<snake_case>      例：items.rusty_sword
 |---|---|---|---|
 | **M0 基建** ✅ | 内容校验器 + 叙事账本骨架 + E1 插值 | `scripts/lint-content.mjs`、`docs/NARRATIVE-LEDGER.md` | 校验器对现有 17 场景跑通并输出基线报告 |
 | **M1 主线序章+第一章** ✅ | 村庄枢纽 + 三条路线（13 场景） | 场景文本 | 校验器全绿；e2e 关键路径覆盖 |
-| **M2 主线第二章+终章** | 古堡内部 + 多结局（12 场景） | 场景文本 | 4 个结局各自可达 |
+| **M2 主线第二章+终章** ✅ | 古堡内部 + 多结局（12 场景） | 场景文本 | 4 个结局各自可达 |
 | **M3 Mod 侦探** | 《星港迷案》15 场景 | 场景文本 | 2 个结局可达；线索逻辑无矛盾 |
 | **M4 收口** | 字数/均长达标、无效选择清零、e2e 全绿 | — | §4.2 七项验收全过 |
 
@@ -384,3 +384,30 @@ items.<snake_case>      例：items.rusty_sword
 
 - M2：古堡内部探索（`castle.hall` / `gallery` / `library` / `dungeon` / `sanctum`）+ 4 个分支结局
 - M3：侦探 Mod《星港迷案》15 场景
+
+### M2 古堡内部 + 分支结局（2026-09-05 完成）
+
+| 指标 | M2 前 | M2 后 |
+|---|---|---|
+| 场景 | 28 | **39** |
+| 正文字符 | 4,347 | **6,402** |
+| 场景均长 | 155 | **164** |
+| 结局 | 4/4 可达 | **6/6 可达** |
+| flags / items | 5 / 5 | **10 / 7**（死变量 0） |
+| e2e 断言 | 116 | **157** |
+
+落地内容：
+- 瓶颈节点 `castle` 三路分流（亮兵器正门 / 情报潜入 / 徒手闯入），进入方式写入 `flags.castleFrontal` / `flags.castleStealth`，并在 `castle.hall` 被读取（潜入可搜刮、正面可问路）
+- 古堡内部：`castle.hall`（枢纽）→ `castle.gallery`（需火把，得银匕首 ATK+3）、`castle.library`（需 `flags.sawMural` 解锁 → `flags.swordLore`）、`castle.dungeon`（守卫战）、`castle.sanctum`（终局）
+- 分支结局：`ending.sword`（BEST END，需 swordLore + 断剑）、`ending-win`（举剑认主）、`ending.merc`（商人结局）
+- 探索有实际收益：银匕首 ATK+3、伤药可回村购买、石像鬼核心可卖 40 金币
+- 顺带把 `flags.swordLore` / `flags.sawMural` / `items.golem_core` 从 §5 规划中移入 §1 生效中
+
+e2e 新增 O 组（探索链 + BEST END）与 P 组（商人结局）；并引入两个 helper 提升健壮性：
+`choose(g, 关键字)` 按选项文本而非硬编码序号发送、`fightUntil(g, 关键字)` 战斗到出现目标场景。
+内容结构一变，硬编码序号必然错位——这是 M1 同步 9 组用例换来的教训。
+
+### 待办（M3）
+
+- 侦探 Mod《星港迷案》15 场景（`case.*` / `crew.*` / `district.*` / `archive.*`）
+- M3 后预计达 ~8,000 字，即 Phase 1 目标；届时再评估是否冲 Phase 2

@@ -20,6 +20,11 @@
 | `flags.arenaChampion` | 通关试炼场石像鬼 | `arena-boss-win` onEnter | `village.tavern` 选项「亮出试炼之王的身份」 |
 | `flags.intelBought` | 酒馆买到古堡守卫换班情报 | `village.tavern` 选项 | `castle` 瓶颈节点「等空档溜进去」条件 |
 | `flags.hasAlly` | 雇佣佣兵同行 | `village.tavern` 选项 | `road.ambush`、`village.tavern.rumor`（佣兵忠告） |
+| `flags.castleFrontal` | 亮兵器走正门进堡 | `castle` 选项 | `castle.hall` 选项「守卫忌惮你，肯指条明路」 |
+| `flags.castleStealth` | 趁换班空档潜入 | `castle` 选项 | `castle.hall` 选项「趁守卫换班，搜刮大厅」 |
+| `flags.hallLooted` | 大厅已搜刮过（防重复） | `castle.hall` 选项 | `castle.hall` 同选项条件 `!flags.hallLooted` |
+| `flags.sawMural` | 看出壁画被刮掉的部分 | `castle.hall` 选项、`castle.hall.mural` | `castle.library` 解锁条件 |
+| `flags.swordLore` | 知道"剑是被分成两半的"真相 | `castle.library` 选项 | `castle.sanctum` 选项「把断剑放回石台」→ BEST END 条件 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -30,6 +35,8 @@
 | `items.torch` | 火把 | `village.shop` 购买（3 金币） | `forest.ruins` 选项「点火把进去搜查」条件 | — |
 | `items.relic` | 废墟里的青铜牌 | `forest.ruins.inside` onEnter | `road.merchant.relic`（商人收购／劝告）、`village.shop` 出售 | — |
 | `items.wolf_pelt` | 狼皮 | `combat` 独眼狼掉落 | `village.shop` 出售（6 金币） | — |
+| `items.silver_dagger` | 银匕首 | `castle.gallery` 壁龛（需火把） | `castle.sanctum` 选项「举起银匕首」 | ATK +3（combat.weapons） |
+| `items.golem_core` | 石像鬼核心 | `combat` 石像鬼掉落 | `village.shop` 出售（40 金币） | — |
 
 ### 1.3 数值
 
@@ -89,10 +96,7 @@ npm run lint:content
 
 | 路径 | 含义 | 计划写入处 | 计划读取处 | 阶段 |
 |---|---|---|---|---|
-| `flags.swordLore` | 从藏书阁得知失落之剑的真相 | `castle.library` | `ending.sword` / `ending.claim` 判定 | M2 |
-| `flags.sawMural` | 注意到大厅壁画 | `castle.hall` | `castle.library` 解锁条件 | M2 |
 | `items.potion` | 伤药（可服用） | `village.shop` | 服用机制（引擎待支持） | M2 评估 |
-| `items.golem_core` | 石像鬼核心 | `combat` 石像鬼掉落 | `castle.sanctum` 结局判定 | M2 |
 | `suspectLevel` | 侦探 Mod 嫌疑锁定进度 | `case.deduce` | `case.accuse` | M3 |
 
 ---

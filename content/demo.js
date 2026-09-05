@@ -48,6 +48,7 @@ export default {
       { text: '买伤药（5 金币，恢复 8 HP）', if: 'gold >= 5 && hp < maxHp', do: { gold: -5, hp: +8 }, goto: 'village.shop' },
       { text: '卖掉古物（12 金币）', if: 'items.relic >= 1', do: { 'items.relic': -1, gold: +12 }, goto: 'village.shop' },
       { text: '卖掉狼皮（6 金币）', if: 'items.wolf_pelt >= 1', do: { 'items.wolf_pelt': -1, gold: +6 }, goto: 'village.shop' },
+      { text: '卖掉石像鬼核心（40 金币）', if: 'items.golem_core >= 1', do: { 'items.golem_core': -1, gold: +40 }, goto: 'village.shop' },
       { text: '回十字路口', goto: 'village' },
     ],
   },
@@ -204,11 +205,151 @@ export default {
     title: '古堡 · 大门',
     text: '古堡大门紧闭，两侧火把在风里摇曳。门洞上方蹲着一尊石像，眼窝里积着雨水，像是在看你。\n'
       + '一个低沉的声音在你脑子里响起，分不清是回声还是别的什么：「持剑者，可入。」\n'
-      + '（瓶颈：你带着什么来，决定你怎么进去。）',
+      + '（瓶颈：你带着什么来，决定你怎么进去——也决定了进去之后，堡里的东西怎么看你。）',
     choices: [
-      { text: '亮出武器', if: 'items.rusty_sword >= 1 || items.broken_sword >= 1', goto: 'ending-win' },
-      { text: '等守卫换班的空档溜进去（需情报）', if: 'flags.intelBought', goto: 'ending-win' },
+      { text: '亮出武器，正门直入（守卫会记住你的脸）', if: 'items.rusty_sword >= 1 || items.broken_sword >= 1', do: { 'flags.castleFrontal': true }, goto: 'castle.hall' },
+      { text: '等守卫换班的空档溜进去（需情报）', if: 'flags.intelBought', do: { 'flags.castleStealth': true }, goto: 'castle.hall' },
       { text: '徒手闯入', do: { hp: -20 }, goto: 'ending-lose' },
+    ],
+  },
+
+  'castle.hall': {
+    title: '古堡 · 大厅',
+    text: '门在你身后合拢，声音像一声叹息。大厅比外面看着更大，穹顶高得看不见顶，只有几束不知从哪儿漏下来的光落在地上。\n'
+      + '正对面的墙上是一整幅壁画：一个披甲的人双手举剑，剑身从中断裂，断口迸出的不是血，是光。画的下半截被人为刮掉了，露出底下的石胎。\n'
+      + '三条路从大厅分出去：左手回廊黑得看不见尽头，右手门缝里透出烛火，脚下台阶通往地牢。',
+    choices: [
+      { text: '细看壁画，看能不能看出被刮掉的部分', if: '!flags.sawMural', do: { 'flags.sawMural': true }, goto: 'castle.hall.mural' },
+      { text: '趁守卫换班，搜刮大厅（需潜入，没人盯着你）', if: 'flags.castleStealth && !flags.hallLooted', do: { 'flags.hallLooted': true, gold: +6 }, goto: 'castle.hall' },
+      { text: '亮了兵器进来的——守卫忌惮你，肯指条明路（需正面进入）', if: 'flags.castleFrontal && !flags.sawMural', goto: 'castle.hall.mural' },
+      { text: '点亮火把，进左侧回廊', if: 'items.torch >= 1', goto: 'castle.gallery' },
+      { text: '摸黑摸进回廊（看不见，会磕碰）', if: '!items.torch', do: { hp: -3 }, goto: 'castle.gallery' },
+      { text: '推开右手的门——壁画给你的提示指向这里', if: 'flags.sawMural', goto: 'castle.library' },
+      { text: '下地牢', goto: 'castle.dungeon' },
+    ],
+  },
+
+  'castle.hall.mural': {
+    title: '大厅 · 壁画',
+    text: '你凑近了看。刮痕很旧，但刮得很仔细——像是有人不想让后来者看见画的下半截。\n'
+      + '借着光，你在被刮掉的地方辨出几笔残迹：一只手，握着剑的**另一半**；那半截断剑不在画中人手里，而是插在一座石台上。\n'
+      + '石台的式样，和你身后大门上方那尊石像的底座一模一样。',
+    choices: [
+      { text: '记在心里，继续查看大厅', goto: 'castle.hall' },
+    ],
+  },
+
+  'castle.gallery': {
+    title: '古堡 · 回廊',
+    text: '回廊两侧立着一排排石像，全是从未见过的兽形，每一尊的眼睛都朝着廊道中央——像是在看着每一个从这里走过的人。\n'
+      + '越往里走越冷。走到中段，一尊石像的基座上有个浅浅的壁龛，里面似乎搁着什么；再往前，廊道尽头透出一小片天光，那里就是通往地牢的阶梯口。\n'
+      + '石像们沉默地看着你。你可以搜，也可以走——但你知道它们会记住你做过什么。',
+    choices: [
+      { text: '借着火光搜查壁龛（需火把）', if: 'items.torch >= 1 && !items.silver_dagger', do: { 'items.silver_dagger': +1 }, goto: 'castle.gallery' },
+      { text: '摸黑在壁龛里乱摸（看不见，只摸到几枚散钱）', if: '!items.torch', do: { gold: +4 }, goto: 'castle.gallery' },
+      { text: '不贪，穿过回廊下地牢', goto: 'castle.dungeon' },
+      { text: '回大厅', goto: 'castle.hall' },
+    ],
+  },
+
+  'castle.library': {
+    title: '古堡 · 藏书阁',
+    text: '推开门，烛火自己亮了起来——像是一直在等什么人来。\n'
+      + '书架上没有几本书，只有一册摊开的手记，纸页焦黄，字迹却很新，像昨天才写完：\n'
+      + '「剑不是断的，是**分**的。有人怕它太利，把它劈作两半，一半随葬，一半封在此地。合二为一之时，认的不是手，是心。」\n'
+      + '落款处被划掉了，只剩下一个墨点，像有人停了很久。',
+    choices: [
+      { text: '把手记读完，记下真相（决定你能不能把剑拼回去）', if: '!flags.swordLore', do: { 'flags.swordLore': true }, goto: 'castle.library.after' },
+      { text: '先不读——知道得越少，走得越轻松（代价：永远拼不回那柄剑）', if: '!flags.swordLore', goto: 'castle.hall' },
+      { text: '回大厅', goto: 'castle.hall' },
+    ],
+  },
+
+  'castle.library.after': {
+    title: '藏书阁 · 余烬',
+    text: '烛火晃了一下。\n'
+      + '你发现手记下面还压着半张图：古堡的剖面，最深处标着"圣所"两个字，旁边画着一柄完整的剑——剑柄朝下，插在一个石台里。\n'
+      + '图的边缘有一行小字：「石像鬼守的不是财宝。」\n'
+      + '你把图对折收进怀里。无论接下来是拼剑、拔剑，还是掉头就走——至少现在，你知道自己在跟什么东西打交道了。',
+    choices: [
+      { text: '把图收好，去圣所', goto: 'castle.dungeon' },
+      { text: '回大厅，再想想', goto: 'castle.hall' },
+    ],
+  },
+
+  'castle.dungeon': {
+    title: '古堡 · 地牢',
+    text: '台阶又窄又陡，墙上的火把早就灭了，越往下空气越浊。\n'
+      + '地牢门口站着一个守卫——不是人。它的皮肤是灰白色的，没有眼睛，脸的位置只有一道横缝。听到你的脚步，那道缝缓缓张开了。\n'
+      + '它身后是通往上层的阶梯，石阶尽头有光——那就是圣所。\n'
+      + '横缝里吐出一句话，不成调，却能听懂：「又一个。」这句话让你后背发凉——它不是第一次说这句话。',
+    mode: 'battle',
+    battle: {
+      enemy: 'guard',
+      onWin: 'castle.dungeon.after',
+      onLose: 'ending-lose',
+      onFlee: 'castle.hall',
+    },
+  },
+
+  'castle.dungeon.after': {
+    title: '地牢 · 阶梯口',
+    text: '守卫倒下了，身体像撒了气的皮囊一样瘪下去，最后只剩一层灰。\n'
+      + '你从它身上搜出几枚古旧的金币，还有一块铁牌——牌上刻着"圣所守夜人"，背面是编号，编号已经被磨得只剩两道横。\n'
+      + '阶梯尽头的光还在。上面就是圣所。',
+    choices: [
+      { text: '登上圣所', goto: 'castle.sanctum' },
+      { text: '先回大厅喘口气', goto: 'castle.hall' },
+    ],
+  },
+
+  'castle.sanctum': {
+    title: '古堡 · 圣所',
+    text: '圣所是整座古堡最高的房间，四面无墙，只有一圈石柱撑着穹顶——从这里能看见整片北山。\n'
+      + '正中是一座三尺高的石台，台上插着半截断剑，断口朝上，和你手里那把正好对得上。石台旁蹲着石像鬼，和门洞上那尊一模一样，只是这只会呼吸。\n'
+      + '它睁开眼，暗红色的光落在你身上，没有立刻动手——它在等你自己决定。',
+    choices: [
+      { text: '把手里的断剑放回石台，让它们合二为一（需知道真相）', if: 'flags.swordLore && items.broken_sword >= 1', goto: 'ending.sword' },
+      { text: '举起你的剑——石像认剑不认人', if: 'items.rusty_sword >= 1 || items.broken_sword >= 1', goto: 'ending-win' },
+      { text: '举起回廊里得来的银匕首——石像认得堡中的旧物', if: 'items.silver_dagger >= 1', goto: 'ending-win' },
+      { text: '拔下石台上那半截，与石像鬼一战', goto: 'castle.sanctum.battle' },
+      { text: '悄悄退回去，把这里的一切卖个好价钱（需持剑）', if: 'items.rusty_sword >= 1 || items.broken_sword >= 1', goto: 'ending.merc' },
+    ],
+  },
+
+  'castle.sanctum.battle': {
+    title: '圣所 · 石像鬼',
+    text: '你的手刚碰到剑柄，石像鬼就站了起来。三米高的身体压下来，石屑从它关节里簌簌落下。\n'
+      + '它的声音像两块磨石在互相碾：又一个想把它拼回去的人。\n'
+      + '「上一个也这么说。」它抬起了拳头，「上一个现在在墙上。」——你这才注意到，石柱上那些凹凸不平的纹路，并不全是雕花。',
+    mode: 'battle',
+    battle: {
+      enemy: 'golem',
+      onWin: 'ending-win',
+      onLose: 'ending-lose',
+      onFlee: 'castle.hall',
+    },
+  },
+
+  'ending.sword': {
+    title: '结局 · 完整的剑',
+    text: '你把断剑放回石台的瞬间，两个断口之间爆出一道白光——不是热，是某种更像"终于"的东西。\n'
+      + '剑合拢了。它悬浮在石台上，缓缓转向你。\n'
+      + '石像鬼没有阻止。它看着那柄完整的剑，暗红色的光一点点暗下去，最后像熄掉的炭火，归于平静。它守了一辈子，等的不是入侵者，是能把剑拼好的人。\n'
+      + '（BEST END）',
+    choices: [
+      { text: '再玩一次', goto: '@restart' },
+    ],
+  },
+
+  'ending.merc': {
+    title: '结局 · 好价钱',
+    text: '你没有碰那柄剑，也没有惊动石像鬼。你记住了路，记住了石台的样子，然后原路退了出去。\n'
+      + '三个月后，城里的收藏家为一张古堡剖面图付了三百枚金币。他没有问图是谁画的，你也没有说石台上还插着半截断剑。\n'
+      + '你变得很富有。只是偶尔在夜里，你会想起穹顶下那圈石柱，和石像鬼看你的眼神——它没有拦你，那才是最难受的部分。\n'
+      + '（GOOD END · 商人结局）',
+    choices: [
+      { text: '再玩一次', goto: '@restart' },
     ],
   },
 
