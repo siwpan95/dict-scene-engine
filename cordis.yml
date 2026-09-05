@@ -20,6 +20,7 @@
     packs:                    # 场景字典内容包（支持多个，后者覆盖前者同 ID 场景）
       - ./content/demo.js
       - ./content/starport.js
+      - ./content/starport-case.js   # M3：侦探 Mod《星港迷案》
 
 - id: state
   name: ./plugins/state.js
@@ -32,6 +33,9 @@
       def: 2                  # 防御（每点抵消 defenseFactor 点伤害）
       crit: 0.15              # 暴击率
       gold: 10
+      suspectLevel: 0        # 侦探 Mod：推理度（线索计数）
+      clues: {}              # 侦探 Mod：已掌握线索（clues.dock 等，必须先声明，
+      testimony: {}         #           否则条件表达式里会 ReferenceError）
       items: {}
       flags: {}
 

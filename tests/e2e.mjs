@@ -39,19 +39,50 @@ function currentOptions(output) {
   return block
 }
 
+/** 等待输出稳定：连续两次采样长度不变，说明这一帧渲染完了。
+ *  用途：waitFor 常常在文本刚出现时就返回，而选项随后才渲染；
+ *  直接取选项块会读到上一场景的旧块（旧块里也可能含同名选项，导致发错序号）。
+ */
+async function settled(g, quiet = 150, timeout = 4000) {
+  const start = Date.now()
+  let last = -1
+  let still = 0
+  while (Date.now() - start < timeout) {
+    const len = g.output().length
+    if (len > 0 && len === last) {
+      if (++still >= 2) return true
+    } else {
+      still = 0
+    }
+    last = len
+    await sleep(quiet)
+  }
+  return false
+}
+
 /** 按选项文本关键字发送，而非硬编码序号 —— 选项会随状态过滤而顺位变化，
  *  硬编码序号在内容调整后极易错位。
- *  异步轮询：waitFor 往往在选项渲染完成前就返回，直接取可能读到上一场景的选项块。
  */
-async function choose(g, keyword, timeout = 4000) {
+async function choose(g, keyword, timeout = 5000) {
   const start = Date.now()
   while (Date.now() - start < timeout) {
-    const hit = currentOptions(g.output()).find((line) => line.includes(keyword))
+    await settled(g)
+    const block = currentOptions(g.output())
+    // spoke 场景的调查选项可能也含"回案卷桌"字样（如"记下拖痕，回案卷桌"），
+    // 真正的"返回枢纽"项通常文本更短、更纯粹。取**最后一个**匹配项——
+    // 调查动作在前、纯返回项在后是惯例。
+    const hit = block.filter((line) => line.includes(keyword)).pop()
     if (hit) {
+      const before = g.output().length
       g.send(hit.match(/\[(\d+)\]/)[1])
+      // 等这次输入被消费并有新输出（新场景渲染），再等它渲染稳定。
+      // 否则下一次 choose 会读到上一场景的选项块，发送错位序号。
+      const t = Date.now()
+      while (g.output().length === before && Date.now() - t < 3000) await sleep(60)
+      await settled(g)
       return true
     }
-    await sleep(80)
+    await sleep(100)
   }
   return false
 }
@@ -139,7 +170,7 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 39 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  assert(await g.waitFor('loaded 55 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
   g.send('1')                              // 走进村庄
   assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
   g.send('5')                              // 花 5 金币向老猎人打听情报
@@ -520,7 +551,18 @@ async function finish(g, label) {
   await g.waitFor('岔路深处')
   g.send('1')                              // 正面迎战 → wolf-win（得断剑）
   assert(await g.waitFor('狼穴'), 'O1 取得断剑')
-  g.send('1')                              // 前往官道
+  // 进堡前回村补给：受伤状态下打地牢守卫会翻车
+  g.send('2')                              // 回村（酒馆）
+  await g.waitFor('老橡木酒馆')
+  assert(await choose(g, '回十字路口'), 'O1a 回村庄枢纽')
+  await g.waitFor('十字路口')
+  assert(await choose(g, '杂货铺'), 'O1b 去杂货铺')
+  await g.waitFor('杂货铺')
+  assert(await choose(g, '买伤药'), 'O1c 买伤药')
+  assert(await g.waitFor('effect hp: 12 -> 20'), 'O1d 治疗生效')
+  assert(await choose(g, '回十字路口'), 'O1e 回十字路口')
+  await g.waitFor('十字路口')
+  assert(await choose(g, '走官道大路'), 'O1f 出村走官道')
   await g.waitFor('青石大路')
   g.send('1')                              // 篷车
   await g.waitFor('篷车商人')
@@ -552,17 +594,14 @@ async function finish(g, label) {
   console.log('\n[商人结局] 持剑退出而非拼剑')
   const g = launch()
   await g.waitFor('村庄 · 晨雾')
-  g.send('2')
-  await g.waitFor('林间小路')
-  g.send('1')
-  await g.waitFor('岔路深处')
-  g.send('1')
-  await g.waitFor('狼穴')
-  g.send('1')
+  // 走官道买剑：不进战斗，HP 保持满值，稳定通过地牢守卫（林间线会掉 8 HP 导致翻车）
+  g.send('3')                              // 直接出发，走官道大路
   await g.waitFor('青石大路')
   g.send('1')
   await g.waitFor('篷车商人')
-  assert(await choose(g, '不买'), 'P1 不买剑')
+  assert(await choose(g, '十枚金币，成交'), 'P1 买下锈剑（商人结局需持剑）')
+  assert(await g.waitFor('effect items.rusty_sword: undefined -> 1'), 'P1a 取得锈剑')
+  assert(await choose(g, '不买'), 'P1b 不再买别的，前往古堡')
   await g.waitFor('古堡 · 大门')
   assert(await choose(g, '亮出武器'), 'P2 进入大厅')
   await g.waitFor('古堡 · 大厅')
@@ -574,6 +613,78 @@ async function finish(g, label) {
   assert(await choose(g, '悄悄退回去'), 'P6 选择把秘密卖掉')
   assert(await g.waitFor('结局 · 好价钱'), 'P7 商人结局达成')
   await quit(g, 'P8 商人结局收尾')
+}
+
+// ---------- 路线 Q：侦探 Mod《星港迷案》—— 充分调查 → 真结局 ----------
+{
+  console.log('\n[侦探线] 接案 → 调查 → 推理 → 定罪')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '登船前往第七星港'), 'Q1 前往星港')
+  await g.waitFor('星港 · 空港大厅')
+  assert(await choose(g, '招人查一桩命案'), 'Q2 入口：接案（新选项加在末尾，不影响原顺位）')
+  await g.waitFor('一桩委托')
+  assert(await choose(g, '接下委托'), 'Q3 接案，拿到案卷桌')
+  await g.waitFor('案卷桌 · 推理进度 0/7')
+
+  // 逐个 spoke 调查。用 waitFor 等待每条线索的关键文本出现，再选返回项。
+  // 不用 choose 做 spoke 选择——spoke 选项文本会随状态过滤变化，
+  // 但 spoke 场景内选项数量少且固定，用 waitFor 确认场景后直接发序号更稳。
+  // 关键：每个 spoke 的选项 1 都是"调查+返回"复合项（统一以"，回案卷桌"结尾）。
+  const investigate = async (boardKeyword, evidenceText, label) => {
+    assert(await choose(g, boardKeyword), `Q-调查 ${label}`)
+    assert(await g.waitFor(evidenceText), `Q-线索 ${label}`, g.output().slice(-600))
+    g.send('1')                            // spoke 选项 1 = 调查并返回案卷桌
+    assert(await g.waitFor('推理进度'), `Q-返回 ${label}`)
+    await sleep(300)
+  }
+  await investigate('去码头现场', '海藻粉', '码头')
+  await investigate('进入死者舱室', '体检报告', '舱室')
+  await investigate('调阅航行日志', '墨色', '日志')
+  await investigate('调阅货物清单', '替他签了', '清单')
+  await investigate('问话：船长', '排练过', '船长')
+
+  assert(await g.waitFor('推理进度 5/7'), 'Q4 推理度随线索累加（插值可见）')
+
+  // 推理台：坐下拼线索 → 组合比对
+  assert(await choose(g, '拼一拼'), 'Q5 进入推理台')
+  await g.waitFor('推理台 · 拼合')
+  assert(await choose(g, '比对货物清单与航行日志'), 'Q5a 组合：清单 × 日志')
+  // 组合后回到推理台（case.deduce），标题不含推理进度；
+  // 用 effect 日志确认 suspectLevel 增长，再确认组合选项已消失（防重复）
+  assert(await g.waitFor('effect suspectLevel: 5 -> 6'), 'Q5b 组合线索再进一步')
+
+  // 指控：证据充分 → 真结局
+  assert(await choose(g, '去指认'), 'Q6 前往指控')
+  await g.waitFor('指控')
+  assert(await choose(g, '摆出清单、日志与欠债'), 'Q7 证据充分，指认船长')
+  assert(await g.waitFor('结局 · 真凶归案'), 'Q8 TRUE END 达成')
+  await quit(g, 'Q9 侦探线收尾')
+}
+
+// ---------- 路线 R：侦探 Mod —— 证据不足 → 冤案结局 ----------
+{
+  console.log('\n[侦探线] 证据不足 → 冤案')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '登船前往第七星港'), 'R1 前往星港')
+  await g.waitFor('星港 · 空港大厅')
+  assert(await choose(g, '招人查一桩命案'), 'R2 接案')
+  await g.waitFor('一桩委托')
+  assert(await choose(g, '接下委托'), 'R3 拿到案卷桌')
+  await g.waitFor('案卷桌')
+  // 只查一条，远达不到定罪门槛
+  assert(await choose(g, '去码头现场'), 'R4 只查一条线索')
+  await settled(g)
+  await g.waitFor('海藻粉')
+  assert(await choose(g, '回案卷桌'), 'R4a 返回枢纽')
+  await g.waitFor('推理进度')
+  assert(await choose(g, '指认凶手'), 'R5 直接去指控')
+  await g.waitFor('指控')
+  assert(await choose(g, '手上还撑不住'), 'R6 证据不足仍指认船长')
+  assert(await g.waitFor('结局 · 冤案'), 'R7 冤案结局达成')
+  assert(await g.waitFor('你指认了船长'), 'R8 结局回显被指认者（不是无差别结局）')
+  await quit(g, 'R9 冤案收尾')
 }
 
 // ---------- 路线 N：内容校验器（lint:content） ----------

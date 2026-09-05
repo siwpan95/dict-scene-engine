@@ -186,7 +186,7 @@ try {
   warn('[账本] 未找到 docs/NARRATIVE-LEDGER.md，跳过变量一致性检查')
 }
 
-for (const v of [...varRefs.read, ...varRefs.write]) {
+for (const v of new Set([...varRefs.read, ...varRefs.write])) {
   if (!ledgerDeclared.has(v)) warn(`[账本] 内容使用了 ${v}，但叙事账本未声明`)
 }
 const deadVars = [...ledgerDeclared].filter((v) => !varRefs.read.has(v) && !varRefs.write.has(v))

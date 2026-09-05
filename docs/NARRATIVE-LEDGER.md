@@ -25,6 +25,14 @@
 | `flags.hallLooted` | 大厅已搜刮过（防重复） | `castle.hall` 选项 | `castle.hall` 同选项条件 `!flags.hallLooted` |
 | `flags.sawMural` | 看出壁画被刮掉的部分 | `castle.hall` 选项、`castle.hall.mural` | `castle.library` 解锁条件 |
 | `flags.swordLore` | 知道"剑是被分成两半的"真相 | `castle.library` 选项 | `castle.sanctum` 选项「把断剑放回石台」→ BEST END 条件 |
+| `flags.caseAccepted` | 已接下星港命案委托 | `case.brief` 选项 | `starport-hub` 入口选项、`case.board` 调查项条件 |
+| `flags.cargoAccess` | 取得货舱进入权限 | `scene.dock`/`scene.cabin`/`crew.captain` 选项 | `case.board` 货舱项条件、`scene.cargo` 解锁 |
+| `flags.linkManifestLog` | 已比对清单与日志 | `case.deduce` 选项 | 同选项条件（防重复） |
+| `flags.linkWeaponRumor` | 已比对凶器与欠债 | `case.deduce` 选项 | 同选项条件（防重复） |
+| `flags.linkTestimony` | 已比对三条证词 | `case.deduce` 选项 | 同选项条件（防重复） |
+| `flags.linkScene` | 已比对现场与封条 | `case.deduce` 选项 | 同选项条件（防重复） |
+| `flags.linkLetter` | 已核对信件与医生处境 | `case.deduce` 选项 | 同选项条件（防重复） |
+| `flags.accused` | 被指认者的名字（用于结局回显） | `case.accuse` 各选项 | `ending.miscarry` 文本插值 `{flags.accused}` |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -48,7 +56,7 @@
 | `crit` | 暴击率 | 0.15 | 无 | 战斗公式 |
 | `gold` | 金币 | 10 | 战利品、出售、`road.merchant` 消费、酒馆 | 商店、贿赂、情报等条件选项 |
 | `visits.village` | 村庄访问次数 | 0 | `village` onEnter | 后续重访反应（M2） |
-| `suspectLevel` | 侦探 Mod 嫌疑锁定进度 | 0 | `case.deduce`（M3） | `case.accuse`（M3） |
+| `suspectLevel` | 侦探 Mod 推理度（线索数） | 0 | 各线索 `do: { suspectLevel: +1 }` | `case.board` 标题插值、`case.accuse` 定罪条件（≥5） |
 
 ---
 
@@ -97,7 +105,6 @@ npm run lint:content
 | 路径 | 含义 | 计划写入处 | 计划读取处 | 阶段 |
 |---|---|---|---|---|
 | `items.potion` | 伤药（可服用） | `village.shop` | 服用机制（引擎待支持） | M2 评估 |
-| `suspectLevel` | 侦探 Mod 嫌疑锁定进度 | `case.deduce` | `case.accuse` | M3 |
 
 ---
 

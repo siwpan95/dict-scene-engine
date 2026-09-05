@@ -12,6 +12,9 @@ export default {
       { text: '潜入货舱区', goto: 'starport-cargo' },
       { text: '去「红矮星」酒吧打听', if: 'gold >= 1', do: { gold: -1 }, goto: 'starport-bar' },
       { text: '掉头返回村庄', goto: 'start' },
+      // 接案入口放在末尾：不影响上面三项的序号（历史用例依赖它们）
+      { text: '港务官在招人查一桩命案', if: '!flags.caseAccepted', goto: 'case.brief' },
+      { text: '继续查那桩命案', if: 'flags.caseAccepted', goto: 'case.board' },
     ],
   },
 
