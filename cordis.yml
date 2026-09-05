@@ -22,6 +22,7 @@
       - ./content/starport.js
       - ./content/starport-case.js   # M3：侦探 Mod《星港迷案》
       - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
+      - ./content/starport-case2.js  # M5：侦探第二案《港湾连环案》
 
 - id: state
   name: ./plugins/state.js
@@ -37,6 +38,10 @@
       suspectLevel: 0        # 侦探 Mod：推理度（线索计数）
       clues: {}              # 侦探 Mod：已掌握线索（clues.dock 等，必须先声明，
       testimony: {}         #           否则条件表达式里会 ReferenceError）
+      case2clues: {}        # M5：第二案线索
+      case2testimony: {}    # M5：第二案证词
+      case2flags: {}        # M5：第二案推理标记
+      case2Evidence: 0      # M5：第二案证据计数
       items: {}
       flags: {}
 

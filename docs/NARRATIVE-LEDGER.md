@@ -42,6 +42,8 @@
 | `flags.ghostCause` | 知道管家死因（反噬） | `castle.underworld.ghost.death` | 背景信息，暂无直接读取 |
 | `flags.ghostSword` | 管家辨出你的武器是仿品 | `castle.underworld.ghost.sword` | 背景信息，暂无直接读取 |
 | `flags.ashOffered` | 已将地下层灰撒入石台缝隙 | `castle.sanctum.ash` 选项 | `castle.sanctum.ash` 后续选项分支 |
+| `flags.case2Accepted` | 已接下第二案（港务官中毒）委托 | `case2.brief` 选项 | `starport-hub` 入口选项、`case2.board` 调查项条件 |
+| `flags.case2accused` | 第二案被指认者（用于结局回显） | `case2.accuse` 各选项 | `case2.ending.miscarry` 文本插值 |
 
 ### 1.2 items（物品，含武器加成）
 

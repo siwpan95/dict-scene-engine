@@ -15,6 +15,8 @@ export default {
       // 接案入口放在末尾：不影响上面三项的序号（历史用例依赖它们）
       { text: '港务官在招人查一桩命案', if: '!flags.caseAccepted', goto: 'case.brief' },
       { text: '继续查那桩命案', if: 'flags.caseAccepted', goto: 'case.board' },
+      { text: '副官在找人查港务官中毒案（第二桩）', if: '!flags.case2Accepted', goto: 'case2.brief' },
+      { text: '继续查港务官中毒案', if: 'flags.case2Accepted', goto: 'case2.board' },
     ],
   },
 
