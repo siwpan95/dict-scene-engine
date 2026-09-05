@@ -170,7 +170,7 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 55 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  assert(await g.waitFor('loaded 68 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
   g.send('1')                              // 走进村庄
   assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
   g.send('5')                              // 花 5 金币向老猎人打听情报

@@ -21,6 +21,7 @@
       - ./content/demo.js
       - ./content/starport.js
       - ./content/starport-case.js   # M3：侦探 Mod《星港迷案》
+      - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
 
 - id: state
   name: ./plugins/state.js

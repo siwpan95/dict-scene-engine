@@ -33,6 +33,15 @@
 | `flags.linkScene` | 已比对现场与封条 | `case.deduce` 选项 | 同选项条件（防重复） |
 | `flags.linkLetter` | 已核对信件与医生处境 | `case.deduce` 选项 | 同选项条件（防重复） |
 | `flags.accused` | 被指认者的名字（用于结局回显） | `case.accuse` 各选项 | `ending.miscarry` 文本插值 `{flags.accused}` |
+| `flags.underworldVisited` | 已进入地下层（防重复入口提示） | `castle.dungeon.after` 选项 | 同选项条件 |
+| `flags.alchemistHeard` | 已听炼金术士讲故事 | `castle.underworld.alchemist` 选项 | 同场景后续选项条件 |
+| `flags.safeMerge` | 知道"安全拼合"的方法 | `castle.underworld.alchemist.tale`/`.trade` | `ending.sword` 的隐含前置（影响拼合成败） |
+| `flags.ghostHeard` | 已听管家讲"了结" | `castle.underworld.ghost` 选项 | 同场景后续选项条件 |
+| `flags.knowSeal` | 知道"封剑"这个选项存在 | `castle.underworld.ghost.duty` 选项 | `castle.underworld.ghost.seal` 解锁条件 |
+| `flags.knowSealMethod` | 知道封剑需要钥匙+留守 | `castle.underworld.ghost.seal` 选项 | `ending.sacrifice` 前置 |
+| `flags.ghostCause` | 知道管家死因（反噬） | `castle.underworld.ghost.death` | 背景信息，暂无直接读取 |
+| `flags.ghostSword` | 管家辨出你的武器是仿品 | `castle.underworld.ghost.sword` | 背景信息，暂无直接读取 |
+| `flags.ashOffered` | 已将地下层灰撒入石台缝隙 | `castle.sanctum.ash` 选项 | `castle.sanctum.ash` 后续选项分支 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -45,6 +54,9 @@
 | `items.wolf_pelt` | 狼皮 | `combat` 独眼狼掉落 | `village.shop` 出售（6 金币） | — |
 | `items.silver_dagger` | 银匕首 | `castle.gallery` 壁龛（需火把） | `castle.sanctum` 选项「举起银匕首」 | ATK +3（combat.weapons） |
 | `items.golem_core` | 石像鬼核心 | `combat` 石像鬼掉落 | `village.shop` 出售（40 金币） | — |
+| `items.seal_key` | 封印钥匙（半透明，管家所赠） | `castle.underworld.ghost.seal` 选项 | `castle.sanctum` 选项「插入底座」→ `ending.sacrifice` |
+| `items.underworld_ash` | 剑断时溅出的灰（碰之伤身） | `castle.underworld.alchemist.burn` onEnter | `castle.sanctum` 选项「灰与剑撒入缝隙」→ `castle.sanctum.ash` |
+| `items.calm_potion` | 稳心剂（拼合时防反噬） | `castle.underworld.alchemist.trade` 选项 | `ending.sword` 隐含前置（影响拼合成败） | — |
 
 ### 1.3 数值
 
