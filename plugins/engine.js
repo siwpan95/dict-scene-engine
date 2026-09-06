@@ -28,6 +28,9 @@ export class EngineService extends Service {
   constructor(ctx, config) {
     super(ctx, 'engine')
     this.config = config
+    // CLI 的 --entry 通过环境变量透传（dse play --entry <场景ID>）：
+    // 优先于 cordis.yml 的 engine.entry，便于脚本从任意场景起跑一段。
+    this.entry = process.env.DSE_ENTRY || config.entry
     this.current = null
     this.running = false
   }
@@ -37,8 +40,8 @@ export class EngineService extends Service {
     setTimeout(() => this.start(), 0)
   }
 
-  /** 开始游戏（默认从配置的 entry 场景入场） */
-  start(entryId = this.config.entry) {
+  /** 开始游戏（默认从配置的 entry 场景入场；DSE_ENTRY 可覆盖） */
+  start(entryId = this.entry) {
     if (this.running) return
     this.running = true
     this.current = entryId
@@ -141,7 +144,7 @@ export class EngineService extends Service {
               const target = String(choice.goto)
               if (target === '@restart') {
                 this.ctx.state.reset()
-                this.goto(this.config.entry)
+                this.goto(this.entry)
               } else {
                 this.goto(target)
               }

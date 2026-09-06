@@ -117,7 +117,8 @@ export class SaveService extends Service {
 
       if (!this.ctx.scenes.has(record.scene)) {
         // 内容改版后存档指向的场景可能已删除：回退入口场景，不让游戏直接死掉
-        const fallback = this.ctx.engine.config?.entry ?? this.ctx.scenes.ids[0]
+        // engine.entry 已含 DSE_ENTRY 覆盖逻辑，优先用它，保证与启动场景一致
+        const fallback = this.ctx.engine.entry ?? this.ctx.engine.config?.entry ?? this.ctx.scenes.ids[0]
         this.ctx.io.print(`  存档场景 "${record.scene}" 已不存在，改为从 "${fallback}" 开始`)
         record.scene = fallback
       }

@@ -23,7 +23,6 @@
       - ./content/starport-case.js   # M3：侦探 Mod《星港迷案》
       - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
       - ./content/starport-case2.js  # M5：侦探第二案《港湾连环案》
-      - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
       - ./content/caravan.js         # M6：新主线《荒漠商队》
       - ./content/town-trade.js      # M8：城镇经营 Mod《东市经营》
       - ./content/wuxia.js           # M9：武侠短篇《刀客》

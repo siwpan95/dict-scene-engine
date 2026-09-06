@@ -4,6 +4,11 @@
 //
 // 输入实现说明：不直接用 rl.question()（win32 管道下每行只返回首字符，
 // 自动化测试/管道输入不可靠），改用 readline async iterator + 等待队列。
+//
+// 脚本输入（CLI 非交互模式）：设置环境变量 DSE_INPUT 为逗号分隔的输入序列
+// （如 DSE_INPUT="3,1,a,a"），ask() 会按序取出并回显；序列用尽后自动返回
+// 'quit'，让引擎走正常退出流程（打印提示 → dispose → 退出码 0），
+// 而不是卡在等待输入上。这样 CLI 可以在 CI/脚本里无交互地跑完整条线路。
 
 import { Service } from 'cordis'
 import { createInterface } from 'node:readline'
@@ -18,9 +23,19 @@ export class ConsoleIO extends Service {
     this.rl = null
     this.lines = []
     this.waiters = []
+    // 脚本输入队列；null = 交互模式
+    this.scripted = process.env.DSE_INPUT
+      ? String(process.env.DSE_INPUT).split(/[,\n]/).map((s) => s.trim()).filter(Boolean)
+      : null
   }
 
   [Service.init]() {
+    // 脚本模式下不创建 readline：stdin 无需消费，避免进程挂在等待输入上
+    if (this.scripted) {
+      this.ctx.root.effect(() => () => { process.stdin.pause() })
+      this.ctx.logger('io').info('scripted input: %d steps', this.scripted.length)
+      return
+    }
     this.rl = createInterface({ input: process.stdin, output: process.stdout })
     // 清理挂在根上下文的 effect 上 —— 引擎不再调用 process.exit()，
     // 而是 dispose 根作用域后让事件循环自然退出，因此这里必须释放 stdin 句柄，
@@ -51,6 +66,12 @@ export class ConsoleIO extends Service {
   }
 
   async ask(prompt = '> ') {
+    // 脚本模式：按序取用，用尽后以 quit 收尾（走引擎的正常退出流程）
+    if (this.scripted) {
+      const next = this.scripted.length ? this.scripted.shift() : 'quit'
+      process.stdout.write(`${prompt}${next}\n`)
+      return next
+    }
     process.stdout.write(prompt)
     if (this.lines.length) return this.lines.shift()
     return new Promise((resolve) => this.waiters.push({ resolve }))

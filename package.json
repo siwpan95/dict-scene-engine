@@ -4,22 +4,30 @@
   "description": "字典场景引擎 —— 基于 Cordis 4.0 插件架构的文字冒险游戏引擎（场景即字典，能力即插件）",
   "type": "module",
   "main": "game.js",
+  "bin": {
+    "dse": "./cli.js"
+  },
   "scripts": {
     "start": "node game.js",
     "start:hmr": "node --expose-internals game.js",
     "build:hmr": "node scripts/build-hmr.mjs",
     "lint:content": "node scripts/lint-content.mjs",
-    "test": "node tests/e2e.mjs"
+    "test": "node tests/e2e.mjs",
+    "test:cli": "node tests/cli.mjs",
+    "test:all": "node tests/e2e.mjs && node tests/cli.mjs"
   },
   "engines": {
     "node": ">=22"
   },
   "files": [
     "game.js",
+    "cli.js",
+    "lib/",
     "cordis.yml",
     "content/",
     "plugins/",
     "vendor/",
+    "scripts/",
     "LICENSE",
     "README.md"
   ],

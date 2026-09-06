@@ -28,16 +28,54 @@ npm install
 npm start          # 开始游戏
 npm run start:hmr  # 开启插件级热重载（官方 HMR，需 --expose-internals）
 npm test           # 端到端验证（332 项断言，spawn 真实进程驱动）
+npm run test:cli   # CLI 接口验证（48 项断言）
+npm run test:all   # 两者都跑
 npm run lint:content  # 内容校验：悬空 goto / 不可达场景 / 结局可达 / 死变量
 npm run build:hmr  # 从本地 cordis 源码重建官方 HMR 插件
 ```
+
+## 命令行接口（CLI）
+
+除交互式游戏外，引擎提供 `dse` 命令，便于脚本 / CI 驱动。全局安装后可直接用 `dse`，本地用 `node cli.js`。
+
+```bash
+dse play --input "3,1,1"      # 非交互跑一条线路（逗号分隔输入序列）
+dse play --entry caravan.camp --input "1"   # 从指定场景起跑
+dse scenes                    # 列出全部场景（按命名空间分组，⚑ 结局 / ⚔ 模式接管）
+dse scenes --scene caravan.fork             # 查看单个场景（含选项条件与跳转目标）
+dse scenes --json | jq 'length'             # 结构化输出，可管道消费
+dse info --json               # 项目统计（场景/字数/结局/模式/入口）
+dse check                     # 内容校验（等价 npm run lint:content）
+dse saves                     # 列出存档位
+```
+
+| 命令 | 作用 | 启动主循环 | 占用 stdin |
+|---|---|---|---|
+| `play --input` | 脚本驱动跑线路，输入用尽自动 `quit` | 是 | 否 |
+| `play`（无 input） | 交互式游戏（等价 `npm start`） | 是 | 是 |
+| `scenes` / `info` | 只读查询字典，不进主循环 | 否 | 否 |
+| `check` | 复用 `scripts/lint-content.mjs` | 否 | 否 |
+| `saves` | 列出 `saves/*.json` | 否 | 否 |
+
+设计要点：
+
+1. **不写第二套启动流程** —— `play` 与 `game.js` 共用 `lib/boot.js`。
+2. **脚本输入靠环境变量透传** —— `DSE_INPUT="1,2,a"` 由 console-io 插件消费；序列用尽后自动返回 `quit`，走引擎正常退出流程（打印提示 → dispose → 退出码 0），不会卡在等待输入上。
+3. **`--entry` 透传为 `DSE_ENTRY`** —— 引擎优先于 `cordis.yml` 的 `engine.entry`，`@restart` 与坏档回退也都用同一个值，保持一致。
+4. **stdout 只放结果、诊断走 stderr** —— 保证 `dse scenes --json | jq` 这类管道消费不被污染；错误退出码非零。
+
+典型用途：CI 里跑 `dse play --input "..."` 断言某条线路仍能抵达预期结局（见 `tests/cli.mjs` 的 P14：完整经营周目跑到 GOOD END）。
 
 ## 目录结构
 
 ```
 dict-scene-engine/
-├── game.js               # 启动器：根 Context + Loader + include cordis.yml
+├── game.js               # 游戏启动器（交互），内部调 lib/boot.js
+├── cli.js                # 命令行接口 dse：play / scenes / info / check / saves
 ├── cordis.yml            # 插件清单（声明式组装，改它 = 改游戏构成）
+├── lib/
+│   ├── boot.js           # 启动流程（game.js 与 cli.js 共用）
+│   └── dict.mjs          # 场景字典离线加载（CLI 只读命令用，不启动引擎）
 ├── plugins/              # 引擎插件（每个能力一个插件，通过 ctx.<service> 通信）
 │   ├── scenes.js         # ctx.scenes   字典场景服务（核心）：加载/校验/查询/热重载
 │   ├── state.js          # ctx.state    玩家状态：dot-path 读写、效果执行、条件求值
@@ -67,7 +105,8 @@ dict-scene-engine/
 │   ├── build-hmr.mjs     # 从 E:\run and run 的 cordis 源码构建官方 HMR
 │   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 厚度）
 ├── tests/
-│   └── e2e.mjs           # 端到端测试：22 组 332 项断言
+│   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：22 组 332 项断言
+│   └── cli.mjs           # CLI 接口测试（命令行/脚本输入）：48 项断言
 │                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
 │                         #   I 官方 HMR / J 战斗中命令 / K 存档安全
 │                         #   L 重放回归 / M 退出竞态 / N 内容校验 / O 古堡探索 / P 商人结局
