@@ -25,6 +25,7 @@
       - ./content/starport-case2.js  # M5：侦探第二案《港湾连环案》
       - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
       - ./content/caravan.js         # M6：新主线《荒漠商队》
+      - ./content/town-trade.js      # M8：城镇经营 Mod《东市经营》
 
 - id: state
   name: ./plugins/state.js
@@ -45,6 +46,10 @@
       case2flags: {}        # M5：第二案推理标记
       case2Evidence: 0      # M5：第二案证据计数
       karma: 0               # M6：荒漠商队善恶值（善举 +1，恶举 -1）
+      stock: {}              # M8：东市经营库存（trade 插件读写）
+      tradeDay: null         # M8：东市经营天数（trade 插件读写，存档可恢复）
+      tradeBaseGold: null    # M8：开市基线资金（trade 插件 begin 记录）
+      tradeProfit: 0         # M8：收市净赚（trade 插件结算，结局判定用）
       items: {}
       flags: {}
 
@@ -88,6 +93,18 @@
       guard: { name: 星港守卫, hp: 16, atk: 4, def: 1, crit: 0.15, drops: { gold: +8 } }
       golem: { name: 石像鬼,   hp: 26, atk: 5, def: 2, crit: 0.15, drops: { gold: +30, 'items.golem_core': +1 } }
       bandit: { name: 沙盗,     hp: 14, atk: 3, def: 1, crit: 0.12, drops: { gold: +12 } }
+
+- id: trade
+  name: ./plugins/trade.js
+  config:
+    goods:                    # 商品表：进价（数据驱动，与敌人字典同哲学）
+      tea:   { name: 茶, buy: 8 }
+      salt:  { name: 盐, buy: 4 }
+      cloth: { name: 布, buy: 2 }
+    schedule:                 # 确定性行情日程（行=商品，列=第 1..5 天卖出价）
+      - [12, 10, 15, 12, 11]  # 茶：第 3 天茶会看涨
+      - [5, 7, 5, 6, 5]       # 盐：第 2 天雨天看涨
+      - [3, 3, 2, 4, 6]       # 布：第 5 天大集看涨
 
 - id: sound
   name: ./plugins/sound.js

@@ -59,6 +59,11 @@
 | `flags.racedStorm` | 沙暴中冒进致伤 | `caravan.storm` 选项 | hp -8（战斗外掉血） |
 | `flags.leftRelic` | 未贪石堡铜符 | `caravan.ruin` 选项 | 善名线（karma +1） |
 | `flags.heardSong` | 听过营火夜谈 | `caravan.song` 选项 | 角色厚度，暂无直接读取 |
+| `flags.knowTeaFair` | 知道第 3 天茶会茶价看涨 | `town.tea` 选项 | `town.recon` 同选项条件（防重复） |
+| `flags.knowRain` | 知道第 2 天雨天盐价看涨 | `town.rain` 选项 | `town.recon` 同选项条件（防重复） |
+| `flags.knowMarket` | 知道第 5 天大集布价看涨 | `town.notice` 选项 | `town.recon` 同选项条件（防重复） |
+| `flags.relicSold` | 铜符已卖给何掌柜的朋友 | `town.relic` 选项 | `town.settle` 入口选项条件（防重复） |
+| `flags.relicKept` | 铜符留作念想未卖 | `town.relic` 选项 | `town.settle` 返回后的状态回显 |
 | `flags.case2Accepted` | 已接下第二案（港务官中毒）委托 | `case2.brief` 选项 | `starport-hub` 入口选项、`case2.board` 调查项条件 |
 | `flags.case2accused` | 第二案被指认者（用于结局回显） | `case2.accuse` 各选项 | `case2.ending.miscarry` 文本插值 |
 
@@ -90,6 +95,11 @@
 | `gold` | 金币 | 10 | 战利品、出售、`road.merchant` 消费、酒馆 | 商店、贿赂、情报等条件选项 |
 | `visits.village` | 村庄访问次数 | 0 | `village` onEnter | 后续重访反应（M2） |
 | `suspectLevel` | 侦探 Mod 推理度（线索数） | 0 | 各线索 `do: { suspectLevel: +1 }` | `case.board` 标题插值、`case.accuse` 定罪条件（≥5） |
+| `karma` | 商队线善恶值 | 0 | `caravan.*` 各选项 ±1/±2 | `caravan.camp` 标题插值、`caravan.fork` 隐者线条件（≥2） |
+| `stock.*` | 东市经营库存（茶/盐/布） | `{}` | `trade` 插件 buy/sell | `trade` 插件面板显示 |
+| `tradeDay` | 东市经营天数 | `null` | `trade` 插件 begin/next（⚠️ set 赋值，勿用 apply 加减） | `trade` 插件面板、收市判定 |
+| `tradeBaseGold` | 东市开市基线资金 | `null` | `trade` 插件 begin | 收市时结算 `tradeProfit` |
+| `tradeProfit` | 东市收市净赚 | 0 | `trade` 插件收市结算（gold − base） | `town.settle` 文本插值、`town.judge` 结局分流（≥60 / ≥10 / <10） |
 
 ---
 

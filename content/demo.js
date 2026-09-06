@@ -22,6 +22,7 @@ export default {
       { text: '前往试炼场（战斗系统 DLC）', goto: 'arena' },
       { text: '登船前往第七星港（DLC）', goto: 'starport-hub' },
       { text: '西出阳关，加入一支荒漠商队（新主线）', goto: 'caravan.camp' },
+      { text: '去东市盘下一间铺子试试营生（经营 Mod）', goto: 'town.start' },
     ],
   },
 

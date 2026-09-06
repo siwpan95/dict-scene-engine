@@ -170,7 +170,7 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 100 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  assert(await g.waitFor('loaded 112 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
   g.send('1')                              // 走进村庄
   assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
   g.send('5')                              // 花 5 金币向老猎人打听情报
@@ -757,6 +757,91 @@ async function finish(g, label) {
     assert(await choose(g, '什么也不留恋，商队散伙'), 'S28 散伙路线')
     assert(await g.waitFor('结局 · 商队散伙'), 'S29 NEUTRAL END 达成')
     await quit(g, 'S30 散伙线收尾')
+  }
+}
+
+// ---------- 路线 T：M8 城镇经营《东市经营》—— 侦察 / 经营循环 / 三结局 ----------
+{
+  console.log('\n[经营线] 侦察 → 经营 → 结算三结局')
+
+  // T-侦察：市面情报 + 条件隐藏
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '去东市盘下一间铺子'), 'T1 进入经营线（入口在末尾，不影响原顺位）')
+    await g.waitFor('三合铺')
+    assert(await choose(g, '先不急着开张'), 'T2 先去市面侦察')
+    await g.waitFor('东市 · 市面')
+    assert(await choose(g, '进茶馆听茶客闲谈'), 'T3 茶馆情报（第 3 天茶涨）')
+    await g.waitFor('东市 · 茶馆')
+    assert(await choose(g, '记下茶会的日子'), 'T4 记录茶会情报')
+    await g.waitFor('东市 · 市面')
+    // 已查过的情报项应隐藏
+    assert(!(await choose(g, '进茶馆听茶客闲谈', 1500)), 'T5 已查情报项隐藏（条件 !flag）')
+    assert(await choose(g, '回铺子开张'), 'T6 回铺子开张（直接进经营场景）')
+    assert(await g.waitFor('东市 · 第 1 天'), 'T7 经营面板出现（trade 插件接管）')
+    await quit(g, 'T8 侦察线收尾')
+  }
+
+  // T-发家（GOOD）：本金 30 全押布 → 第 5 天大集卖 90 ≥ 80
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '去东市盘下一间铺子'), 'T9 进入经营线')
+    await g.waitFor('三合铺')
+    assert(await choose(g, '接过铺子，先开张试试'), 'T10 直接开张（本金 30）')
+    await g.waitFor('东市 · 第 1 天')
+    g.send('buy cloth 15')                    // 全押布（-30）
+    assert(await g.waitFor('库存 15'), 'T11 进货 15 件布')
+    for (let i = 0; i < 4; i++) g.send('next')   // 熬到第 5 天
+    assert(await g.waitFor('东市 · 第 5 天'), 'T12 推进到第 5 天（大集日）')
+    g.send('sell cloth')                      // 15 × 6 = 90
+    assert(await g.waitFor('+90 金'), 'T13 大集出货 +90 金')
+    g.send('next')                            // 收市结算
+    assert(await g.waitFor('收市盘账'), 'T14 进入结算')
+    assert(await choose(g, '请何掌柜裁断'), 'T15 请掌柜裁断')
+    // judge 的三个"（听结果）"选项文本相同、条件互斥，过滤后只剩一个 → 直接选 1
+    g.send('1')
+    assert(await g.waitFor('结局 · 东市 · 商会入主'), 'T16 GOOD END（净赚 ≥60）')
+    await quit(g, 'T17 发家线收尾')
+  }
+
+  // T-糊口（NEUTRAL）：只押 5 件布 → 50 金
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '去东市盘下一间铺子'), 'T18 进入经营线')
+    await g.waitFor('三合铺')
+    assert(await choose(g, '接过铺子，先开张试试'), 'T19 直接开张')
+    await g.waitFor('东市 · 第 1 天')
+    g.send('buy cloth 5')                     // 小押（-10）
+    assert(await g.waitFor('库存 5'), 'T20 进货 5 件布')
+    for (let i = 0; i < 4; i++) g.send('next')
+    await g.waitFor('东市 · 第 5 天')
+    g.send('sell cloth')                      // 5 × 6 = 30，总 50
+    await g.waitFor('+30 金')
+    g.send('next')
+    await g.waitFor('收市盘账')
+    assert(await choose(g, '请何掌柜裁断'), 'T21 请掌柜裁断')
+    g.send('1')
+    assert(await g.waitFor('结局 · 东市 · 小本营生'), 'T22 NEUTRAL END（净赚 10–59）')
+    await quit(g, 'T23 糊口线收尾')
+  }
+
+  // T-破产（BAD）：全程不动 → 30 金
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '去东市盘下一间铺子'), 'T24 进入经营线')
+    await g.waitFor('三合铺')
+    assert(await choose(g, '接过铺子，先开张试试'), 'T25 直接开张')
+    await g.waitFor('东市 · 第 1 天')
+    for (let i = 0; i < 5; i++) g.send('next')    // 第 5 天 next 触发收市
+    assert(await g.waitFor('收市盘账'), 'T26 直接收市')
+    assert(await choose(g, '请何掌柜裁断'), 'T27 请掌柜裁断')
+    g.send('1')
+    assert(await g.waitFor('结局 · 东市 · 铺子没保住'), 'T28 BAD END（净赚 <10）')
+    await quit(g, 'T29 破产线收尾')
   }
 }
 

@@ -32,6 +32,13 @@ const warn = (msg) => warnings.push(msg)
 
 /** '@' 开头的特殊跳转目标白名单（引擎实现见 engine.js） */
 const SPECIAL_GOTO = new Set(['@restart'])
+// mode → 跳转键映射：非 normal 模式的流转边（插件内部 engine.goto 的目标）
+// 与 combat/trade 插件的 battle.* / trade.* 字段一一对应；
+// 新增第三种 mode 时，只需在此追加一行。
+const MODE_EDGES = {
+  battle: ['onWin', 'onLose', 'onFlee'],
+  trade: ['onEnd'],
+}
 
 /** ID 命名空间：<标识>[.<标识>]*，标识为小写字母数字（允许 - _ 连接）
  *  新内容推荐用 '.' 分层（castle.gallery），历史内容用 '-'（starport-hub）同样合法
@@ -62,8 +69,8 @@ for (const [id, scene] of Object.entries(dict)) {
     (scene.choices ?? []).reduce((n, c) => n + (c.text ?? '').length, 0)
   totalChars += len
   if (len < 120) {
-    // 战斗场景的文本通常较短，降为告警而非错误
-    const level = scene.mode === 'battle' ? warn : err
+    // 模式接管场景（battle/trade）的文本通常较短，降为告警而非错误
+    const level = scene.mode && scene.mode !== 'normal' ? warn : err
     level(`[厚度] 场景 ${id} 正文仅 ${len} 字（目标 ≥ 120）`)
   }
 }
@@ -90,7 +97,8 @@ for (const [id, scene] of Object.entries(dict)) {
   collectEffectVars(scene.onEnter)
   const choices = scene.choices ?? []
   // 结局判定：无选项，或所有选项都是"重开"（@restart）——后者是结算后的重玩入口
-  const isEnding = scene.mode !== 'battle' &&
+  // 模式接管场景（battle/trade）由插件终结，不在此判为结局
+  const isEnding = (scene.mode == null || scene.mode === 'normal') &&
     (choices.length === 0 || choices.every((c) => String(c?.goto ?? '').startsWith('@')))
   if (isEnding) endings.push(id)
   for (const choice of choices) {
@@ -114,11 +122,13 @@ for (const [id, scene] of Object.entries(dict)) {
     }
     if (!(t in dict)) err(`[悬空] ${id} 第 ${i + 1} 个选项 -> "${t}" 未定义`)
   }
-  // 战斗场景的胜负分支同样是跳转边（battle.onWin / onLose / onFlee）
-  for (const key of ['onWin', 'onLose', 'onFlee']) {
-    const t = scene.battle?.[key]
-    if (t !== undefined && !(String(t) in dict)) {
-      err(`[悬空] ${id} 的 battle.${key} -> "${t}" 未定义`)
+  // 模式接管场景的流转分支同样是跳转边（battle.onWin/onLose/onFlee、trade.onEnd）
+  for (const [mode, keys] of Object.entries(MODE_EDGES)) {
+    for (const key of keys) {
+      const t = scene[mode]?.[key]
+      if (t !== undefined && !(String(t) in dict)) {
+        err(`[悬空] ${id} 的 ${mode}.${key} -> "${t}" 未定义`)
+      }
     }
   }
 }
@@ -136,10 +146,12 @@ while (queue.length) {
     const t = String(choice?.goto ?? '')
     if (t && !t.startsWith('@') && !reachable.has(t)) queue.push(t)
   }
-  // 战斗场景：胜负/逃跑分支也是可达边
-  for (const key of ['onWin', 'onLose', 'onFlee']) {
-    const t = scene.battle?.[key]
-    if (t !== undefined && !reachable.has(String(t))) queue.push(String(t))
+  // 模式接管场景：流转分支也是可达边（battle.* / trade.*）
+  for (const [mode, keys] of Object.entries(MODE_EDGES)) {
+    for (const key of keys) {
+      const t = scene[mode]?.[key]
+      if (t !== undefined && !reachable.has(String(t))) queue.push(String(t))
+    }
   }
 }
 for (const id of ids) {
