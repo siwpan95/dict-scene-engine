@@ -1,6 +1,6 @@
 {
   "name": "dict-scene-engine",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "字典场景引擎 —— 基于 Cordis 4.0 插件架构的文字冒险游戏引擎（场景即字典，能力即插件）",
   "type": "module",
   "main": "game.js",
