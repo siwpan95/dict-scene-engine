@@ -935,6 +935,40 @@ async function finish(g, label) {
   }
 }
 
+// ---------- 路线 X：M10 跨包联动彩蛋（商队铜符 → 东市） ----------
+{
+  console.log('\n[跨包彩蛋] 商队铜符 → 东市识货人')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '加入一支荒漠商队'), 'X1 进入商队线')
+  await g.waitFor('商队营地')
+  assert(await choose(g, '去西边沙丘探路'), 'X2 去沙丘')
+  await g.waitFor('西边 · 沙丘')
+  assert(await choose(g, '记下这条秘道'), 'X3 得古商道图')
+  await g.waitFor('商队营地')
+  assert(await choose(g, '去找废弃的石堡遗迹'), 'X4 持图探遗迹')
+  await g.waitFor('古商道 · 遗迹')
+  assert(await choose(g, '把铜符收进怀里'), 'X5 取得铜符（A 包物品）')
+  await g.waitFor('商队营地')
+  assert(await choose(g, '去东市寻识货人'), 'X6 营地出现跨包跳转项（B 包场景）')
+  await g.waitFor('三合铺')
+  assert(await choose(g, '先不急着开张'), 'X7 进入东市（跨包跳转成功）')
+  await g.waitFor('东市 · 市面')
+  assert(await choose(g, '回铺子开张'), 'X8 回铺子')
+  await g.waitFor('东市 · 第 1 天')
+  g.send('next')
+  g.send('next')
+  g.send('next')
+  g.send('next')
+  g.send('next')                            // 直过 5 天收市
+  assert(await g.waitFor('收市盘账'), 'X9 收市')
+  assert(await choose(g, '把荒漠带回来的铜符'), 'X10 结算时出现卖符选项（B 包读 A 包物品）')
+  await g.waitFor('东市 · 铜符')
+  assert(await choose(g, '卖了它'), 'X11 卖出铜符 +30 金')
+  assert(await g.waitFor('effect gold'), 'X11a 金币入账')
+  await quit(g, 'X12 彩蛋链路收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')

@@ -26,6 +26,7 @@ export default {
     { text: '途中遇上沙暴，先找地方躲一躲', if: '!flags.rodeStorm && !flags.racedStorm', goto: 'caravan.storm' },
     { text: '循着古商道图，去找废弃的石堡遗迹', if: 'items.caravan_map >= 1', goto: 'caravan.ruin' },
     { text: '面对合伙人，把这一程的事说开', if: 'flags.readLedger && !flags.metPartner', goto: 'caravan.partner' },
+    { text: '带着荒漠里的铜符去东市寻识货人（彩蛋）', if: 'items.relic_charm >= 1', goto: 'town.start' },
     { text: '够了，做最后的决断', goto: 'caravan.fork' },
   ],
 },
@@ -172,7 +173,8 @@ export default {
 'caravan.ruin': {
   title: '古商道 · 遗迹',
   text: '循着木牌上的古商道，你在一座风蚀的石堡前停下。堡门塌了半边，门楣上刻着一行褪色的字：「行商者，先量良心，再量货。」\n'
-    + '堡内空空，只在墙角堆着几只碎了的陶罐——罐底压着一枚旧铜符，符上的人面似笑非笑，像在考你肯不肯贪这点死人财。',
+    + '堡内空空，只在墙角堆着几只碎了的陶罐——罐底压着一枚旧铜符，符上的人面似笑非笑，像在考你肯不肯贪这点死人财。\n'
+    + '你想起老商人提过一嘴：东市的三合铺有位识货的掌柜，收这西边古商道的行商符，收了大半辈子。',
   choices: [
     { text: '把铜符收进怀里（也许值钱）', if: '!items.relic_charm', do: { 'items.relic_charm': +1 }, goto: 'caravan.camp' },
     { text: '不碰死人的东西，留它在原处', if: '!flags.leftRelic', do: { 'flags.leftRelic': true, karma: +1 }, goto: 'caravan.camp' },

@@ -27,7 +27,7 @@ cd dict-scene-engine
 npm install
 npm start          # 开始游戏
 npm run start:hmr  # 开启插件级热重载（官方 HMR，需 --expose-internals）
-npm test           # 端到端验证（318 项断言，spawn 真实进程驱动）
+npm test           # 端到端验证（332 项断言，spawn 真实进程驱动）
 npm run lint:content  # 内容校验：悬空 goto / 不可达场景 / 结局可达 / 死变量
 npm run build:hmr  # 从本地 cordis 源码重建官方 HMR 插件
 ```
@@ -63,12 +63,12 @@ dict-scene-engine/
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
 ├── scripts/build-hmr.mjs # 从 E:\run and run 的 cordis 源码构建官方 HMR
 ├── tests/
-│   └── e2e.mjs           # 端到端测试：21 组 318 项断言
+│   └── e2e.mjs           # 端到端测试：22 组 332 项断言
 │                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
 │                         #   I 官方 HMR / J 战斗中命令 / K 存档安全
 │                         #   L 重放回归 / M 退出竞态 / N 内容校验 / O 古堡探索 / P 商人结局
 │                         #   Q 侦探真结局 / R 侦探冤案 / S 商队三结局 / T 经营三结局
-│                         #   U 武侠刀客 / V 空间站疑云 / W 古宅惊魂
+│                         #   U 武侠刀客 / V 空间站疑云 / W 古宅惊魂 / X 跨包彩蛋
 ├── docs/
 │   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～3）
 │   └── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
@@ -83,6 +83,7 @@ dict-scene-engine/
 | 正文字数 | 25,612（均长 169 字/场景） |
 | 结局 | 30（全部可达） |
 | 状态变量 | flags 65 / items 15（无死变量） |
+| 跨包彩蛋 | 商队铜符可在东市卖 30 金（双向引用：caravan ↔ town） |
 | 结构 | branch-and-bottleneck（主线）+ hub-and-spoke（侦探/商队，枢纽可重访） |
 
 内容校验：
