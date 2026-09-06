@@ -23,6 +23,8 @@
       - ./content/starport-case.js   # M3：侦探 Mod《星港迷案》
       - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
       - ./content/starport-case2.js  # M5：侦探第二案《港湾连环案》
+      - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
+      - ./content/caravan.js         # M6：新主线《荒漠商队》
 
 - id: state
   name: ./plugins/state.js
@@ -42,6 +44,7 @@
       case2testimony: {}    # M5：第二案证词
       case2flags: {}        # M5：第二案推理标记
       case2Evidence: 0      # M5：第二案证据计数
+      karma: 0               # M6：荒漠商队善恶值（善举 +1，恶举 -1）
       items: {}
       flags: {}
 
@@ -84,6 +87,7 @@
       wolf:  { name: 独眼狼,   hp: 12, atk: 3, def: 0, crit: 0.10, drops: { gold: +5, 'items.wolf_pelt': +1 } }
       guard: { name: 星港守卫, hp: 16, atk: 4, def: 1, crit: 0.15, drops: { gold: +8 } }
       golem: { name: 石像鬼,   hp: 26, atk: 5, def: 2, crit: 0.15, drops: { gold: +30, 'items.golem_core': +1 } }
+      bandit: { name: 沙盗,     hp: 14, atk: 3, def: 1, crit: 0.12, drops: { gold: +12 } }
 
 - id: sound
   name: ./plugins/sound.js

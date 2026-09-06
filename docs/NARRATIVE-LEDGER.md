@@ -42,6 +42,23 @@
 | `flags.ghostCause` | 知道管家死因（反噬） | `castle.underworld.ghost.death` | 背景信息，暂无直接读取 |
 | `flags.ghostSword` | 管家辨出你的武器是仿品 | `castle.underworld.ghost.sword` | 背景信息，暂无直接读取 |
 | `flags.ashOffered` | 已将地下层灰撒入石台缝隙 | `castle.sanctum.ash` 选项 | `castle.sanctum.ash` 后续选项分支 |
+| `flags.tradeLicense` | 持有七大城联号贸易牌照 | `caravan.trade` 选项 | `caravan.fork` 商队之王结局条件（需 + gold≥40） |
+| `flags.helpedRefugee` | 收留过难民车队 | `caravan.camp` 选项 | `caravan.hermit` 善名线贡献（karma） |
+| `flags.droveRefugee` | 驱赶过难民 | `caravan.refugee` 选项 | 恶名线（karma 负值） |
+| `flags.heardMerchant` | 听过老商人提醒合伙人不可信 | `caravan.merchant` 选项 | `caravan.partner` 解锁前置 |
+| `flags.heardScout` | 听过斥候火防沙盗的法子 | `caravan.scout` 选项 | 背景信息 |
+| `flags.readLedger` | 查过账本，发现合伙人贪污 | `caravan.ledger` 选项 | `caravan.partner` 解锁条件 |
+| `flags.metPartner` | 已与合伙人对峙 | `caravan.partner` 选项 | 同场景两项互斥（reformed/betrayed） |
+| `flags.partnerReformed` | 原谅并立字据约束合伙人 | `caravan.partner` 选项 | 善名线（karma +1） |
+| `flags.betrayedPartner` | 卷款独吞、背叛合伙人 | `caravan.partner` 选项 | 恶名线（karma -2） |
+| `flags.smuggled` | 接过黑市走私的活 | `caravan.market` 选项 | 恶名线（karma -1） |
+| `flags.reportedMarket` | 举报过黑市 | `caravan.market` 选项 | 善名线（karma +1） |
+| `flags.sharedOasis` | 分水给穷人 | `caravan.oasis` 选项 | 善名线（karma +1） |
+| `flags.hoardedOasis` | 抢水独享 | `caravan.oasis` 选项 | 恶名线（karma -1） |
+| `flags.rodeStorm` | 沙暴中护住驼队 | `caravan.storm` 选项 | 善名线（karma +1） |
+| `flags.racedStorm` | 沙暴中冒进致伤 | `caravan.storm` 选项 | hp -8（战斗外掉血） |
+| `flags.leftRelic` | 未贪石堡铜符 | `caravan.ruin` 选项 | 善名线（karma +1） |
+| `flags.heardSong` | 听过营火夜谈 | `caravan.song` 选项 | 角色厚度，暂无直接读取 |
 | `flags.case2Accepted` | 已接下第二案（港务官中毒）委托 | `case2.brief` 选项 | `starport-hub` 入口选项、`case2.board` 调查项条件 |
 | `flags.case2accused` | 第二案被指认者（用于结局回显） | `case2.accuse` 各选项 | `case2.ending.miscarry` 文本插值 |
 
@@ -59,6 +76,8 @@
 | `items.seal_key` | 封印钥匙（半透明，管家所赠） | `castle.underworld.ghost.seal` 选项 | `castle.sanctum` 选项「插入底座」→ `ending.sacrifice` |
 | `items.underworld_ash` | 剑断时溅出的灰（碰之伤身） | `castle.underworld.alchemist.burn` onEnter | `castle.sanctum` 选项「灰与剑撒入缝隙」→ `castle.sanctum.ash` |
 | `items.calm_potion` | 稳心剂（拼合时防反噬） | `castle.underworld.alchemist.trade` 选项 | `ending.sword` 隐含前置（影响拼合成败） | — |
+| `items.caravan_map` | 古商道图（沙丘秘道） | `caravan.dunes` 选项 | `caravan.camp` 解锁「石堡遗迹」项、`caravan.ruin` 入口 |
+| `items.relic_charm` | 石堡铜符（旧物） | `caravan.ruin` 选项 | 背景物品，暂无直接读取 |
 
 ### 1.3 数值
 

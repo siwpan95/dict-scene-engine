@@ -21,6 +21,7 @@ export default {
       { text: '直接出发，走官道大路（绕远，但安全）', goto: 'road' },
       { text: '前往试炼场（战斗系统 DLC）', goto: 'arena' },
       { text: '登船前往第七星港（DLC）', goto: 'starport-hub' },
+      { text: '西出阳关，加入一支荒漠商队（新主线）', goto: 'caravan.camp' },
     ],
   },
 

@@ -170,7 +170,7 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 81 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  assert(await g.waitFor('loaded 100 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
   g.send('1')                              // 走进村庄
   assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
   g.send('5')                              // 花 5 金币向老猎人打听情报
@@ -254,6 +254,7 @@ async function finish(g, label) {
   g.send('save a')
   assert(await g.waitFor('已保存到存档位 a'), 'C1 save 命令被 save 插件拦截并落盘')
   assert(await g.waitFor('林间小路'), 'C2 存档后重新渲染当前场景')
+  await sleep(300)                      // 等异步写盘完成，避免 quit 赶在落盘前杀进程导致 g2 读到陈旧存档
   g.send('quit')
   assert(await g.waitFor('游戏已退出'), 'C3 quit 退出提示')
   await g.exit()
@@ -404,7 +405,7 @@ async function finish(g, label) {
     await writeFile(file, original + '\n// hmr probe\n', 'utf8')
     assert(await g.waitFor('hmr reload plugin'), 'I2 修改插件文件触发自动重载')
     // 重载是异步的（debounce + 重新 init），用计数轮询等待 init 第二次执行
-    assert(await g.waitForCount('combat loaded 3 enemies', 2), 'I3 插件被重新初始化（init 再次执行）')
+    assert(await g.waitForCount('combat loaded 4 enemies', 2), 'I3 插件被重新初始化（init 再次执行）')
   } finally {
     await writeFile(file, original, 'utf8')
     await g.waitFor('hmr reload plugin')
@@ -685,6 +686,78 @@ async function finish(g, label) {
   assert(await g.waitFor('结局 · 冤案'), 'R7 冤案结局达成')
   assert(await g.waitFor('你指认了船长'), 'R8 结局回显被指认者（不是无差别结局）')
   await quit(g, 'R9 冤案收尾')
+}
+
+// ---------- 路线 S：M6 荒漠商队 —— 国王 / 隐者 / 散伙 三结局 ----------
+{
+  console.log('\n[商队线] 国王 / 隐者 / 散伙 三结局')
+
+  // S-KING：走私攒钱 → 打盗匪 → 办牌照 → 大宗买卖
+  // 注意：caravan 每个 spoke 选项执行后自动 goto 回营地，无需再选"回营地"
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '加入一支荒漠商队'), 'S1 进入商队线')
+    await g.waitFor('商队营地')
+    assert(await choose(g, '去北边黑市'), 'S2 去黑市')
+    await g.waitFor('北边 · 黑市')
+    assert(await choose(g, '接下走私的活'), 'S3 走私 +30 金（善名 -1）')
+    assert(await g.waitFor('effect gold: 10 -> 40'), 'S3a 金币 10 → 40')
+    await g.waitFor('商队营地')
+    assert(await choose(g, '去西边沙丘探路'), 'S5 去沙丘')
+    await g.waitFor('西边 · 沙丘')
+    assert(await choose(g, '继续往沙丘深处走'), 'S6 深入触发盗匪战')
+    assert(await g.waitFor('沙丘 · 盗匪'), 'S6a 进入战斗')
+    assert(await fightUntil(g, '击退沙盗'), 'S7 战胜沙盗')
+    assert(await choose(g, '回营地'), 'S8 收尾回营地（金币 +12）')
+    await g.waitFor('商队营地')
+    assert(await choose(g, '去南边贸易站'), 'S9 去贸易站')
+    await g.waitFor('南边 · 贸易站')
+    assert(await choose(g, '花 20 金办一张贸易牌照'), 'S10 办牌照（-20 金）')
+    await g.waitFor('effect flags.tradeLicense')   // 牌照已写入状态
+    await g.waitFor('商队营地')
+    assert(await choose(g, '做最后的决断'), 'S12 进入决策点')
+    await g.waitFor('最后的决断')
+    assert(await choose(g, '凭贸易许可证'), 'S13 走大宗买卖路线（需牌照 + 金≥25）')
+    assert(await g.waitFor('结局 · 商队之王'), 'S14 GOOD END 达成')
+    await quit(g, 'S15 国王线收尾')
+  }
+
+  // S-HERMIT：善举攒善名 → 分金留绿洲
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '加入一支荒漠商队'), 'S16 进入商队线')
+    await g.waitFor('商队营地')
+    assert(await choose(g, '收留路过的难民'), 'S17 进入难民场景')
+    await g.waitFor('路过的难民')
+    assert(await choose(g, '收留他们过夜'), 'S17b 收留动作（善名 +1）')
+    assert(await g.waitFor('effect karma: 0 -> 1'), 'S17c 善名 0 → 1')
+    await g.waitFor('商队营地')
+    assert(await choose(g, '去东边绿洲休整'), 'S19 去绿洲')
+    await g.waitFor('东边 · 绿洲')
+    assert(await choose(g, '出钱买水，也分一口给路过的穷人'), 'S20 分水（善名 +1，金 -5）')
+    assert(await g.waitFor('effect karma: 1 -> 2'), 'S20a 善名 1 → 2')
+    await g.waitFor('商队营地')
+    assert(await choose(g, '做最后的决断'), 'S22 进入决策点')
+    await g.waitFor('最后的决断')
+    assert(await choose(g, '把赚的钱分给一路帮过你的人'), 'S23 走隐者路线（需善名 ≥ 2）')
+    assert(await g.waitFor('结局 · 绿洲隐者'), 'S24 TRUE END 达成')
+    await quit(g, 'S25 隐者线收尾')
+  }
+
+  // S-BROKE：直接散伙
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '加入一支荒漠商队'), 'S26 进入商队线')
+    await g.waitFor('商队营地')
+    assert(await choose(g, '做最后的决断'), 'S27 进入决策点')
+    await g.waitFor('最后的决断')
+    assert(await choose(g, '什么也不留恋，商队散伙'), 'S28 散伙路线')
+    assert(await g.waitFor('结局 · 商队散伙'), 'S29 NEUTRAL END 达成')
+    await quit(g, 'S30 散伙线收尾')
+  }
 }
 
 // ---------- 路线 N：内容校验器（lint:content） ----------
