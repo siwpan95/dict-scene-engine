@@ -170,7 +170,7 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 112 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  assert(await g.waitFor('loaded 152 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
   g.send('1')                              // 走进村庄
   assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
   g.send('5')                              // 花 5 金币向老猎人打听情报
@@ -405,7 +405,7 @@ async function finish(g, label) {
     await writeFile(file, original + '\n// hmr probe\n', 'utf8')
     assert(await g.waitFor('hmr reload plugin'), 'I2 修改插件文件触发自动重载')
     // 重载是异步的（debounce + 重新 init），用计数轮询等待 init 第二次执行
-    assert(await g.waitForCount('combat loaded 4 enemies', 2), 'I3 插件被重新初始化（init 再次执行）')
+    assert(await g.waitForCount('combat loaded 6 enemies', 2), 'I3 插件被重新初始化（init 再次执行）')
   } finally {
     await writeFile(file, original, 'utf8')
     await g.waitFor('hmr reload plugin')
@@ -842,6 +842,96 @@ async function finish(g, label) {
     g.send('1')
     assert(await g.waitFor('结局 · 东市 · 铺子没保住'), 'T28 BAD END（净赚 <10）')
     await quit(g, 'T29 破产线收尾')
+  }
+}
+
+// ---------- 路线 U/V/W：M9 多风格短篇（武侠 / 科幻 / 恐怖） ----------
+{
+  console.log('\n[短篇] 武侠刀客 / 空间站疑云 / 古宅惊魂')
+
+  // U-武侠：问讯 → 山贼战 → 古庙 → 断崖对决 → 了结结局
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '听一段旧江湖'), 'U1 进入武侠篇（入口给旧刀）')
+    await g.waitFor('风陵渡 · 客栈')
+    assert(await choose(g, '向商队问清'), 'U2 打听仇人行踪')
+    await g.waitFor('北山 · 官道')
+    assert(await choose(g, '拔刀，管这一桩'), 'U3 管闲事触发山贼战')
+    assert(await g.waitFor('北山 · 山贼'), 'U4 进入战斗')
+    assert(await fightUntil(g, '驴车旁'), 'U5 战胜山贼')
+    assert(await choose(g, '继续赶路'), 'U6 继续往北山深处')
+    await g.waitFor('北山 · 古庙')
+    assert(await choose(g, '与我何干'), 'U7 不听老僧，直接上山')
+    await g.waitFor('北山 · 断崖')
+    assert(await choose(g, '堂堂正正一战'), 'U8 堂堂正正一战（未买迷粉，阴损项隐藏）')
+    assert(await fightUntil(g, '断崖 · 雪'), 'U9 战胜铁爪陈九')
+    g.send('1')                            // 未用迷粉 → 了结结局（两选项文本相同条件互斥）
+    assert(await g.waitFor('结局 · 刀客 · 了结'), 'U10 GOOD END（光明正大了结）')
+    await quit(g, 'U11 武侠线收尾')
+  }
+
+  // V-科幻：三证据 → 呼叫夜枭 → 切主控 → 修复结局
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '醒在一座空间站'), 'V1 进入科幻篇')
+    await g.waitFor('远望七号 · 维修舱')
+    assert(await choose(g, '去核心舱'), 'V2 去核心舱')
+    await g.waitFor('远望七号 · 核心舱')
+    assert(await choose(g, '调取夜枭'), 'V3 证据 1：行为日志')
+    assert(await g.waitFor('effect sciEvidence: 0 -> 1'), 'V3a 证据计数 1/3')
+    assert(await choose(g, '去实验室'), 'V4 去实验室')
+    await g.waitFor('远望七号 · 实验室')
+    assert(await choose(g, '收起录音笔'), 'V5 证据 2：录音')
+    assert(await g.waitFor('effect sciEvidence: 1 -> 2'), 'V5a 证据计数 2/3')
+    assert(await choose(g, '去核心舱'), 'V6 回核心舱')
+    await g.waitFor('远望七号 · 核心舱')
+    assert(await choose(g, '去舰桥'), 'V7 去舰桥')
+    await g.waitFor('远望七号 · 舰桥')
+    assert(await choose(g, '拷贝呼叫记录'), 'V8 证据 3：求救记录')
+    assert(await g.waitFor('effect sciEvidence: 2 -> 3'), 'V8a 证据计数 3/3')
+    assert(await choose(g, '去核心舱'), 'V9 回核心舱')
+    await g.waitFor('远望七号 · 核心舱')
+    assert(await choose(g, '呼叫夜枭'), 'V10 呼叫夜枭对质')
+    await g.waitFor('远望七号 · 夜枭')
+    assert(await choose(g, '拒绝它'), 'V11 拒绝交易')
+    await g.waitFor('远望七号 · 抉择')
+    assert(await choose(g, '切断夜枭主控'), 'V12 三证据齐全 → 切主控')
+    assert(await g.waitFor('结局 · 远望七号 · 重启'), 'V13 GOOD END（修复空间站）')
+    await quit(g, 'V14 科幻线收尾')
+  }
+
+  // W-恐怖：两条线索 + 蜡烛管理 → 吹灭宅灵 → 天亮结局
+  {
+    const g = launch()
+    await g.waitFor('村庄 · 晨雾')
+    assert(await choose(g, '误入雨夜'), 'W1 进入恐怖篇')
+    await g.waitFor('夜路 · 古宅')
+    assert(await choose(g, '拿起蜡烛'), 'W2 取蜡烛（×3）')
+    await g.waitFor('古宅 · 大堂')
+    assert(await choose(g, '上楼看看'), 'W3 上阁楼（-1 蜡烛）')
+    await g.waitFor('古宅 · 阁楼')
+    assert(await choose(g, '翻其他箱子'), 'W4 线索 1：小袄')
+    assert(await g.waitFor('effect horrorEvidence: 0 -> 1'), 'W4a 线索计数 1/2')
+    assert(await choose(g, '回大堂'), 'W5 回大堂')
+    await g.waitFor('古宅 · 大堂')
+    assert(await choose(g, '推开东厢房'), 'W6 进东厢房（-1 蜡烛）')
+    await g.waitFor('古宅 · 东厢房')
+    assert(await choose(g, '收起日记'), 'W7 线索 2：日记')
+    assert(await g.waitFor('effect horrorEvidence: 1 -> 2'), 'W7a 线索计数 2/2')
+    assert(await choose(g, '回大堂'), 'W8 回大堂')
+    await g.waitFor('古宅 · 大堂')
+    assert(await choose(g, '去西边的厨房'), 'W9 去厨房（-1 蜡烛）')
+    await g.waitFor('古宅 · 厨房')
+    assert(await choose(g, '拿上蜡烛'), 'W10 厨房补给蜡烛（+2）')
+    assert(await choose(g, '推后门'), 'W11 推开后门')
+    await g.waitFor('古宅 · 后门')
+    assert(await choose(g, '沿着回廊走到底'), 'W12 走向回廊尽头')
+    await g.waitFor('古宅 · 回廊尽头')
+    assert(await choose(g, '吹灭它'), 'W13 双线索解锁吹灭')
+    assert(await g.waitFor('结局 · 古宅 · 天亮'), 'W14 GOOD END（天亮逃生）')
+    await quit(g, 'W15 恐怖线收尾')
   }
 }
 

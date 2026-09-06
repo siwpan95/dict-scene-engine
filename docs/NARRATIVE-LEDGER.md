@@ -64,6 +64,20 @@
 | `flags.knowMarket` | 知道第 5 天大集布价看涨 | `town.notice` 选项 | `town.recon` 同选项条件（防重复） |
 | `flags.relicSold` | 铜符已卖给何掌柜的朋友 | `town.relic` 选项 | `town.settle` 入口选项条件（防重复） |
 | `flags.relicKept` | 铜符留作念想未卖 | `town.relic` 选项 | `town.settle` 返回后的状态回显 |
+| `flags.skippedRobbers` | 未管山贼拦路之事 | `wuxia.road` 选项 | 恶名线（karma -1） |
+| `flags.savedOldMan` | 救下驴车上的老汉 | `wuxia.road.after` 选项 | 善名线（karma +1） |
+| `flags.heardMonk` | 听过老僧的话 | `wuxia.temple.talk` 选项 | 同场景两选项互斥 |
+| `flags.monkDeep` | 听老僧讲完了然 | `wuxia.temple.talk` 选项 | `wuxia.temple.answer` 解锁放下结局 |
+| `flags.dirtyFight` | 对决前用了迷粉（阴损） | `wuxia.cliff` 选项 | `wuxia.cliff.after` 结局分流（毒结局） |
+| `flags.gotLog` | 取得夜枭行为日志 | `scifi.core` 选项 | `scifi.core` 解锁呼叫夜枭项 |
+| `flags.metAI` | 已与夜枭对话 | `scifi.ai` 选项 | `scifi.decide` 共存/迷失选项条件 |
+| `flags.gotVoice` | 取得实验室录音 | `scifi.lab` 选项 | 证据计数 sciEvidence |
+| `flags.gotCall` | 拷贝舰桥求救记录 | `scifi.bridge` 选项 | 证据计数 sciEvidence |
+| `flags.gotCandle` | 厨房拿到蜡烛 | `horror.kitchen` 选项 | 同场景防重复、后门选项条件 |
+| `flags.gotClue1` | 阁楼箱子线索 | `horror.attic` 选项 | 线索计数 horrorEvidence |
+| `flags.gotClue2` | 东厢房日记线索 | `horror.bedroom` 选项 | 线索计数 horrorEvidence |
+| `flags.metGhost` | 走到回廊尽头见到宅灵 | `horror.backdoor` 选项 | `horror.cellar` 入口 |
+| `flags.gaveCandle` | 把蜡烛交给宅灵 | `horror.cellar` 选项 | `horror.end-master` 宅主结局 |
 | `flags.case2Accepted` | 已接下第二案（港务官中毒）委托 | `case2.brief` 选项 | `starport-hub` 入口选项、`case2.board` 调查项条件 |
 | `flags.case2accused` | 第二案被指认者（用于结局回显） | `case2.accuse` 各选项 | `case2.ending.miscarry` 文本插值 |
 
@@ -83,6 +97,9 @@
 | `items.calm_potion` | 稳心剂（拼合时防反噬） | `castle.underworld.alchemist.trade` 选项 | `ending.sword` 隐含前置（影响拼合成败） | — |
 | `items.caravan_map` | 古商道图（沙丘秘道） | `caravan.dunes` 选项 | `caravan.camp` 解锁「石堡遗迹」项、`caravan.ruin` 入口 |
 | `items.relic_charm` | 石堡铜符（旧物） | `caravan.ruin` 选项 | 背景物品，暂无直接读取 |
+| `items.blade` | 旧刀（师门遗物） | `start` 入口选项 | 战斗 ATK+4（combat.weapons） |
+| `items.antidote` | 解药（防陈九爪毒） | `wuxia.town` 选项（10 金） | `wuxia.cliff` 阴损选项条件 |
+| `items.candle` | 蜡烛（古宅行动次数） | `horror.start`/`horror.kitchen` 选项 | `horror.hall` 各选项条件、`horror.cellar` 宅主结局 |
 
 ### 1.3 数值
 

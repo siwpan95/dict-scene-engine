@@ -26,6 +26,9 @@
       - ./content/demo-deep.js       # M4：古堡主线深化（地下层 + NPC + 新结局）
       - ./content/caravan.js         # M6：新主线《荒漠商队》
       - ./content/town-trade.js      # M8：城镇经营 Mod《东市经营》
+      - ./content/wuxia.js           # M9：武侠短篇《刀客》
+      - ./content/scifi.js           # M9：科幻短篇《空间站疑云》
+      - ./content/horror.js          # M9：恐怖短篇《古宅惊魂》
 
 - id: state
   name: ./plugins/state.js
@@ -50,6 +53,8 @@
       tradeDay: null         # M8：东市经营天数（trade 插件读写，存档可恢复）
       tradeBaseGold: null    # M8：开市基线资金（trade 插件 begin 记录）
       tradeProfit: 0         # M8：收市净赚（trade 插件结算，结局判定用）
+      sciEvidence: 0         # M9：科幻篇证据计数
+      horrorEvidence: 0      # M9：恐怖篇线索计数
       items: {}
       flags: {}
 
@@ -88,11 +93,14 @@
       broken_sword:  { name: 断剑, atk: 2 }
       rusty_sword:   { name: 锈剑, atk: 4 }
       silver_dagger: { name: 银匕首, atk: 3 }   # M2：回廊探索所得
+      blade:         { name: 旧刀, atk: 4 }     # M9：武侠篇，师门遗物
     enemies:                  # 敌人字典（数据驱动，与场景字典同哲学）
       wolf:  { name: 独眼狼,   hp: 12, atk: 3, def: 0, crit: 0.10, drops: { gold: +5, 'items.wolf_pelt': +1 } }
       guard: { name: 星港守卫, hp: 16, atk: 4, def: 1, crit: 0.15, drops: { gold: +8 } }
       golem: { name: 石像鬼,   hp: 26, atk: 5, def: 2, crit: 0.15, drops: { gold: +30, 'items.golem_core': +1 } }
       bandit: { name: 沙盗,     hp: 14, atk: 3, def: 1, crit: 0.12, drops: { gold: +12 } }
+      robber: { name: 山贼,     hp: 14, atk: 3, def: 1, crit: 0.10, drops: { gold: +10 } }      # M9：武侠篇
+      nemesis: { name: 铁爪陈九, hp: 16, atk: 4, def: 1, crit: 0.15, drops: { gold: +25 } }    # M9：武侠篇 Boss（有刀玩家可稳过）
 
 - id: trade
   name: ./plugins/trade.js
