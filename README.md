@@ -49,8 +49,12 @@ dict-scene-engine/
 │   ├── sound.js          # 音效（事件订阅 → 程序化合成 PCM → 播放）
 │   └── hot-reload.js     # 内容热重载（改场景字典，游戏内即时生效）
 ├── content/              # 内容包（⚠️ 可执行 ESM 模块，只装可信来源）
-│   ├── demo.js           # 示例剧本《古堡寻剑》+ 试炼场（13 个场景）
-│   └── starport.js       # DLC《星港潜行》（4 个场景，演示多包叠加与跨包跳转）
+│   ├── demo.js           # 主线《古堡寻剑》：开场 + 村庄枢纽 + 三路线 + 古堡内部
+│   ├── starport.js       # DLC《星港潜行》：货舱潜入线 + 两案入口
+│   ├── starport-case.js  # 侦探 Mod 第一案《星港迷案》（hub-and-spoke 知识标记）
+│   ├── starport-case2.js # 侦探 Mod 第二案《港湾连环案》（多嫌疑人）
+│   ├── demo-deep.js      # 古堡地下层 + 幽灵管家/炼金术士 NPC + 僭主/献祭结局
+│   └── caravan.js        # 新主线《荒漠商队》：贸易 + 战斗 + karma 道德选择
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
 ├── scripts/build-hmr.mjs # 从 E:\run and run 的 cordis 源码构建官方 HMR
 ├── tests/
@@ -73,7 +77,7 @@ dict-scene-engine/
 | 正文字数 | 17,519（均长 175 字/场景） |
 | 结局 | 15（全部可达） |
 | 状态变量 | flags 46 / items 12（无死变量） |
-| 结构 | branch-and-bottleneck + 村庄枢纽可重访 |
+| 结构 | branch-and-bottleneck（主线）+ hub-and-spoke（侦探/商队，枢纽可重访） |
 
 内容校验：
 
