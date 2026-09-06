@@ -156,6 +156,13 @@ export class TradeService extends Service {
     }
     const cost = this.goods[id].buy * n
     const gold = this.ctx.state.get('gold') ?? 0
+    // 防御纵深（全检 S-1）：非有限数一律不进状态机。注意 `gold < NaN` 恒为 false，
+    // 单靠下面的「金币不够」判断拦不住 NaN，必须前置拦截。
+    if (!Number.isFinite(cost) || !Number.isFinite(gold)) {
+      this.ctx.io.print('  金额异常，交易已取消（未扣款）。')
+      this.render()
+      return { type: 'noop' }
+    }
     if (gold < cost) {
       this.ctx.io.print(`  金币不够：${this.goods[id].name} 进价 ${this.goods[id].buy}，${n} 件需 ${cost} 金，你只有 ${gold} 金。`)
       this.render()
@@ -178,6 +185,12 @@ export class TradeService extends Service {
       return { type: 'noop' }
     }
     const n = this.parseCount(args[1], stock)
+    // 全检 N9：doBuy 有 n<=0 校验而 doSell 漏了，负数数量会变成「反向交易」
+    if (n <= 0) {
+      this.ctx.io.print('  数量至少为 1。')
+      this.render()
+      return { type: 'noop' }
+    }
     if (n > stock) {
       this.ctx.io.print(`  库存不够：${this.goods[id].name} 只有 ${stock} 件。`)
       this.render()
@@ -185,6 +198,12 @@ export class TradeService extends Service {
     }
     const price = this.priceOf(id)
     const earn = price * n
+    // 同上：非有限数不进状态机
+    if (!Number.isFinite(price) || !Number.isFinite(earn)) {
+      this.ctx.io.print('  金额异常，出货已取消。')
+      this.render()
+      return { type: 'noop' }
+    }
     this.ctx.state.apply({ gold: +earn, [`stock.${id}`]: -n })
     this.ctx.io.print(`  出货：${this.goods[id].name} ×${n} @ ${price} 金（+${earn} 金），库存 ${this.ctx.state.get(`stock.${id}`)}。`)
     this.render()
@@ -218,7 +237,11 @@ export class TradeService extends Service {
   /** 商品 ID 归一：支持中文名 / 前缀缩写 */
   normalizeId(input) {
     if (!input) return null
-    if (this.goods[input]) return input
+    // 全检 S-1：必须用「自有属性」判断，不能写 `if (this.goods[input])`。
+    // 后者会被原型链上的 __proto__ / constructor / toString 等命中（分别返回
+    // Object.prototype 与函数，皆为 truthy），使非法 ID 通过校验，后续
+    // this.goods[id].buy 取到 undefined → 金额为 NaN → 金币被永久污染。
+    if (Object.prototype.hasOwnProperty.call(this.goods, input)) return input
     for (const [id, g] of Object.entries(this.goods)) {
       if (g.name === input) return id
     }

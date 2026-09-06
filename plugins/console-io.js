@@ -23,6 +23,7 @@ export class ConsoleIO extends Service {
     this.rl = null
     this.lines = []
     this.waiters = []
+    this.eof = false // stdin 是否已耗尽（EOF）
     // 脚本输入队列；null = 交互模式
     this.scripted = process.env.DSE_INPUT
       ? String(process.env.DSE_INPUT).split(/[,\n]/).map((s) => s.trim()).filter(Boolean)
@@ -53,6 +54,9 @@ export class ConsoleIO extends Service {
         else { this.lines.push(line.trim()) }
       }
       for (const waiter of this.waiters.splice(0)) waiter.resolve('')
+      // 全检 N5：标记 stdin 已耗尽。此后 ask() 若再无缓冲输入，直接返回 quit
+      // 走引擎正常退出流程，而不是把空串交给主循环（空串=重绘 → 死循环挂起）。
+      this.eof = true
     })().catch((error) => this.ctx.logger('io').error(error))
   }
 
@@ -70,10 +74,21 @@ export class ConsoleIO extends Service {
     if (this.scripted) {
       const next = this.scripted.length ? this.scripted.shift() : 'quit'
       process.stdout.write(`${prompt}${next}\n`)
+      // 全检 S-2/N1：必须让出一个宏任务。
+      // 否则引擎主循环会退化成纯 microtask 循环，永不把控制权交回事件循环，
+      // 导致 setTimeout / fs 回调 / 其余插件的 async init 被永久饿死 ——
+      // 表现为脚本模式下 save/sound 等插件从未就绪，命令静默回落成「未识别的输入」。
+      await new Promise((resolve) => setImmediate(resolve))
       return next
     }
+    // 交互模式：即便缓冲区里已有输入，也先让出一个宏任务。
+    // 否则管道/极速输入会在异步 init（如 save 插件的 await mkdir）完成之前送达，
+    // 该命令尚未注册即被判为「未识别的输入」。
+    await new Promise((resolve) => setImmediate(resolve))
     process.stdout.write(prompt)
     if (this.lines.length) return this.lines.shift()
+    // stdin 已耗尽：不再挂起等待，交给引擎走正常退出流程（见 [Service.init] 的 eof 标记）
+    if (this.eof) return 'quit'
     return new Promise((resolve) => this.waiters.push({ resolve }))
   }
 

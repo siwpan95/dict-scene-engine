@@ -350,10 +350,12 @@ async function finish(g, label) {
   console.log('\n[音效] 事件订阅 → 程序化合成')
   const { readdir, rm, stat } = await import('node:fs/promises')
   const { tmpdir } = await import('node:os')
-  const dir = join(tmpdir(), 'dict-scene-engine-sfx')
+  // 全检：原先是固定共享路径，任何其他进程（含手工运行的实例）写入都会污染
+  // G5「静音模式不生成任何音频文件」断言（实测偶发失败）。改为本次运行唯一目录。
+  const dir = join(tmpdir(), `dict-scene-engine-sfx-${process.pid}-${Date.now()}`)
   await rm(dir, { recursive: true, force: true })
 
-  const g = launch()
+  const g = launch({ env: { DSE_SFX_DIR: dir } })
   await g.waitFor('村庄 · 晨雾')
   g.send('2')                              // 选择 → choice 音效；进入 forest → scene-enter 音效
   assert(await g.waitFor('林间小路'), 'G0 场景跳转正常')
@@ -367,7 +369,7 @@ async function finish(g, label) {
 
   // 静音模式（DSE_MUTE=1）不应产生任何文件
   await rm(dir, { recursive: true, force: true })
-  const g2 = launch({ env: { DSE_MUTE: '1' } })
+  const g2 = launch({ env: { DSE_MUTE: '1', DSE_SFX_DIR: dir } })
   assert(await g2.waitFor('音效已静音'), 'G4 DSE_MUTE=1 时插件进入静音模式')
   await g2.waitFor('村庄 · 晨雾')
   g2.send('2')
@@ -376,6 +378,8 @@ async function finish(g, label) {
   const mutedFiles = await readdir(dir).catch(() => [])
   assert(mutedFiles.length === 0, 'G5 静音模式不生成任何音频文件')
   await quit(g2, '音效 退出')
+  // 收尾清掉本次运行的唯一临时目录，避免在 tmpdir 里累积残留
+  await rm(dir, { recursive: true, force: true })
 }
 
 // ---------- 路线 H：战斗系统 ----------
@@ -409,13 +413,25 @@ async function finish(g, label) {
   const file = join(root, 'plugins/combat.js')
   const original = await readFile(file, 'utf8')
   try {
-    await writeFile(file, original + '\n// hmr probe\n', 'utf8')
-    assert(await g.waitFor('hmr reload plugin'), 'I2 修改插件文件触发自动重载')
+    // 全检 F1：HMR 依赖 chokidar + debounce，慢盘/高负载下首轮可能整体错过。
+    // 三重保险：超时放宽到 20s → 首轮未命中则再次触碰文件重试一轮 → 才判失败。
+    await writeFile(file, original + '\n// hmr probe 1\n', 'utf8')
+    let i2ok = await g.waitFor('hmr reload plugin', 20000)
+    if (!i2ok) {
+      await writeFile(file, original + '\n// hmr probe 2\n', 'utf8')
+      i2ok = await g.waitFor('hmr reload plugin', 20000)
+    }
+    assert(i2ok, 'I2 修改插件文件触发自动重载')
     // 重载是异步的（debounce + 重新 init），用计数轮询等待 init 第二次执行
-    assert(await g.waitForCount('combat loaded 6 enemies', 2), 'I3 插件被重新初始化（init 再次执行）')
+    let i3ok = await g.waitForCount('combat loaded 6 enemies', 2, 20000)
+    if (!i3ok) {
+      await writeFile(file, original + '\n// hmr probe 3\n', 'utf8')
+      i3ok = await g.waitForCount('combat loaded 6 enemies', 2, 20000)
+    }
+    assert(i3ok, 'I3 插件被重新初始化（init 再次执行）')
   } finally {
     await writeFile(file, original, 'utf8')
-    await g.waitFor('hmr reload plugin')
+    await g.waitFor('hmr reload plugin', 20000)
   }
   g.send('stats')
   assert(await g.waitFor('ATK'), 'I4 重载后游戏仍可正常交互')

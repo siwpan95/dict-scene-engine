@@ -184,6 +184,11 @@ function cmdSaves() {
 
 // ---------- play ----------
 async function cmdPlay(args) {
+  // 全检 M2：`dse play --help` 原先不打印帮助，而是直接启动游戏并卡在等待 stdin
+  if (args.flags.help || args.flags.h || args._.includes('help')) {
+    process.stdout.write(HELP)
+    return
+  }
   if (args.flags.input) {
     process.env.DSE_INPUT = String(args.flags.input)
   }

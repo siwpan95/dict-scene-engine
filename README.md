@@ -2,7 +2,7 @@
 
 基于 **Cordis 4.0** 插件架构的文字冒险游戏引擎。核心理念一句话：**场景即字典，能力即插件** —— 游戏内容由场景字典描述，引擎的每个能力是一个可插拔插件，两者通过 cordis.yml 声明式组装。
 
-> 架构参照：[Cordis：时空可组合性元框架](https://arxiv.org/abs/2608.25512)（论文 PDF：见仓库 `paper-main/paper.pdf`）与 DeepSeek Harness 的 Cordis 插件实践。
+> 架构参照：[Cordis：时空可组合性元框架](https://arxiv.org/abs/2608.25512) 与 DeepSeek Harness 的 Cordis 插件实践。
 
 ---
 
@@ -102,7 +102,7 @@ dict-scene-engine/
 │   └── horror.js         # 恐怖短篇《古宅惊魂》：蜡烛资源管理 + 逃生
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
 ├── scripts/
-│   ├── build-hmr.mjs     # 从 E:\run and run 的 cordis 源码构建官方 HMR
+│   ├── build-hmr.mjs     # 从本地 cordis-4.0.0-rc.9 源码构建官方 HMR
 │   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 厚度）
 ├── tests/
 │   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：22 组 332 项断言
@@ -296,7 +296,7 @@ export default class Achievements extends Service {
 
 **两级热重载**：
 - **内容级**（默认启用）：运行时编辑 `content/*.js` 保存即生效，玩家状态保留。由 `hot-reload` 插件提供，纯公开 API。
-- **插件级**（`npm run start:hmr`）：修改 `plugins/*.js` 时自动重新加载该插件（其他插件与玩家状态不受影响）。由官方 `@cordisjs/plugin-hmr` 提供 —— 该包未发布到 npm，本项目用 `npm run build:hmr` 从 `E:\run and run\cordis-4.0.0-rc.9\packages\hmr` 源码构建到 `vendor/plugin-hmr`；它需要 `node --expose-internals` 才能访问 Node 内部模块加载器，未带该标志时启动器自动跳过。
+- **插件级**（`npm run start:hmr`）：修改 `plugins/*.js` 时自动重新加载该插件（其他插件与玩家状态不受影响）。由官方 `@cordisjs/plugin-hmr` 提供 —— 该包未发布到 npm，本项目用 `npm run build:hmr` 从本地 `cordis-4.0.0-rc.9/packages/hmr` 源码构建到 `vendor/plugin-hmr`（源码放项目同级目录或项目内，见脚本内 `RELATIVE_SRC`）；它需要 `node --expose-internals` 才能访问 Node 内部模块加载器，未带该标志时启动器自动跳过。
 
 **音效**：程序化合成（波形 sine/square/saw/triangle + ADSR 包络），无外部音频资源；订阅事件自动发声，可用 `DSE_MUTE=1` 静音，或在 `cordis.yml` 覆盖音色表。
 

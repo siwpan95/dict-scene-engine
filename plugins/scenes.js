@@ -161,7 +161,8 @@ export class SceneService extends Service {
 
   get(id) {
     const scene = this.dict[id]
-    if (!scene) throw new Error(`场景 "${id}" 不存在（可用: ${this.ids.join(', ')}）`)
+    // 全检 E1：不再把全部场景 ID（152 个）拼进错误信息 —— 既刷屏，又泄漏内容结构
+    if (!scene) throw new Error(`场景 "${id}" 不存在（共 ${this.size} 个场景，用 dse scenes 查看）`)
     return scene
   }
 

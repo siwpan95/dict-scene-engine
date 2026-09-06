@@ -115,7 +115,10 @@ export class SoundService extends Service {
     /** 已生成的临时文件列表，退出时清理 */
     this.files = []
     this.played = 0
-    this.dir = config.dir ?? join(tmpdir(), 'dict-scene-engine-sfx')
+    // 全检：DSE_SFX_DIR 供测试/隔离运行指定独立输出目录。
+    // 此前只有固定默认路径，多个进程（含并发测试与手工运行实例）会互相污染，
+    // 导致 e2e 的 G5「静音模式不生成任何音频文件」偶发失败。
+    this.dir = config.dir ?? process.env.DSE_SFX_DIR ?? join(tmpdir(), 'dict-scene-engine-sfx')
   }
 
   async [Service.init]() {

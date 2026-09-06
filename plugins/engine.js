@@ -46,9 +46,18 @@ export class EngineService extends Service {
     this.running = true
     this.current = entryId
     this.ctx.emit('engine/start', entryId)
-    this.run().catch((error) => {
-      this.ctx.logger('engine').error(error)
-      this.stop()
+    // 让出一个宏任务再进主循环：确保其余插件的异步 init（如 save 的 await mkdir）
+    // 在首条输入被处理前完成。否则第一条 plugin 命令会被判为「未识别的输入」。
+    setImmediate(() => {
+      this.run().catch((error) => {
+        // 全检 N1：引擎异常必须体现在进程退出码上，并且堆栈必须走 stderr。
+        // 原先只 logger.error()（写入 stdout）就 stop()，导致：
+        //   1) 崩溃的进程仍以退出码 0 结束 —— CI 把失败判成成功；
+        //   2) 堆栈混进 stdout —— 违反 README 承诺的「stdout 只放结果、诊断走 stderr」。
+        process.stderr.write(`[engine] ${error?.stack || error}\n`)
+        process.exitCode = 1
+        this.stop(1)
+      })
     })
   }
 
@@ -57,8 +66,10 @@ export class EngineService extends Service {
     this.current = id
   }
 
-  /** 结束游戏：设置退出码并主动清理根作用域，让事件循环自然退出 */
-  async stop() {
+  /** 结束游戏：设置退出码并主动清理根作用域，让事件循环自然退出
+   *  @param {number} exitCode 进程退出码。异常收尾传 1，正常退出为 0。
+   */
+  async stop(exitCode = 0) {
     if (!this.running) return
     this.running = false
     this.ctx.emit('engine/stop')
@@ -69,7 +80,9 @@ export class EngineService extends Service {
     // （音效临时文件残留在系统临时目录）、截断管道输出（npm start > log.txt
     // 丢掉尾部），也让引擎无法嵌入宿主程序。改为设置 exitCode 后主动 dispose
     // 根作用域，由 Node 在句柄清空后自然退出。
-    process.exitCode = 0
+    // ⚠️ 不要无条件写 0：异常收尾时 stop(1) 传进来的退出码会被冲掉，
+    // 导致崩溃的进程仍以 0 退出（全检 N1 首次修复就栽在这里）。
+    process.exitCode = exitCode
     try {
       await this.ctx.root.fiber.dispose()
       const handles = process._getActiveHandles?.() ?? []

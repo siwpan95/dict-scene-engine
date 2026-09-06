@@ -31,6 +31,11 @@ export class SaveService extends Service {
   }
 
   async [Service.init]() {
+    // ⚠️ 顺序不可随意调整：`await mkdir` 必须留在注册之前。
+    // cordis 的 prepend 是「后注册者排在链路最前」，save 因这个 await 注册得最晚，
+    // 从而排在 combat/trade 之前 —— 战斗中（combat 接管输入时）save 才能被本插件处理。
+    // 曾尝试把注册提到 await 之前，结果 combat 抢占 save，L9「战斗中存档成功」失败。
+    // 启动窗口内 save 可能尚未就绪的问题，改由 console-io 在 ask() 让出宏任务解决。
     await mkdir(this.dir, { recursive: true })
     // prepend: 抢在引擎默认处理器之前拿到输入
     this.ctx.on('engine/command', (line, choices, next) => this.handle(line, choices, next), { prepend: true })
