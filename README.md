@@ -46,9 +46,11 @@ dict-scene-engine/
 │   ├── save.js           # ctx.save     存档/读档
 │   ├── achievements.js   # 成就系统（纯事件监听 + 命令拦截）
 │   ├── combat.js         # 战斗数值系统（回合制战斗 + 敌人/武器字典，接管 battle 场景）
-│   ├── trade.js           # 经营数值系统（天数循环 + 库存买卖 + 确定性行情，接管 trade 场景）
+│   ├── trade.js          # 经营数值系统（天数循环 + 库存买卖 + 确定性行情，接管 trade 场景）
 │   ├── sound.js          # 音效（事件订阅 → 程序化合成 PCM → 播放）
-│   └── hot-reload.js     # 内容热重载（改场景字典，游戏内即时生效）
+│   ├── hot-reload.js     # 内容热重载（改场景字典，游戏内即时生效）
+│   └── lib/
+│       └── safe-path.js  # 存档位白名单校验（save 插件共用）
 ├── content/              # 内容包（⚠️ 可执行 ESM 模块，只装可信来源）
 │   ├── demo.js           # 主线《古堡寻剑》：开场 + 村庄枢纽 + 三路线 + 古堡内部
 │   ├── starport.js       # DLC《星港潜行》：货舱潜入线 + 两案入口
@@ -56,12 +58,14 @@ dict-scene-engine/
 │   ├── starport-case2.js # 侦探 Mod 第二案《港湾连环案》（多嫌疑人）
 │   ├── demo-deep.js      # 古堡地下层 + 幽灵管家/炼金术士 NPC + 僭主/献祭结局
 │   ├── caravan.js        # 新主线《荒漠商队》：贸易 + 战斗 + karma 道德选择
-│   ├── town-trade.js      # 城镇经营 Mod《东市经营》：侦察 + 5 天经营 + 三结局
-│   ├── wuxia.js           # 武侠短篇《刀客》：复仇 + 道德分叉 + 两场战斗
-│   ├── scifi.js           # 科幻短篇《空间站疑云》：三证据调查链
-│   └── horror.js          # 恐怖短篇《古宅惊魂》：蜡烛资源管理 + 逃生
+│   ├── town-trade.js     # 城镇经营 Mod《东市经营》：侦察 + 5 天经营 + 三结局
+│   ├── wuxia.js          # 武侠短篇《刀客》：复仇 + 道德分叉 + 两场战斗
+│   ├── scifi.js          # 科幻短篇《空间站疑云》：三证据调查链
+│   └── horror.js         # 恐怖短篇《古宅惊魂》：蜡烛资源管理 + 逃生
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
-├── scripts/build-hmr.mjs # 从 E:\run and run 的 cordis 源码构建官方 HMR
+├── scripts/
+│   ├── build-hmr.mjs     # 从 E:\run and run 的 cordis 源码构建官方 HMR
+│   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 厚度）
 ├── tests/
 │   └── e2e.mjs           # 端到端测试：22 组 332 项断言
 │                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
@@ -79,8 +83,8 @@ dict-scene-engine/
 
 | 指标 | 数值 |
 | --- | --- |
-| 场景 | 152（+ 经营 Mod 12 + 短篇三则 40） |
-| 正文字数 | 25,612（均长 169 字/场景） |
+| 场景 | 152（古堡主线 48 + 星港 DLC 4 + 侦探两案 29 + 商队 19 + 经营 12 + 短篇三则 40） |
+| 正文字数 | 25,676（均长 169 字/场景） |
 | 结局 | 30（全部可达） |
 | 状态变量 | flags 65 / items 15（无死变量） |
 | 跨包彩蛋 | 商队铜符可在东市卖 30 金（双向引用：caravan ↔ town） |
@@ -257,7 +261,7 @@ export default class Achievements extends Service {
 
 **音效**：程序化合成（波形 sine/square/saw/triangle + ADSR 包络），无外部音频资源；订阅事件自动发声，可用 `DSE_MUTE=1` 静音，或在 `cordis.yml` 覆盖音色表。
 
-**内置命令**：输入选项编号选择；`help` 帮助；`stats` 状态；`achievements` 成就；`quit` 退出；`save [位]` / `load [位]` / `slots` 存档。战斗场景内：`a` 攻击 / `d` 防御 / `r` 逃跑。
+**内置命令**：输入选项编号选择；`help` 帮助；`stats` 状态；`achievements` 成就；`quit` 退出；`save [位]` / `load [位]` / `slots` 存档。战斗场景内：`a` 攻击 / `d` 防御 / `r` 逃跑。经营场景内：`buy <商品> [数量]` 进货 / `sell <商品> [数量]` 出货 / `next` 下一天 / `info` 行情。
 
 ## 环境要求
 
@@ -276,6 +280,10 @@ export default class Achievements extends Service {
 7. ~~管道输入 + `process.exit()` 组合下 stdout 未 flush，后续输出会丢失 —— 实为测试环境假象。~~ **该结论是错的，已订正**：`npm start > log.txt` 同样丢尾部输出，这是 `process.exit()` 的真实缺陷。现已改为 `process.exitCode = 0` + 主动 dispose 根作用域（见下条）。
 8. **去掉 `process.exit()` 后进程仍可能不退出**：残留句柄会吊住事件循环 —— 实测有两类：① spawn 的音效播放子进程（须 `child.unref()`）；② chokidar 的 `watcher.close()` 是异步的（disposer 必须 `await`）。另需 `process.stdin.pause()` 释放 stdin 句柄。
 9. **插件 init 与退出存在竞态**：极速输入（管道里 `1\n1\nquit` 一闪而过）时游戏可能在插件 init 完成前就 dispose，此时 `ctx.on` 抛 `INACTIVE_EFFECT` → 进程非零退出。事件注册要放在 init 早期，并对该错误码做良性处理。
+10. **`state.apply` 对数值是"加减"语义，不是赋值**（M8 经营插件实测）：`apply({ tradeDay: 2 })` 会让天数 +2 而不是置 2（1 → 3）。凡要"设置一个数"的插件内部逻辑，必须走 `state.set`；`apply` 只用于玩家内容里的 `do: { hp: -5 }` 这类增减。同类陷阱：给场景"本金"写 `do: { gold: 30 }` 实际是 +30，应按文案写成增量或改由插件记录基线。
+11. **战斗数值要按"入口状态"标定**（M9 实测）：Boss 若按"满装备玩家"设计数值，对从该线入口进来的无武器玩家可能 RNG 必输——e2e 会翻车。新内容线的敌人强度应以"该线入口时玩家的最低状态"为基准标定。
+12. **模式扩展点（scene/mode）的校验器支持是表驱动**：`scripts/lint-content.mjs` 的 `MODE_EDGES = { battle: [...], trade: ['onEnd'] }` 同时驱动悬空检查、BFS 可达、结局判定三处；新增第四种 mode 只需追加一行，别在三处各写一遍。
+13. **e2e 的 `choose()` 取"最后一个"匹配项**：条件互斥但文本相同的选项（如结算场景三个"（听结果）"）会被误选——这类场景改用 `g.send('1')`（条件过滤后只剩一个）；选项关键字必须与内容原文逐字一致（"沿回廊"与"沿着回廊"差一字就匹配不到）。
 
 ## 退出机制
 
