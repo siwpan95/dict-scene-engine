@@ -27,7 +27,7 @@ cd dict-scene-engine
 npm install
 npm start          # 开始游戏
 npm run start:hmr  # 开启插件级热重载（官方 HMR，需 --expose-internals）
-npm test           # 端到端验证（332 项断言，spawn 真实进程驱动）
+npm test           # 端到端验证（407 项断言，spawn 真实进程驱动）
 npm run test:cli   # CLI 接口验证（48 项断言）
 npm run test:all   # 两者都跑
 npm run lint:content  # 内容校验：悬空 goto / 不可达场景 / 结局可达 / 死变量
@@ -88,7 +88,8 @@ dict-scene-engine/
 │   ├── sound.js          # 音效（事件订阅 → 程序化合成 PCM → 播放）
 │   ├── hot-reload.js     # 内容热重载（改场景字典，游戏内即时生效）
 │   └── lib/
-│       └── safe-path.js  # 存档位白名单校验（save 插件共用）
+│       ├── safe-path.js      # 路径安全白名单（scenes/hot-reload 共用）
+│       └── global-commands.js # 全局命令注册表（quit/save/成就… 战斗中放行的唯一名单）
 ├── content/              # 内容包（⚠️ 可执行 ESM 模块，只装可信来源）
 │   ├── demo.js           # 主线《古堡寻剑》：开场 + 村庄枢纽 + 三路线 + 古堡内部
 │   ├── starport.js       # DLC《星港潜行》：货舱潜入线 + 两案入口
@@ -99,21 +100,25 @@ dict-scene-engine/
 │   ├── town-trade.js     # 城镇经营 Mod《东市经营》：侦察 + 5 天经营 + 三结局
 │   ├── wuxia.js          # 武侠短篇《刀客》：复仇 + 道德分叉 + 两场战斗
 │   ├── scifi.js          # 科幻短篇《空间站疑云》：三证据调查链
-│   └── horror.js         # 恐怖短篇《古宅惊魂》：蜡烛资源管理 + 逃生
+│   ├── horror.js         # 恐怖短篇《古宅惊魂》：蜡烛资源管理 + 逃生
+│   ├── loop.js           # M11 时间循环短篇《子夜集》：三核拼真相 + @loop 保留域
+│   ├── post.js           # M12 情感短篇《驿路》：三天借宿的关系去留（留灯/出关/各安/冷）
+│   └── river.js          # M13 历史推理中篇《江畔·县志》：指认可错 + 三铁证定谳
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
 ├── scripts/
 │   ├── build-hmr.mjs     # 从本地 cordis-4.0.0-rc.9 源码构建官方 HMR
-│   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 厚度）
+│   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 契约 / 数值字段）
 ├── tests/
-│   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：22 组 332 项断言
+│   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：25 组 407 项断言
 │   └── cli.mjs           # CLI 接口测试（命令行/脚本输入）：48 项断言
 │                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
 │                         #   I 官方 HMR / J 战斗中命令 / K 存档安全
 │                         #   L 重放回归 / M 退出竞态 / N 内容校验 / O 古堡探索 / P 商人结局
 │                         #   Q 侦探真结局 / R 侦探冤案 / S 商队三结局 / T 经营三结局
 │                         #   U 武侠刀客 / V 空间站疑云 / W 古宅惊魂 / X 跨包彩蛋
+│                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志（真结局+冤狱）
 ├── docs/
-│   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～3）
+│   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～4）
 │   └── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
 └── saves/                # 存档目录（运行时生成，已 gitignore）
 ```
@@ -122,12 +127,14 @@ dict-scene-engine/
 
 | 指标 | 数值 |
 | --- | --- |
-| 场景 | 152（古堡主线 48 + 星港 DLC 4 + 侦探两案 29 + 商队 19 + 经营 12 + 短篇三则 40） |
-| 正文字数 | 25,676（均长 169 字/场景） |
-| 结局 | 30（全部可达） |
-| 状态变量 | flags 65 / items 15（无死变量） |
-| 跨包彩蛋 | 商队铜符可在东市卖 30 金（双向引用：caravan ↔ town） |
-| 结构 | branch-and-bottleneck（主线）+ hub-and-spoke（侦探/商队，枢纽可重访） |
+| 场景 | 202（古堡主线 48 + 星港 DLC 4 + 侦探两案 29 + 商队 19 + 经营 12 + 短篇三则 40 + 子夜集 17 + 驿路 13 + 江畔县志 20） |
+| 正文字数 | 37,609（均长 186 字/场景） |
+| 结局 | 43（全部可达） |
+| 状态变量 | flags 74 / items 15（无死变量） |
+| 成就 | 9 |
+| 内容包 | 13（demo / starport / case×2 / caravan / town-trade / 武侠 / 科幻 / 恐怖 / 子夜集 / 驿路 / 江畔县志） |
+| 跨包彩蛋 | 商队铜符可在东市卖 30 金（caravan ↔ town）；新篇文字呼应（药铺提东市、后山提商队） |
+| 结构 | branch-and-bottleneck（主线）+ hub-and-spoke（侦探/商队/江畔，枢纽可重访）+ 时间循环（子夜集） |
 
 内容校验：
 
@@ -182,12 +189,24 @@ export default {
         text: '花 10 金币买剑',
         if: 'gold >= 10',                 // 显示条件（基于状态表达式求值）
         do: { gold: -10, 'items.rusty_sword': +1 },  // 选中后的效果
-        goto: 'castle',                   // 跳转；支持 '@restart' 重开
+        goto: 'castle',                   // 跳转；特殊目标：'@restart' 全量重置回 entry、
+                                          //          '@loop:<场景ID>' 时间循环部分重置（见下）
       },
     ],
   },
 }
 ```
+
+**特殊跳转目标与时间循环**（M11 起，引擎语义，非新 mode）：
+
+- `goto: '@restart'` —— 状态全量重置回 `engine.entry`（重开一局）。
+- `goto: '@loop:<场景ID>'` —— **部分重置**后跳转指定场景：状态回 `initial`，但
+  `cordis.yml` `state.config.loopKeep` 声明的点路径前缀（如 `clues.loop`、`flags.loop`）
+  从旧状态保留——"知识跨循环保留、消耗态每轮复原"。`state.reset({ keep })` 是其
+  底层 API，`loopKeep` 缺省为空数组（= 全量重置，兼容 `@restart`）。
+- 落地例：《子夜集》（content/loop.js）每夜以 `@loop:` 回到客舍清晨，线索
+  `clues.loop.*` 跨夜保留、行动力 `loopMoves` 每夜复原；lint 校验 `@loop:` 目标
+  场景必须存在，并把其当作可达边参与 BFS。
 
 **状态插值**作用于三处：`scene.text`、`scene.title`、`choice.text`，写法 `{path}`（点路径，如 `{gold}`、`{items.rusty_sword}`）；路径不存在时原样保留 `{path}`。
 
