@@ -15,6 +15,7 @@
 //       next 下一天 | info 行情与库存 | 全局命令（quit/save/...）放行
 
 import { Service } from 'cordis'
+import { isGlobalCommand } from './lib/global-commands.js'
 
 export const name = 'trade'
 
@@ -123,21 +124,9 @@ export class TradeService extends Service {
         this.ctx.io.print('  经营指令: buy <商品> [数量] 进货 | sell <商品> [数量] 出货（默认全部）| next 下一天 | info 行情 | quit 退出')
         this.render()
         return { type: 'noop' }
-      // 全局命令放行（与 combat 插件同一套协议）
-      case 'quit':
-      case 'exit':
-      case 'stats':
-      case 'status':
-      case 'achievements':
-      case '成就':
-      case 'save':
-      case '存':
-      case 'load':
-      case '读':
-      case 'slots':
-      case '档':
-        return next()
       default:
+        // 全局命令放行（名单集中在 plugins/lib/global-commands.js，审计 F2）
+        if (isGlobalCommand(raw)) return next()
         this.ctx.io.print(`  经营中不可用：${raw || '(空)'}（指令: buy 进货 | sell 出货 | next 下一天 | info 行情 | help 帮助）`)
         this.render()
         return { type: 'noop' }
