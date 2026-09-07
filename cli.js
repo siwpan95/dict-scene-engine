@@ -17,8 +17,9 @@
 import { pathToFileURL } from 'node:url'
 import { resolve, dirname } from 'node:path'
 import { spawn } from 'node:child_process'
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { load as loadYaml } from 'js-yaml'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)))
 
@@ -173,8 +174,23 @@ function cmdCheck() {
 }
 
 // ---------- saves ----------
+/** 读取 save 插件配置的存档目录（与 plugins/save.js 的 config.dir 对齐，缺省 ./saves）。
+ *  此前这里硬编码 resolve(root,'saves')：改了 cordis.yml 的 save.dir 后
+ *  `dse saves` 会列错目录（审计 F9）。解析失败/无 save 条目时回退默认。 */
+function readSaveDir() {
+  try {
+    const raw = readFileSync(resolve(root, 'cordis.yml'), 'utf8')
+    const manifest = loadYaml(raw)
+    const entry = (Array.isArray(manifest) ? manifest : []).find((item) => item?.id === 'save')
+    const dir = entry?.config?.dir
+    return typeof dir === 'string' && dir ? dir : './saves'
+  } catch {
+    return './saves'
+  }
+}
+
 function cmdSaves() {
-  const dir = resolve(root, 'saves')
+  const dir = resolve(root, readSaveDir())
   if (!existsSync(dir)) { process.stdout.write('（暂无存档）\n'); return }
   const files = readdirSync(dir).filter((f) => f.endsWith('.json'))
   if (!files.length) { process.stdout.write('（暂无存档）\n'); return }
@@ -197,7 +213,15 @@ async function cmdPlay(args) {
     process.env.DSE_ENTRY = String(args.flags.entry)
   }
   const { boot } = await import(pathToFileURL(resolve(root, 'lib/boot.js')).href)
-  await boot({ banner: !args.flags.quiet, quiet: !!args.flags.quiet })
+  try {
+    await boot({ banner: !args.flags.quiet, quiet: !!args.flags.quiet })
+  } catch (error) {
+    // 启动失败（cordis.yml 缺失 / 内容包语法错等）：裸堆栈对用户不友好，
+    // 按「诊断走 stderr」惯例输出一行摘要 + 完整堆栈，退出码 1。
+    process.stderr.write(`dse: 启动失败: ${error?.message ?? error}\n`)
+    if (error?.stack) process.stderr.write(`${error.stack}\n`)
+    process.exitCode = 1
+  }
 }
 
 // ---------- 主分发 ----------

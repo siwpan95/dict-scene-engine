@@ -15,6 +15,7 @@
 import { Service } from 'cordis'
 import { watch } from 'chokidar'
 import { relative } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { assertInsideProject } from './lib/safe-path.js'
 
 export const name = 'hot-reload'
@@ -50,8 +51,12 @@ export class HotReloadService extends Service {
   }
 
   async apply(file) {
-    // 转为配置里 packs 的相对路径形式（./content/xxx.js，正斜杠）
-    const rel = './' + relative(process.cwd(), file).replaceAll('\\', '/')
+    // 转为配置里 packs 的相对路径形式（./content/xxx.js，正斜杠）。
+    // 基准是 ctx 根（include 锚定的项目根）而非 process.cwd()：
+    // 从项目外目录启动时 cwd ≠ 项目根，relative(cwd, file) 会得到
+    // 一串 ../.. 前缀，导致 scenes.reload 找不到该包而热更静默失效（审计 F1）。
+    const root = fileURLToPath(this.ctx.root.baseUrl)
+    const rel = './' + relative(root, file).replaceAll('\\', '/')
     const ok = await this.ctx.scenes.reload(rel)
     if (!ok) return
     this.ctx.io.print(`  ⚡ 内容已热更新：${rel}（场景总数 ${this.ctx.scenes.size}）`)
