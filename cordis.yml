@@ -30,6 +30,7 @@
       - ./content/horror.js          # M9：恐怖短篇《古宅惊魂》
       - ./content/loop.js            # M11：时间循环短篇《子夜集》
       - ./content/post.js            # M12：情感短篇《驿路》
+      - ./content/river.js           # M13：历史推理中篇《江畔·县志》
 
 - id: state
   name: ./plugins/state.js
@@ -61,10 +62,13 @@
       sciEvidence: 0         # M9：科幻篇证据计数
       horrorEvidence: 0      # M9：恐怖篇线索计数
       loopMoves: 3           # M11：子夜集每夜行动力（每次出门-1，@loop 重置回 3）
+      riveEvidence: 0        # M13：江畔县志铁证计数（forgery/ledger/arsenic 齐 ≥2 可定罪）
+      riverClues: {}         # M13：江畔县志线索（riverClues.ferry 等，须先声明，条件链不抛错）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
         post: {}             # M12：驿路立场中间层（flags.post.adviceGo 等，同上理）
+        river: {}            # M13：江畔县志节拍中间层（flags.river.autopsy 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js
@@ -91,6 +95,8 @@
       - { id: night-walker, name: 夜行人,   desc: 《子夜集》：成了雾里的守夜人,       when: 'scene === "loop.end-deep"' }
       - { id: keep-lamp,    name: 留灯,     desc: 《驿路》：你接下了那盏驿灯,         when: 'scene === "post.end-stay"' }
       - { id: cross-pass,   name: 出关,     desc: 《驿路》：你履约，带她去看驿道那头, when: 'scene === "post.end-go"' }
+      - { id: river-truth,  name: 江水为证, desc: 《江畔·县志》：铁证定谳，画工的堤不漏了, when: 'scene === "river.end-truth"' }
+      - { id: river-remand, name: 疑案,     desc: 《江畔·县志》：你退堂了，志书照改,      when: 'scene === "river.end-open"' }
 
 - id: combat
   name: ./plugins/combat.js

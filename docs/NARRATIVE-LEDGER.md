@@ -86,6 +86,9 @@
 | `flags.post.asked` | 《驿路》问过那只空茶碗在等谁 | `post.evening` 选项 | `post.last` 冷线选项否决条件（有交情则不开） |
 | `flags.post.help` | 《驿路》替老秦垫药钱（5 金） | `post.morning` 选项 | `post.last` 留灯选项条件（adviceStay+help） |
 | `flags.post.promise` | 《驿路》许诺带阿萤走出荒驿 | `post.morning` / `post.ridge` 选项 | `post.last` 同行选项条件 |
+| `flags.river.autopsy` | 《江畔·县志》验尸定论：非溺死、胃有砒霜 | `river.clinic` 选项 | `river.hub` 上堂选项条件 |
+| `flags.river.blocked` | 《江畔·县志》索阅《河工卷》被主簿拦下 | `river.yamen` 选项 | `river.yamen` 夜探选项条件（被拒后解锁） |
+| `flags.river.sawScribe` | 《江畔·县志》找书办宋七坐过 | `river.yamen` 选项 | `river.yamen` 后续选项去重 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -124,6 +127,7 @@
 | `tradeBaseGold` | 东市开市基线资金 | `null` | `trade` 插件 begin | 收市时结算 `tradeProfit` |
 | `tradeProfit` | 东市收市净赚 | 0 | `trade` 插件收市结算（gold − base） | `town.settle` 文本插值、`town.judge` 结局分流（≥60 / ≥10 / <10） |
 | `loopMoves` | 《子夜集》每夜行动力 | 3 | `loop.awaken` 出门选项 `-1`（每处地点 1 分） | `loop.awaken` 各地点选项条件 `loopMoves >= 1`；`@loop:` 重置回 3 |
+| `riveEvidence` | 《江畔·县志》铁证计数（forgery/ledger/arsenic） | 0 | 三处铁证 do `+1` | `river.court` 指认主簿条件 `>= 2`（否则走反噬/冤枉线） |
 
 ---
 

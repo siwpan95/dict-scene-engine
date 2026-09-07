@@ -1096,6 +1096,59 @@ async function finish(g, label) {
   await quit(g, 'Z20 驿路出关线收尾')
 }
 
+// ---------- 路线 AA：M13 历史推理《江畔·县志》—— 铁证定谳 / 错指冤狱 ----------
+{
+  console.log('\n[江畔县志] 铁证线 · 验尸 → 药铺 → 画室 → 当堂亮证')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '江畔捞起画工的浮尸'), 'AA1 入口进入《江畔·县志》')
+  await g.waitFor('临江 · 采石矶')
+  assert(await choose(g, '识得几个'), 'AA2 受聘协查')
+  await g.waitFor('查案 · 临江县城')
+
+  assert(await choose(g, '孙鹤年的医馆'), 'AA3 医馆验尸')
+  await g.waitFor('孙鹤年 · 医馆')
+  assert(await choose(g, '验尸定论'), 'AA4 验尸：非溺死，胃有砒霜（autopsy，开上堂）')
+  await g.waitFor('查案 · 临江县城')
+
+  assert(await choose(g, '城南药铺'), 'AA5 药铺查砒霜')
+  await g.waitFor('回春药铺')
+  assert(await choose(g, '砒霜凭县衙条子'), 'AA6 铁证一：毒药来源（riveEvidence=1）')
+  await g.waitFor('查案 · 临江县城')
+
+  assert(await choose(g, '画室旧居'), 'AA7 画室翻遗物')
+  await g.waitFor('陈砚秋 · 画室')
+  assert(await choose(g, '暗格账页'), 'AA8 铁证二：决算亏空（riveEvidence=2）')
+  await g.waitFor('查案 · 临江县城')
+
+  assert(await choose(g, '击鼓鸣冤'), 'AA9 上堂（autopsy 后解锁）')
+  await g.waitFor('临江县 · 大堂')
+  assert(await choose(g, '当堂亮出实证'), 'AA10 双铁证当堂指认主簿')
+  assert(await g.waitFor('结局 · 铁证定谳'), 'AA11 真结局（徐文远伏法）')
+  assert(await g.waitFor('成就解锁：江水为证'), 'AA12 成就随结局解锁')
+  await quit(g, 'AA13 江畔县志真结局线收尾')
+}
+{
+  console.log('\n[江畔县志] 错判线 · 仅验尸即上堂 → 咬定里正 → 冤狱')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '江畔捞起画工的浮尸'), 'AA14 再入《江畔·县志》')
+  await g.waitFor('临江 · 采石矶')
+  assert(await choose(g, '识得几个'), 'AA15 受聘协查')
+  await g.waitFor('查案 · 临江县城')
+  assert(await choose(g, '孙鹤年的医馆'), 'AA16 医馆验尸')
+  await g.waitFor('孙鹤年 · 医馆')
+  assert(await choose(g, '验尸定论'), 'AA17 验尸开上堂')
+  await g.waitFor('查案 · 临江县城')
+  assert(await choose(g, '击鼓鸣冤'), 'AA18 证据不足也上堂（指认可错）')
+  await g.waitFor('临江县 · 大堂')
+  assert(await choose(g, '指着里正赵存礼'), 'AA19 咬定误导对象里正')
+  await g.waitFor('大堂 · 指认赵存礼')
+  assert(await choose(g, '咬死不放'), 'AA20 一意孤行')
+  assert(await g.waitFor('结局 · 冤狱'), 'AA21 错判冤狱（赵存礼被斩监候）')
+  await quit(g, 'AA22 江畔县志错判线收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')
