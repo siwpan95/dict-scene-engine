@@ -119,15 +119,22 @@ export class SceneService extends Service {
     return true
   }
 
-  /** 检查悬空 goto 引用，返回错误列表（空数组 = 通过）
-   *  '@' 开头的特殊目标（如 @restart）免检
+  /** 检查悬空 goto 引用与缺失 goto，返回错误列表（空数组 = 通过）
+   *  '@' 开头的特殊目标（如 @restart）免检。
+   *  ⚠️ 选项缺失 goto 也在此拦截（审计 F11）：运行时引擎对无 goto 的选项
+   *  不流转、重进当前场景 → onEnter 副作用（扣钱/发物品）重复执行，与
+   *  全检报告 #4 修过的 rerender 重放是同一类坑。lint 侧同步为 error。
    */
   findDangling(dict) {
     const dangling = []
     for (const [id, scene] of Object.entries(dict)) {
       for (const [i, choice] of (scene.choices ?? []).entries()) {
         const target = choice?.goto
-        if (target !== undefined && !String(target).startsWith('@') && !(target in dict)) {
+        if (target === undefined) {
+          dangling.push(`  - #${id} 第 ${i + 1} 个选项缺少 goto（选中后无法流转，会重放 onEnter）`)
+          continue
+        }
+        if (!String(target).startsWith('@') && !(target in dict)) {
           dangling.push(`  - #${id} 第 ${i + 1} 个选项 -> "${target}"`)
         }
       }

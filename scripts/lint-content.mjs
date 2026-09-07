@@ -45,10 +45,36 @@ const MODE_EDGES = {
  */
 const ID_PATTERN = /^[a-z][a-z0-9]*([-_][a-z0-9]+)*(\.[a-z0-9]+([-_][a-z0-9]+)*)*$/
 
+// ---------- 数值域字段校验的辅助（审计 F5） ----------
+// 允许的动态域前缀：账本 §1.3/内容里以点路径分层的状态字段。
+// 顶层裸字段（gold/hp/karma/...）必须已在 cordis.yml state.initial 声明。
+const NUM_DYNAMIC = new Set(['flags', 'items', 'clues', 'testimony', 'case2clues',
+  'case2testimony', 'case2flags', 'stock', 'visits', 'rep'])
+// 条件表达式作用域里非状态字段的标识符（引擎注入的 extra 上下文 + JS 字面量/关键字）
+const EXPR_EXTRA = new Set(['scene', 'choice', 'effects', 'true', 'false', 'null',
+  'undefined', 'NaN', 'Infinity', 'typeof', 'instanceof', 'void', 'delete', 'new',
+  'in', 'of', 'function', 'return', 'if', 'else', 'Math', 'Number', 'String',
+  'Object', 'Array', 'JSON', 'length'])
+/** 提取表达式里的点路径标识符 token（'gold >= 10' → ['gold']；'flags.a' → ['flags.a']） */
+const exprPathTokens = (expr) => String(expr).match(/[A-Za-z_$][\w$]*(?:\.[\w$]+)*/g) ?? []
+/** effects 键是否是动态域（flags.xxx / clues.xxx / ...）或引擎字段 */
+const isNumDynamicKey = (key) => NUM_DYNAMIC.has(String(key).split('.')[0])
+
 // ---------- 载入配置与内容 ----------
 const config = loadYaml(await readFile(join(root, 'cordis.yml'), 'utf8'))
 const engineEntry = config.find((e) => e.id === 'engine')?.config?.entry ?? 'start'
 const packs = config.find((e) => e.id === 'scenes')?.config?.packs ?? []
+// 模式场景 ↔ 插件配置的交叉校验数据（审计 F3/F5）：
+// 内容包的 battle.enemy / trade.days 与 cordis.yml 的 combat/trade 配置是
+// 跨文件契约，运行时才炸的错误应在开发期被 lint 拦下。
+const stateCfg = config.find((e) => e.id === 'state')?.config?.initial ?? {}
+const enemyTable = config.find((e) => e.id === 'combat')?.config?.enemies ?? {}
+const tradeGoods = config.find((e) => e.id === 'trade')?.config?.goods ?? {}
+const tradeSchedule = Array.isArray(config.find((e) => e.id === 'trade')?.config?.schedule)
+  ? config.find((e) => e.id === 'trade')?.config?.schedule
+  : []
+const scheduleDays = tradeSchedule[0]?.length ?? 0
+const achList = config.find((e) => e.id === 'achievements')?.config?.list ?? []
 
 const dict = Object.create(null)
 for (const path of packs) {
@@ -81,6 +107,9 @@ stats.avgChars = Math.round(totalChars / ids.length)
 // ---------- 3. 收集跳转与变量引用 ----------
 const varRefs = { read: new Set(), write: new Set() }
 const endings = []
+// 数值域裸字段引用（审计 F5）：{ read: Set<string>, write: Set<string> }，顶层无点路径
+const numRead = new Set()
+const numWrite = new Set()
 
 const collectExprVars = (expr, target) => {
   for (const m of String(expr).matchAll(/\b(flags|items)\.([\w]+)/g)) {
@@ -104,6 +133,20 @@ for (const [id, scene] of Object.entries(dict)) {
   for (const choice of choices) {
     if (choice.if) collectExprVars(choice.if, varRefs.read)
     collectEffectVars(choice.do)
+    // 数值域裸字段（审计 F5）：效果键直接写顶层；条件里读裸标识符
+    for (const key of Object.keys(choice.do ?? {})) {
+      if (!isNumDynamicKey(key) && !key.includes('.')) numWrite.add(key)
+    }
+    if (choice.if) {
+      for (const p of exprPathTokens(choice.if)) {
+        const head = p.split('.')[0]
+        if (!NUM_DYNAMIC.has(head) && !EXPR_EXTRA.has(head) && !p.includes('.')) numRead.add(p)
+      }
+    }
+  }
+  // onEnter 效果的数值字段写入
+  for (const key of Object.keys(scene.onEnter ?? {})) {
+    if (!isNumDynamicKey(key) && !key.includes('.')) numWrite.add(key)
   }
 }
 
@@ -112,7 +155,9 @@ for (const [id, scene] of Object.entries(dict)) {
   for (const [i, choice] of (scene.choices ?? []).entries()) {
     const target = choice?.goto
     if (target === undefined) {
-      warn(`[悬空] ${id} 第 ${i + 1} 个选项没有 goto（玩家会卡在此场景）`)
+      // error（审计 F11）：运行时选中无 goto 选项 = 重进当前场景 → onEnter 副作用
+      // 重复执行（与 scenes.js findDangling 的运行时拦截同口径；曾仅为 warn 不阻塞）
+      err(`[悬空] ${id} 第 ${i + 1} 个选项没有 goto（选中后无法流转，会重放 onEnter）`)
       continue
     }
     const t = String(target)
@@ -130,6 +175,39 @@ for (const [id, scene] of Object.entries(dict)) {
         err(`[悬空] ${id} 的 ${mode}.${key} -> "${t}" 未定义`)
       }
     }
+  }
+}
+
+// ---------- 4b. 模式场景 ↔ 插件配置契约（跨文件，审计 F3） ----------
+// battle.enemy 必须存在于 combat.enemies；trade.days 不得超出行情表列数。
+// 这些此前只在运行时暴露（缺敌人曾导致"半放行"卡场景，见 combat.js begin）。
+for (const [id, scene] of Object.entries(dict)) {
+  if (scene.mode === 'battle') {
+    const enemy = scene.battle?.enemy
+    if (enemy === undefined) {
+      err(`[契约] ${id} 是 battle 场景但未声明 battle.enemy`)
+    } else if (!(enemy in enemyTable)) {
+      err(`[契约] ${id} 的 battle.enemy "${enemy}" 未在 cordis.yml combat.enemies 中定义（运行时会拒绝开战）`)
+    }
+  }
+  if (scene.mode === 'trade') {
+    const days = scene.trade?.days ?? 5
+    if (scheduleDays > 0 && days > scheduleDays) {
+      err(`[契约] ${id} 的 trade.days=${days} 超出行情表列数 ${scheduleDays}（第 ${scheduleDays + 1} 天起卖出价为 0）`)
+    }
+  }
+}
+const goodsCount = Object.keys(tradeGoods).length
+if (tradeSchedule.length && goodsCount && tradeSchedule.length !== goodsCount) {
+  err(`[契约] 行情表行数 ${tradeSchedule.length} 与商品数 ${goodsCount} 不一致（第 ${goodsCount + 1} 个商品无行情，卖出价恒 0）`)
+}
+
+// ---------- 4c. 成就 when 的场景引用（审计 F3） ----------
+for (const item of achList) {
+  const when = item?.when
+  if (typeof when !== 'string') continue
+  for (const m of when.matchAll(/scene\s*===\s*['"]([^'"]+)['"]/g)) {
+    if (!(m[1] in dict)) err(`[成就] "${item.id}" 的 when 引用了不存在的场景 "${m[1]}"（成就将永不触发）`)
   }
 }
 
@@ -207,6 +285,20 @@ stats.flags = [...ledgerDeclared].filter((v) => v.startsWith('flags.')).length
 stats.items = [...ledgerDeclared].filter((v) => v.startsWith('items.')).length
 stats.deadVars = deadVars.length
 
+// ---------- 9. 数值域字段 ↔ state.initial 一致性（审计 F5） ----------
+// 内容裸写/裸读的顶层数值字段（gold/hp/karma/suspectLevel/tradeProfit/...）必须在
+// cordis.yml state.initial 声明过；未声明 = 拼写错误或漏声明，运行时静默失效
+// （条件恒 false / 效果写进孤儿字段），此前零防线。
+const topKeys = new Set(Object.keys(stateCfg))
+const unknownNums = [...new Set([...numRead, ...numWrite])]
+  .filter((p) => !topKeys.has(p))
+  .sort()
+for (const p of unknownNums) {
+  warn(`[数值] 内容引用 "${p}"，但 cordis.yml state.initial 未声明该字段（拼写错误或漏声明？）`)
+}
+stats.numFields = topKeys.size
+stats.numOrphans = unknownNums.length
+
 // ---------- 输出 ----------
 if (jsonMode) {
   console.log(JSON.stringify({ stats, errors, warnings }, null, 2))
@@ -214,6 +306,7 @@ if (jsonMode) {
   console.log('内容统计：')
   console.log(`  场景 ${stats.scenes} | 正文 ${stats.chars} 字 | 均长 ${stats.avgChars} 字`)
   console.log(`  结局 ${stats.endings}（可达 ${stats.endingsReachable}） | flags ${stats.flags} | items ${stats.items} | 死变量 ${stats.deadVars}`)
+  console.log(`  数值字段 ${stats.numFields}（initial 顶层） | 孤儿数值引用 ${stats.numOrphans}`)
   if (warnings.length) {
     console.log(`\n⚠ 警告 ${warnings.length} 项：`)
     for (const w of warnings) console.log('  - ' + w)
