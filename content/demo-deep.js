@@ -103,7 +103,10 @@ export default {
       + '「上去的人要么想拼它，要么想拿它，要么想卖它。没有人想过——也许该把它**封了**。让它别再漏，别再等人。」\n'
       + '他看着你，半透明的脸上有一丝不易察觉的恳求。',
     choices: [
-      { text: '记下"封剑"这个选项', do: { 'flags.knowSeal': true }, goto: 'castle.underworld.ghost' },
+      // 记下后留在本场景（自循环），让"问他怎么封"在同一场景内可达——
+      // 原实现 goto 回管家室，而管家室不再提供再入 duty 的入口（ghost 的
+      // "需要了结"选项 once），导致封印钥匙链状态不可达（e2e BB97 发现）
+      { text: '记下"封剑"这个选项', do: { 'flags.knowSeal': true }, goto: 'castle.underworld.ghost.duty' },
       { text: '问他怎么封', if: 'flags.knowSeal', do: { 'flags.knowSealMethod': true }, goto: 'castle.underworld.ghost.seal' },
       { text: '回管家室', goto: 'castle.underworld.ghost' },
     ],
