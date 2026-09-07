@@ -96,7 +96,7 @@
 | `items.underworld_ash` | 剑断时溅出的灰（碰之伤身） | `castle.underworld.alchemist.burn` onEnter | `castle.sanctum` 选项「灰与剑撒入缝隙」→ `castle.sanctum.ash` |
 | `items.calm_potion` | 稳心剂（拼合时防反噬） | `castle.underworld.alchemist.trade` 选项 | `ending.sword` 隐含前置（影响拼合成败） | — |
 | `items.caravan_map` | 古商道图（沙丘秘道） | `caravan.dunes` 选项 | `caravan.camp` 解锁「石堡遗迹」项、`caravan.ruin` 入口 |
-| `items.relic_charm` | 石堡铜符（旧物） | `caravan.ruin` 选项 | 背景物品，暂无直接读取 |
+| `items.relic_charm` | 石堡铜符（旧物） | `caravan.ruin` 选项 | `town.settle` 入口选项条件、`town.relic`（M10 跨包联动：持符可在东市卖 30 金） |
 | `items.blade` | 旧刀（师门遗物） | `start` 入口选项 | 战斗 ATK+4（combat.weapons） |
 | `items.antidote` | 解药（防陈九爪毒） | `wuxia.town` 选项（10 金） | `wuxia.cliff` 阴损选项条件 |
 | `items.candle` | 蜡烛（古宅行动次数） | `horror.start`/`horror.kitchen` 选项 | `horror.hall` 各选项条件、`horror.cellar` 宅主结局 |
@@ -120,19 +120,45 @@
 
 ---
 
-## 2. 结局条件矩阵
+## 2. 结局清单
 
-| 结局 | 场景 ID | 触发条件 | 所属 | 状态 |
-|---|---|---|---|---|
-| 剑主 | `ending-win`（M2 改 `ending.sword`） | 持剑 + `flags.swordLore` | 主线 | 现有 |
-| 认主 | `ending-win`（M2 拆 `ending.claim`） | 持剑、无知 | 主线 | 现有 |
-| 败亡 | `ending-lose` | hp ≤ 0 | 主线 | 现有 |
-| 试炼场之殇 | `arena-lose` | 试炼场战败 | 支线 | 现有 |
-| 试炼之王 | `arena-boss-win` | 击败石像鬼 | 支线 | 现有 |
-| 星港结局 | `starport-win` | 取得数据核心 | Mod（星港） | 现有 |
+> 结局判定口径与引擎/lint 一致：无选项，或所有选项都是"重开"（`@restart`）。
+> 下表由场景字典导出（30 个，2026-09-07 核对），与 `npm run lint:content`
+> 的"结局可达性"统计同源；内容改版后以字典为准，必要时用
+> `node scripts/lint-content.mjs` 复核总数与可达性。
 
-> M2 补充：商人结局 `ending.merc`（持剑但选择出售）。
-> M3 补充：侦探 Mod 的 `ending.truth` / `ending.miscarry`。
+| 场景 ID | 所属 | 标题 |
+|---|---|---|
+| `arena-lose` | 主线 | 结局 · 试炼场之殇 |
+| `ending-lose` | 主线 | 结局 · 荒山野岭 |
+| `ending-win` | 主线 | 结局 · 剑之认主 |
+| `starport-win` | 主线 | 结局 · 数据核心 |
+| `case2.ending.miscarry` | case2 线 | 结局 · 连环案 · 冤判 |
+| `case2.ending.truth` | case2 线 | 结局 · 连环案 · 真相 |
+| `ending.caravan-broke` | ending 线 | 结局 · 商队散伙 |
+| `ending.caravan-hermit` | ending 线 | 结局 · 绿洲隐者 |
+| `ending.caravan-king` | ending 线 | 结局 · 商队之王 |
+| `ending.merc` | ending 线 | 结局 · 好价钱 |
+| `ending.miscarry` | ending 线 | 结局 · 冤案 |
+| `ending.sacrifice` | ending 线 | 结局 · 献祭 |
+| `ending.sword` | ending 线 | 结局 · 完整的剑 |
+| `ending.truth` | ending 线 | 结局 · 真凶归案 |
+| `ending.tyrant` | ending 线 | 结局 · 僭主 |
+| `horror.end-dawn` | horror 线 | 结局 · 古宅 · 天亮 |
+| `horror.end-eaten` | horror 线 | 结局 · 古宅 · 烛灭 |
+| `horror.end-master` | horror 线 | 结局 · 古宅 · 宅主 |
+| `horror.end-rain` | horror 线 | 结局 · 夜路 · 雨 |
+| `scifi.end-coexist` | scifi 线 | 结局 · 远望七号 · 交易 |
+| `scifi.end-escape` | scifi 线 | 结局 · 远望七号 · 弃站 |
+| `scifi.end-fix` | scifi 线 | 结局 · 远望七号 · 重启 |
+| `scifi.end-lost` | scifi 线 | 结局 · 远望七号 · 沉没 |
+| `town.end-mid` | town 线 | 结局 · 东市 · 小本营生 |
+| `town.end-poor` | town 线 | 结局 · 东市 · 铺子没保住 |
+| `town.end-rich` | town 线 | 结局 · 东市 · 商会入主 |
+| `wuxia.end-dead` | wuxia 线 | 结局 · 刀客 · 死 |
+| `wuxia.end-letgo` | wuxia 线 | 结局 · 刀客 · 放下 |
+| `wuxia.end-mutual` | wuxia 线 | 结局 · 刀客 · 毒 |
+| `wuxia.end-vengeance` | wuxia 线 | 结局 · 刀客 · 了结 |
 
 ---
 

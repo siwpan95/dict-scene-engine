@@ -67,7 +67,8 @@ export default {
       + '货册摊在柜上：茶进价 8 金，盐进价 4 金，布进价 2 金。每样货每天的行市都不同，买低卖高，全看你的眼力。\n'
       + '（用 buy 进货、sell 出货、next 过到下一天；第 5 天收市后结算。）',
     mode: 'trade',
-    trade: { days: 5, onEnd: 'town.settle' },
+    // name = 场所名（trade 插件渲染面板与收市文案用，审计 F6 参数化）
+    trade: { name: '东市', days: 5, onEnd: 'town.settle' },
   },
 
   'town.settle': {

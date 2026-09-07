@@ -81,7 +81,14 @@ export class TradeService extends Service {
     for (const id of this.ids) {
       if (s.get(`stock.${id}`) == null) s.set(`stock.${id}`, 0)
     }
-    this.active = { days: trade.days ?? 5, onEnd: trade.onEnd }
+    // 场所名参数化（审计 F6）：此前"东市"写死在渲染/收市文案里，复用本插件做
+    // 第二个经营 Mod 只能改代码。现在由场景 trade.name 声明（缺省兼容历史内容），
+    // 也可用插件 config.place 全局覆盖。
+    this.active = {
+      days: trade.days ?? 5,
+      onEnd: trade.onEnd,
+      name: trade.name ?? this.config.place ?? '东市',
+    }
   }
 
   /** 当前天（1 起） */
@@ -208,7 +215,7 @@ export class TradeService extends Service {
       const base = s.get('tradeBaseGold') ?? 0
       const gold = s.get('gold') ?? 0
       s.set('tradeProfit', gold - base)
-      this.ctx.io.print(`  第 ${days} 天收市。你带着 ${gold} 金走出东市，比进铺时多出 ${gold - base} 金。`)
+      this.ctx.io.print(`  第 ${days} 天收市。你带着 ${gold} 金走出${this.active.name}，比进铺时多出 ${gold - base} 金。`)
       s.set('tradeDay', null)
       this.active = null
       if (onEnd) {
@@ -258,7 +265,7 @@ export class TradeService extends Service {
     if (!this.active) return
     const s = this.ctx.state
     this.ctx.io.blank()
-    this.ctx.io.print(`  ── 东市 · 第 ${this.day} 天 ──`)
+    this.ctx.io.print(`  ── ${this.active.name} · 第 ${this.day} 天 ──`)
     this.ctx.io.print(`  今日行情（卖出价）：`)
     for (const id of this.ids) {
       const g = this.goods[id]

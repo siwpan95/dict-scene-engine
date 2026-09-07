@@ -85,8 +85,6 @@ export class EngineService extends Service {
     process.exitCode = exitCode
     try {
       await this.ctx.root.fiber.dispose()
-      const handles = process._getActiveHandles?.() ?? []
-      const reqs = process._getActiveRequests?.() ?? []
     } catch (error) {
       this.ctx.logger('engine').warn('清理资源时出错: %s', error.message)
     }
@@ -236,7 +234,9 @@ export class EngineService extends Service {
     switch (line.toLowerCase()) {
       case 'help':
       case '?':
-        this.ctx.io.print('内置命令: 输入选项编号进行选择 | help 帮助 | stats 查看状态 | quit 退出')
+        // 命令全集与实现清单集中在 plugins/lib/global-commands.js；
+        // 这里提示玩家存在存档/成就命令（审计 F12：原文案只列 help/stats/quit）
+        this.ctx.io.print('内置命令: 输入选项编号进行选择 | help 帮助 | stats 查看状态 | achievements 成就 | save/load/slots 存档 | quit 退出')
         return { type: 'rerender' }
       case 'stats':
       case 'status': {
