@@ -13,7 +13,8 @@
 
 import { Service } from 'cordis'
 import { mkdir, readFile, writeFile, readdir, rename, unlink } from 'node:fs/promises'
-import { join, resolve, sep } from 'node:path'
+import { resolve, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 export const name = 'save'
 
@@ -21,13 +22,18 @@ export const name = 'save'
 const SLOT_PATTERN = /^[\w.\-]{1,64}$/
 
 export class SaveService extends Service {
-  // scenes 用于读档时校验存档指向的场景是否仍存在（内容改版兜底）
-  static inject = ['state', 'engine', 'io', 'scenes']
+  // scenes 用于读档时校验存档指向的场景是否仍存在（内容改版兜底）；
+  // achievements 用于把解锁列表写入存档 / 读档恢复（审计 F10，cordis 服务
+  // 须经 inject 声明才能访问，否则代理抛 "without inject"）。
+  static inject = ['state', 'engine', 'io', 'scenes', 'achievements']
 
   constructor(ctx, config) {
     super(ctx, 'save')
     this.config = config
-    this.dir = resolve(process.cwd(), config.dir ?? './saves')
+    // 目录基准用 ctx 根（include 已锚定到项目根），而非 process.cwd()：
+    // 保证从任意目录 `dse play`/`dse saves` 都读写同一份存档（硬编码审计 F1/F9）
+    const root = fileURLToPath(this.ctx.root.baseUrl)
+    this.dir = resolve(root, config.dir ?? './saves')
   }
 
   async [Service.init]() {
@@ -96,6 +102,9 @@ export class SaveService extends Service {
       scene: this.ctx.engine.current,
       state: this.ctx.state.snapshot(),
       savedAt: new Date().toISOString(),
+      // 成就解锁随档持久化（审计 F10）。inject 已声明 achievements，
+      // 服务必然可用；直接展开其解锁集合写入存档。
+      achievements: [...this.ctx.achievements.unlocked],
     }
     const tmp = file + '.tmp'
     try {
@@ -129,6 +138,8 @@ export class SaveService extends Service {
       }
 
       this.ctx.state.restore(record.state)
+      // 读档恢复成就解锁（内容改版后无效 id 由 achievements.restore 过滤）
+      this.ctx.achievements.restore(record.achievements)
       this.ctx.engine.goto(record.scene)
       this.ctx.io.print(`  已读取存档位 ${slot}（场景: ${record.scene}）`)
       return true
@@ -146,6 +157,11 @@ export class SaveService extends Service {
     if (typeof record.scene !== 'string' || !record.scene) problems.push('缺少 scene 字段')
     if (!record.state || typeof record.state !== 'object' || Array.isArray(record.state)) {
       problems.push('state 字段不是对象')
+    }
+    // 成就字段可选（旧档无），但一旦出现必须是字符串数组
+    if (record.achievements !== undefined &&
+      (!Array.isArray(record.achievements) || record.achievements.some((x) => typeof x !== 'string'))) {
+      problems.push('achievements 字段不是字符串数组')
     }
     return problems
   }

@@ -57,6 +57,17 @@ export class AchievementsService extends Service {
     this.ctx.io.print(`  ★ 成就解锁：${item.name} —— ${item.desc}`)
   }
 
+  /** 读档恢复解锁集合（审计 F10）：只保留仍在成就表中的 id（内容改版兜底）。
+   *  旧档 / achievements 插件缺失时该字段为 undefined，直接忽略。 */
+  restore(list) {
+    if (!Array.isArray(list)) return
+    for (const id of list) {
+      if (typeof id === 'string' && this.table[id] && !this.unlocked.has(id)) {
+        this.unlocked.add(id)
+      }
+    }
+  }
+
   show() {
     const list = Object.entries(this.table)
     if (!list.length) return this.ctx.io.print('  （暂无成就）')
