@@ -30,8 +30,12 @@ const stats = {}
 const err = (msg) => errors.push(msg)
 const warn = (msg) => warnings.push(msg)
 
-/** '@' 开头的特殊跳转目标白名单（引擎实现见 engine.js） */
+/** '@' 开头的特殊跳转目标白名单（引擎实现见 engine.js）：
+ *  @restart 全量重置回 entry；@loop:<sceneId> 时间循环部分保留后回指定场景（M11）
+ */
 const SPECIAL_GOTO = new Set(['@restart'])
+const LOOP_PREFIX = '@loop:'
+const isSpecialGoto = (t) => SPECIAL_GOTO.has(t) || t.startsWith(LOOP_PREFIX)
 // mode → 跳转键映射：非 normal 模式的流转边（插件内部 engine.goto 的目标）
 // 与 combat/trade 插件的 battle.* / trade.* 字段一一对应；
 // 新增第三种 mode 时，只需在此追加一行。
@@ -162,7 +166,13 @@ for (const [id, scene] of Object.entries(dict)) {
     }
     const t = String(target)
     if (t.startsWith('@')) {
-      if (!SPECIAL_GOTO.has(t)) err(`[悬空] ${id} -> ${t} 不是引擎支持的特殊目标（白名单: ${[...SPECIAL_GOTO].join(', ')}）`)
+      if (!isSpecialGoto(t)) {
+        err(`[悬空] ${id} -> ${t} 不是引擎支持的特殊目标（白名单: @restart / @loop:<场景ID>）`)
+      } else if (t.startsWith(LOOP_PREFIX)) {
+        // @loop: 的后缀必须是已定义场景，否则运行时 goto 会崩（§16.2 规格）
+        const loopScene = t.slice(LOOP_PREFIX.length)
+        if (!(loopScene in dict)) err(`[悬空] ${id} -> @loop:${loopScene} 目标场景 "${loopScene}" 未定义`)
+      }
       continue
     }
     if (!(t in dict)) err(`[悬空] ${id} 第 ${i + 1} 个选项 -> "${t}" 未定义`)
@@ -221,7 +231,10 @@ while (queue.length) {
   reachable.add(id)
   const scene = dict[id]
   for (const choice of scene.choices ?? []) {
-    const t = String(choice?.goto ?? '')
+    // @restart 是回 entry 的特殊目标（不入队）；@loop:<scene> 的时间循环起点
+    // 是实际可达场景，解出前缀后照常入队（M11 §16.2）
+    const raw = String(choice?.goto ?? '')
+    const t = raw.startsWith(LOOP_PREFIX) ? raw.slice(LOOP_PREFIX.length) : raw
     if (t && !t.startsWith('@') && !reachable.has(t)) queue.push(t)
   }
   // 模式接管场景：流转分支也是可达边（battle.* / trade.*）

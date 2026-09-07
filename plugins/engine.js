@@ -167,8 +167,16 @@ export class EngineService extends Service {
             if (choice.goto !== undefined) {
               const target = String(choice.goto)
               if (target === '@restart') {
+                // 全量重置回 entry（开局重玩）
                 this.ctx.state.reset()
                 this.goto(this.entry)
+              } else if (target.startsWith('@loop:')) {
+                // 时间循环（M11，见 CONTENT-EXPANSION-PLAN §16.2）：重置但保留
+                // cordis.yml state.config.loopKeep 声明域的知识（如 clues.loop.*），
+                // 回到循环起点场景。@restart 全清语义不受影响。
+                const loopEntry = target.slice('@loop:'.length)
+                this.ctx.state.reset({ keep: this.ctx.state.config.loopKeep })
+                this.goto(loopEntry)
               } else {
                 this.goto(target)
               }

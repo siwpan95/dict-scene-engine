@@ -119,8 +119,31 @@ export class StateService extends Service {
     })
   }
 
-  reset() {
+  /** 重置状态为 initial 快照
+   *  @param {{ keep?: string[] }} [options] keep：点路径前缀数组。重置后，
+   *        旧状态中命中前缀的字段被回填（递归合并子树），用于时间循环的
+   *        "知识跨轮保留"（见 CONTENT-EXPANSION-PLAN §16.2）。
+   *        缺省/空数组 = 全量重置（@restart 语义不变）。
+   */
+  reset({ keep = [] } = {}) {
+    const old = this.data
     this.data = structuredClone(this.config.initial ?? {})
+    if (!keep.length) return
+    // 收集旧状态中命中 keep 前缀的子树（命中即整棵保留，不再下钻）
+    const kept = []
+    const collect = (obj, base = '') => {
+      for (const [key, value] of Object.entries(obj)) {
+        const path = base ? `${base}.${key}` : key
+        if (keep.some((p) => path === p || path.startsWith(p + '.'))) {
+          kept.push([path, value])
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          collect(value, path)
+        }
+      }
+    }
+    collect(old)
+    // 用 set 回填（复用原型污染防护与中间对象创建）
+    for (const [path, value] of kept) this.set(path, structuredClone(value))
   }
 
   snapshot() {
