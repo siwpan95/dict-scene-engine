@@ -113,9 +113,22 @@ export class EngineService extends Service {
       }
 
       // mode 扩展点：默认 normal（引擎渲染选项并判定结局）；
-      // 其他 mode（如 battle）由插件接管界面与输入，返回 falsy 则引擎回退渲染
+      // 其他 mode（如 battle）由插件接管界面与输入，返回 falsy 则引擎回退渲染。
+      // bail 短路语义：监听返回非 null/false/undefined 即停（cordis isBailed）。
+      // 返回值约定：
+      //   true                        → 插件已接管界面（引擎不渲染选项）
+      //   { redirect: <场景ID> }      → 请求立即正规流转到该场景（跳过渲染与
+      //                                输入循环，重新走外层进入流程：scene/leave、
+      //                                onEnter、scene/enter、结局判定）。
+      //                                战斗插件在敌人配置缺失时用它直入 onWin，
+      //                                替代旧"静默 goto"造成的半放行（审计 F4）。
       const mode = scene.mode ?? 'normal'
-      const handled = mode === 'normal' ? false : !!this.ctx.bail('scene/mode', this.current, scene, mode)
+      const modeResult = mode === 'normal' ? false : this.ctx.bail('scene/mode', this.current, scene, mode)
+      if (modeResult && typeof modeResult === 'object' && typeof modeResult.redirect === 'string') {
+        this.goto(modeResult.redirect)
+        continue
+      }
+      const handled = !!modeResult
       this.ctx.emit('scene/enter', this.current, scene)
 
       // 2. 首次渲染（纯输出，不改状态）

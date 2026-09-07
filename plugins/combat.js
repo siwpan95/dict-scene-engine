@@ -40,11 +40,12 @@ export class CombatService extends Service {
   }
 
   [Service.init]() {
-    // 接管 battle 模式的场景
+    // 接管 battle 模式的场景。返回值协议见 engine.js scene/mode 注释：
+    // begin 成功 → true（接管）；缺敌人有 onWin → { redirect } 立即流转；
+    // 缺敌人无 onWin → false（回退 normal 渲染）
     this.ctx.on('scene/mode', (sceneId, scene, mode) => {
       if (mode !== 'battle') return false
-      this.begin(scene.battle ?? {})
-      return true
+      return this.begin(scene.battle ?? {})
     }, { prepend: true })
 
     // 战斗中优先处理输入（抢在 save / achievements 之前）
@@ -59,14 +60,25 @@ export class CombatService extends Service {
     this.ctx.logger('combat').info('loaded %d enemies', Object.keys(this.enemies).length)
   }
 
-  /** 开战：读取敌人字典，初始化战斗状态，渲染首屏 */
+  /** 开战：读取敌人字典，初始化战斗状态，渲染首屏
+   *  @returns {boolean | { redirect: string }} true=已接管；{redirect}=缺敌人时
+   *           请求引擎立即正规进入 onWin；false=无 onWin 可回退（不接管）
+   */
   begin(battle) {
     const id = battle.enemy ?? 'dummy'
     const enemy = this.enemies[id]
     if (!enemy) {
-      this.ctx.io.print(`  （战斗配置缺失：未定义敌人 "${id}"，直接放行）`)
-      if (battle.onWin) this.ctx.engine.goto(battle.onWin)
-      return
+      // 契约错误：内容包 battle.enemy 引用未在 combat.enemies 配置的敌人。
+      // 审计 F4 实测旧实现（goto + 静默放行）会让引擎停在原场景，玩家任意
+      // 输入才经 redraw 跳到 onWin，且 scene/leave、onEnter、结局判定全被跳过；
+      // 现在返回 { redirect } 走引擎正规流转。开发期还应由 lint 交叉校验拦截
+      // （scripts/lint-content.mjs：battle.enemy ↔ cordis.yml combat.enemies）。
+      if (battle.onWin) {
+        this.ctx.io.print(`  （战斗配置错误：未定义敌人 "${id}"，直接进入后续场景）`)
+        return { redirect: battle.onWin }
+      }
+      this.ctx.io.print(`  （战斗配置错误：未定义敌人 "${id}" 且无 onWin 回退）`)
+      return false
     }
     this.active = {
       id,
@@ -79,6 +91,7 @@ export class CombatService extends Service {
     }
     // 界面由 'scene/rendered' 统一渲染（保证「场景文本 → 战斗面板」的顺序）
     this.ctx.emit('battle/start', id, enemy)
+    return true
   }
 
   /** 玩家战斗属性：基础属性 + 背包武器加成 */
