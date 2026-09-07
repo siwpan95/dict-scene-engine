@@ -1048,6 +1048,54 @@ async function finish(g, label) {
   await quit(g, 'Y26 子夜集收尾')
 }
 
+// ---------- 路线 Z：M12 情感《驿路》—— 留灯 / 出关 两线 ----------
+{
+  console.log('\n[情感驿路] 留灯线 · 劝留 → 垫药 → 接灯')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '大雪封路'), 'Z1 入口进入《驿路》')
+  await g.waitFor('雪路 · 青泥驿')
+  assert(await choose(g, '推门进去'), 'Z2 入驿')
+  await g.waitFor('青泥驿 · 大堂')
+  assert(await choose(g, '灯边坐下'), 'Z2a 落座用饭')
+  await g.waitFor('晚膳 · 粗茶淡饭')
+  assert(await choose(g, '那只碗'), 'Z3 问起旧茶碗（走进故事）')
+  await g.waitFor('檐下 · 夜谈')
+  assert(await choose(g, '劝她留下'), 'Z4 第一夜劝留（adviceStay）')
+  await g.waitFor('次日 · 晨')
+  assert(await choose(g, '药钱我垫'), 'Z5 垫药钱（help，-5 金）')
+  await g.waitFor('午后 · 柴房')
+  assert(await choose(g, '她该知道'), 'Z6 得知阿萤身世')
+  await g.waitFor('辞行 · 灯下')
+  assert(await choose(g, '我来添油'), 'Z7 接过驿灯')
+  assert(await g.waitFor('结局 · 留灯'), 'Z8 留灯结局')
+  assert(await g.waitFor('成就解锁：留灯'), 'Z9 成就随结局解锁')
+  await quit(g, 'Z10 驿路留灯线收尾')
+}
+{
+  console.log('\n[情感驿路] 出关线 · 支持 → 许诺 → 履约同行')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '大雪封路'), 'Z11 再入《驿路》')
+  await g.waitFor('雪路 · 青泥驿')
+  assert(await choose(g, '推门进去'), 'Z12 入驿')
+  await g.waitFor('青泥驿 · 大堂')
+  assert(await choose(g, '灯边坐下'), 'Z12a 落座用饭')
+  await g.waitFor('晚膳 · 粗茶淡饭')
+  assert(await choose(g, '那只碗'), 'Z13 问起旧茶碗')
+  await g.waitFor('檐下 · 夜谈')
+  assert(await choose(g, '劝她出去看看'), 'Z14 第一夜支持她走（adviceGo）')
+  await g.waitFor('次日 · 晨')
+  assert(await choose(g, '我带你去看看'), 'Z15 许诺带她进城（promise）')
+  await g.waitFor('午后 · 山脊')
+  assert(await choose(g, '算。明早天亮'), 'Z16 履约承诺')
+  await g.waitFor('辞行 · 灯下')
+  assert(await choose(g, '我答应过带你走'), 'Z17 履约同行')
+  assert(await g.waitFor('结局 · 出关'), 'Z18 出关结局')
+  assert(await g.waitFor('成就解锁：出关'), 'Z19 成就随结局解锁')
+  await quit(g, 'Z20 驿路出关线收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')

@@ -27,6 +27,7 @@ export default {
       { text: '醒在一座空间站的警报声里（科幻短篇）', goto: 'scifi.start' },
       { text: '误入雨夜中的古宅（恐怖短篇）', goto: 'horror.start' },
       { text: '雾夜投宿，误入山脚一家叫「听雨」的客店（时间循环短篇）', goto: 'loop.start' },
+      { text: '大雪封路，借宿在官道尽头一盏还亮着灯的破驿（情感短篇）', goto: 'post.start' },
     ],
   },
 

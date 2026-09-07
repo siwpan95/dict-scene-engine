@@ -29,6 +29,7 @@
       - ./content/scifi.js           # M9：科幻短篇《空间站疑云》
       - ./content/horror.js          # M9：恐怖短篇《古宅惊魂》
       - ./content/loop.js            # M11：时间循环短篇《子夜集》
+      - ./content/post.js            # M12：情感短篇《驿路》
 
 - id: state
   name: ./plugins/state.js
@@ -63,6 +64,7 @@
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
+        post: {}             # M12：驿路立场中间层（flags.post.adviceGo 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js
@@ -87,6 +89,8 @@
       - { id: sword-master, name: 剑主,     desc: 让失落之剑认你为主,       when: 'scene === "ending-win"' }
       - { id: fog-lifted,   name: 雾散还人, desc: 《子夜集》：破局，让雾散，还了人, when: 'scene === "loop.end-good"' }
       - { id: night-walker, name: 夜行人,   desc: 《子夜集》：成了雾里的守夜人,       when: 'scene === "loop.end-deep"' }
+      - { id: keep-lamp,    name: 留灯,     desc: 《驿路》：你接下了那盏驿灯,         when: 'scene === "post.end-stay"' }
+      - { id: cross-pass,   name: 出关,     desc: 《驿路》：你履约，带她去看驿道那头, when: 'scene === "post.end-go"' }
 
 - id: combat
   name: ./plugins/combat.js

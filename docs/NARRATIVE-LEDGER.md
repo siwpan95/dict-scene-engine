@@ -81,6 +81,11 @@
 | `flags.case2Accepted` | 已接下第二案（港务官中毒）委托 | `case2.brief` 选项 | `starport-hub` 入口选项、`case2.board` 调查项条件 |
 | `flags.case2accused` | 第二案被指认者（用于结局回显） | `case2.accuse` 各选项 | `case2.ending.miscarry` 文本插值 |
 | `flags.loop.n` | 《子夜集》当前是第几个夜晚（时间循环计数） | `loop.start` 选项、`loop.awaken` 睡去选项 do `+1` | `loop.awaken` 标题/文本插值与条件（≥3 开祠堂密龛、≥6 永夜） |
+| `flags.post.adviceStay` | 《驿路》第一夜劝阿萤留下 | `post.night` 选项 | `post.morning` 帮药选项条件 → 留灯线 |
+| `flags.post.adviceGo` | 《驿路》第一夜支持阿萤出去看看 | `post.night` 选项 | `post.morning` 同行选项条件 → 出关线 |
+| `flags.post.asked` | 《驿路》问过那只空茶碗在等谁 | `post.evening` 选项 | `post.last` 冷线选项否决条件（有交情则不开） |
+| `flags.post.help` | 《驿路》替老秦垫药钱（5 金） | `post.morning` 选项 | `post.last` 留灯选项条件（adviceStay+help） |
+| `flags.post.promise` | 《驿路》许诺带阿萤走出荒驿 | `post.morning` / `post.ridge` 选项 | `post.last` 同行选项条件 |
 
 ### 1.2 items（物品，含武器加成）
 
