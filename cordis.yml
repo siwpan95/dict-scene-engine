@@ -28,10 +28,14 @@
       - ./content/wuxia.js           # M9：武侠短篇《刀客》
       - ./content/scifi.js           # M9：科幻短篇《空间站疑云》
       - ./content/horror.js          # M9：恐怖短篇《古宅惊魂》
+      - ./content/loop.js            # M11：时间循环短篇《子夜集》
 
 - id: state
   name: ./plugins/state.js
   config:
+    loopKeep:                 # M11：时间循环保留域（goto '@loop:' 时保留的知识，
+      - clues.loop            #       其余状态回 initial。见 CONTENT-EXPANSION-PLAN §16）
+      - flags.loop
     initial:                  # 玩家初始状态（战斗属性：atk/def/crit/maxHp）
       name: 旅人
       hp: 20
@@ -41,9 +45,10 @@
       crit: 0.15              # 暴击率
       gold: 10
       suspectLevel: 0        # 侦探 Mod：推理度（线索计数）
-      clues: {}              # 侦探 Mod：已掌握线索（clues.dock 等，必须先声明，
-      testimony: {}         #           否则条件表达式里会 ReferenceError）
-      case2clues: {}        # M5：第二案线索
+      clues:                 # 侦探 Mod：已掌握线索（clues.dock 等，必须先声明，
+        loop: {}             #           否则条件表达式里会 ReferenceError）
+      testimony: {}          #           M11 子夜集用 clues.loop.* 保留域——
+      case2clues: {}         #           中间层 loop 必须预声明，条件链才不抛错
       case2testimony: {}    # M5：第二案证词
       case2flags: {}        # M5：第二案推理标记
       case2Evidence: 0      # M5：第二案证据计数
@@ -54,8 +59,10 @@
       tradeProfit: 0         # M8：收市净赚（trade 插件结算，结局判定用）
       sciEvidence: 0         # M9：科幻篇证据计数
       horrorEvidence: 0      # M9：恐怖篇线索计数
+      loopMoves: 3           # M11：子夜集每夜行动力（每次出门-1，@loop 重置回 3）
       items: {}
-      flags: {}
+      flags:
+        loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
 
 - id: io
   name: ./plugins/console-io.js
@@ -78,6 +85,8 @@
       - { id: wolf-slayer,  name: 屠狼者,   desc: 战胜林间的独眼狼,         when: 'scene === "wolf-win"' }
       - { id: informant,    name: 星际线人, desc: 在星港酒吧买到情报,       when: 'scene === "starport-bar"' }
       - { id: sword-master, name: 剑主,     desc: 让失落之剑认你为主,       when: 'scene === "ending-win"' }
+      - { id: fog-lifted,   name: 雾散还人, desc: 《子夜集》：破局，让雾散，还了人, when: 'scene === "loop.end-good"' }
+      - { id: night-walker, name: 夜行人,   desc: 《子夜集》：成了雾里的守夜人,       when: 'scene === "loop.end-deep"' }
 
 - id: combat
   name: ./plugins/combat.js

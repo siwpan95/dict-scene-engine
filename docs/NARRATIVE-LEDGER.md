@@ -80,6 +80,7 @@
 | `flags.gaveCandle` | 把蜡烛交给宅灵 | `horror.cellar` 选项 | `horror.end-master` 宅主结局 |
 | `flags.case2Accepted` | 已接下第二案（港务官中毒）委托 | `case2.brief` 选项 | `starport-hub` 入口选项、`case2.board` 调查项条件 |
 | `flags.case2accused` | 第二案被指认者（用于结局回显） | `case2.accuse` 各选项 | `case2.ending.miscarry` 文本插值 |
+| `flags.loop.n` | 《子夜集》当前是第几个夜晚（时间循环计数） | `loop.start` 选项、`loop.awaken` 睡去选项 do `+1` | `loop.awaken` 标题/文本插值与条件（≥3 开祠堂密龛、≥6 永夜） |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -117,6 +118,7 @@
 | `tradeDay` | 东市经营天数 | `null` | `trade` 插件 begin/next（⚠️ set 赋值，勿用 apply 加减） | `trade` 插件面板、收市判定 |
 | `tradeBaseGold` | 东市开市基线资金 | `null` | `trade` 插件 begin | 收市时结算 `tradeProfit` |
 | `tradeProfit` | 东市收市净赚 | 0 | `trade` 插件收市结算（gold − base） | `town.settle` 文本插值、`town.judge` 结局分流（≥60 / ≥10 / <10） |
+| `loopMoves` | 《子夜集》每夜行动力 | 3 | `loop.awaken` 出门选项 `-1`（每处地点 1 分） | `loop.awaken` 各地点选项条件 `loopMoves >= 1`；`@loop:` 重置回 3 |
 
 ---
 

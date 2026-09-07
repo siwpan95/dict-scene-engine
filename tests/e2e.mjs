@@ -170,7 +170,7 @@ async function finish(g, label) {
   const g = launch()
   assert(await g.waitFor('村庄 · 晨雾'), 'A1 游戏启动，进入起始场景')
   assert(await g.waitFor('HP 20，金币 10'), 'A2 状态插值 {hp} {gold} 生效')
-  assert(await g.waitFor('loaded 152 scenes'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效）')
+  assert(await g.waitFor('scenes loaded'), 'A3 scenes 插件加载日志可见（多包叠加 + 序章，logger-console 生效；不绑定具体数量以免内容扩容漂移）')
   g.send('1')                              // 走进村庄
   assert(await g.waitFor('十字路口'), 'A4 进入村庄枢纽（可重访）')
   g.send('5')                              // 花 5 金币向老猎人打听情报
@@ -997,6 +997,55 @@ async function finish(g, label) {
   assert(await choose(g, '卖了它'), 'X11 卖出铜符 +30 金')
   assert(await g.waitFor('effect gold'), 'X11a 金币入账')
   await quit(g, 'X12 彩蛋链路收尾')
+}
+
+// ---------- 路线 Y：M11 时间循环《子夜集》—— 知识跨轮保留与三夜破局 ----------
+{
+  console.log('\n[时间循环] 子夜集 · 知识跨轮 + 三夜破局')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '听雨'), 'Y1 入口进入《子夜集》')
+  await g.waitFor('夜路 · 听雨客店')
+  assert(await choose(g, '躺下'), 'Y2 进入第一个夜晚')
+  assert(await g.waitFor('第 1 个夜晚'), 'Y3 循环计数从第 1 夜起')
+
+  // 第一夜：更楼取两核（更鼓刻痕 + 更簿名单）
+  assert(await choose(g, '去村东更楼'), 'Y4 第一夜去更楼')
+  await g.waitFor('村东 · 更楼')
+  assert(await choose(g, '细看那道新刻痕'), 'Y5 记下更鼓刻痕（clues.loop.drum）')
+  await g.waitFor('村东 · 更楼')
+  assert(await choose(g, '上二楼'), 'Y6 上二楼翻更簿')
+  await g.waitFor('更楼 · 二楼')
+  assert(await choose(g, '把更簿记在心里'), 'Y7 记下更簿名单（clues.loop.ledger）')
+  await g.waitFor('村东 · 更楼')
+  assert(await choose(g, '回客舍'), 'Y8 回到客舍')
+  assert(await g.waitFor('还剩 2 分'), 'Y9 出门消耗 1 分行动力')
+  assert(await choose(g, '睡去'), 'Y10 结束第一夜（@loop 部分重置）')
+  assert(await g.waitFor('第 2 个夜晚'), 'Y11 进入第二夜')
+  assert(await g.waitFor('还剩 3 分'), 'Y12 行动力重置回 3')
+
+  // 第二夜：祠堂密龛未开放（flags.loop.n >= 3 门槛），知识保留待下一夜
+  assert(await choose(g, '去村中祠堂'), 'Y13 第二夜去祠堂')
+  await g.waitFor('村中 · 祠堂')
+  assert(!g.output().includes('绕到神龛后头'), 'Y14 第二夜密龛未开放（n < 3）', g.output().slice(-600))
+  assert(await choose(g, '回客舍'), 'Y15 离开祠堂')
+  assert(await choose(g, '睡去'), 'Y16 结束第二夜')
+  assert(await g.waitFor('第 3 个夜晚'), 'Y17 进入第三夜')
+
+  // 第三夜：密龛开放，取得第三核（shrine），守祠堂破局 → 好结局
+  assert(await choose(g, '去村中祠堂'), 'Y18 第三夜再访祠堂')
+  await g.waitFor('村中 · 祠堂')
+  assert(await choose(g, '绕到神龛后头'), 'Y19 第三夜密龛开放（n >= 3）')
+  await g.waitFor('神龛之后')
+  assert(await choose(g, '把信上的话记牢'), 'Y20 取得脏银回信（clues.loop.shrine）')
+  await g.waitFor('村中 · 祠堂')
+  assert(await choose(g, '回客舍'), 'Y21 回客舍')
+  assert(await choose(g, '守到祠堂'), 'Y22 三核齐，出现对峙选项')
+  await g.waitFor('祠堂 · 子夜')
+  assert(await choose(g, '抢上前'), 'Y23 当众揭发')
+  assert(await g.waitFor('雾散·还人'), 'Y24 达成好结局（救回被拐者）')
+  assert(await g.waitFor('成就解锁：雾散还人'), 'Y25 成就随结局解锁')
+  await quit(g, 'Y26 子夜集收尾')
 }
 
 // ---------- 路线 N：内容校验器（lint:content） ----------

@@ -763,3 +763,34 @@ Phase 2 遗留的字数缺口（17.5k/28k）被 Phase 3 消化至 25.7k；
 5. 与既有世界联动 ≥1 处（彩蛋位：`loop.merchant` 提商队/东市）
 
 > **下一步（待确认后执行）**：1) 确认 §16 规格与结构 → 2) 引擎增强（reset/@loop/lint）先行 + 回归 → 3) M11 文本填充 + 账本同步 → 4) e2e 循环组 → 5) 独立 commit（engine 增强与内容分开提交）。
+
+---
+
+## 17. M11 落地记录（2026-09-07 完成）
+
+### 落地内容
+
+- 引擎增强（先行独立提交）：`state.reset({keep})` 保留域 + engine 特殊目标 `@loop:<sceneId>` + lint `@loop:` 白名单/目标校验/可达 BFS 解前缀 —— 规格见 §16.2，沙箱实测后并入
+- 内容包 `content/loop.js`《子夜集》：**19 场景 / 4 结局**（good 雾散还人 / arson 一了百了 / deep 夜行人 / forever 第七夜）
+- 结构：循环壳（`loop.start`/`loop.awaken`）+ 5 处 spoke（更楼·鼓/更楼二楼·簿、祠堂·密龛、井台、铁匠铺、药铺）+ 后山口 + 对峙破局（`loop.confront`）+ 4 结局
+- 机制：每夜 `loopMoves=3`（出门-1，@loop 重置）；真相 = 更声暗号 + 更簿名单 + 神龛脏银回信三核拼合（`clues.loop.drum/ledger/shrine`）；`flags.loop.n>=3` 开放密龛、`>=6` 触发永夜通牒（"每轮必变"约束：前两夜无法集齐真相，三核门槛保证 ≥3 轮）
+- 集成：cordis.yml 注册包 + `loopKeep` 保留域 + `loopMoves` 初始值 + 2 条成就（fog-lifted/night-walker）；start 入口池 + 1 项；账本登记 `flags.loop.n` / `loopMoves`
+- 彩蛋位：`loop.doctor.shelf` 提东市药行与三合铺何掌柜、`loop.pass` 提商队绕行后山（M6/M8 文字呼应）
+
+### 里程碑指标
+
+| 指标 | M11 前 | M11 后 |
+|---|---|---|
+| 场景 | 152 | **169** |
+| 正文字数 | 25,676 | **29,116** |
+| 结局 | 30（全可达） | **34（全可达）** |
+| 内容包 | 10 | **11** |
+| flags / items | 65 / 15 | **66 / 15**（死变量 0） |
+| 孤儿数值引用 | 0 | **0**（initial 顶层 24，含 loopMoves） |
+| 成就 | 3 | **5** |
+| e2e 断言 | 332 | **358（+26 路线 Y）** |
+
+### 过程中修的两个校验器缺陷（对 M11 是必要修复）
+
+1. `collectExprVars` 与账本解析只抓 `flags|items` 单段 —— `flags.loop.n >= 3` 被截成 `flags.loop` 致账本误报；改为收集完整点路径（历史内容无多级引用，零回归）。
+2. `clues.loop.*`/`flags.loop.*` 需中间层预声明：初始数据补 `clues.loop: {}` / `flags.loop: {}`（与侦探 Mod 既有"未声明中间层会 ReferenceError"约定同源，见 state.js 注释）。

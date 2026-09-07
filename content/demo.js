@@ -26,6 +26,7 @@ export default {
       { text: '听一段旧江湖的旧事（武侠短篇）', do: { 'items.blade': +1 }, goto: 'wuxia.start' },
       { text: '醒在一座空间站的警报声里（科幻短篇）', goto: 'scifi.start' },
       { text: '误入雨夜中的古宅（恐怖短篇）', goto: 'horror.start' },
+      { text: '雾夜投宿，误入山脚一家叫「听雨」的客店（时间循环短篇）', goto: 'loop.start' },
     ],
   },
 
