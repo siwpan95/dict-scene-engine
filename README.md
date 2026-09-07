@@ -110,7 +110,10 @@ dict-scene-engine/
 │   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 契约 / 数值字段）
 ├── tests/
 │   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：25 组 407 项断言
-│   └── cli.mjs           # CLI 接口测试（命令行/脚本输入）：48 项断言
+│   ├── cli.mjs           # CLI 接口测试（命令行/脚本输入）：48 项断言
+│   ├── traverse.mjs      # 结构-状态遍历（从 entry DFS 全图：执行每条 goto 边/效果/条件）
+│   ├── coverage.mjs      # 结局覆盖审计（traverse ∪ e2e 双缺 == 0；生成 docs/TEST-COVERAGE.md）
+│   └── playthrough.mjs   # 逐线实跑转录（stdout 落盘 deliverables，供人工阅读留存）
 │                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
 │                         #   I 官方 HMR / J 战斗中命令 / K 存档安全
 │                         #   L 重放回归 / M 退出竞态 / N 内容校验 / O 古堡探索 / P 商人结局
@@ -119,7 +122,8 @@ dict-scene-engine/
 │                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志（真结局+冤狱）
 ├── docs/
 │   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～4）
-│   └── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
+│   ├── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
+│   └── TEST-COVERAGE.md           # 结局覆盖矩阵（tests/coverage.mjs 生成，43 结局逐条 T/E 来源）
 └── saves/                # 存档目录（运行时生成，已 gitignore）
 ```
 
@@ -142,7 +146,21 @@ dict-scene-engine/
 npm run lint:content
 ```
 
-检查悬空 goto、不可达场景、结局可达性、叙事账本一致性（未声明引用与死变量）、场景厚度、疑似假选择、ID 命名。当前 **0 错误 0 警告**。
+检查悬空 goto、不可达场景、结局可达性、叙事账本一致性（未声明引用与死变量）、场景厚度、疑似假选择、ID 命名、模式契约与数值字段。当前 **0 错误 0 警告**。
+
+## 剧情线测试分层与覆盖门
+
+"所有剧情线（主线 + 支线）都被测过"由四层 + 一个总门保证，新增内容包只把入口挂进 `start`（lint 可达性强制），就会自动进入覆盖范围：
+
+| 层 | 脚本 | 覆盖什么 | 新增内容如何被纳入 |
+| --- | --- | --- | --- |
+| 结构 | `npm run lint:content` | 图论层：悬空/可达/结局判定/契约 | 自动（每次跑） |
+| 状态 | `npm run test:traverse` | 从 entry DFS 全图：真实执行每条 goto 边、每个效果、每个条件 | 自动（可达结局进 reached 集合） |
+| 路径 | `npm test` | 真实进程 spawn，逐条完整剧情线断言文本 | 新包深链结局（插件/多轮/计数类 traverse 到不了的）需补一条 e2e 直达，否则 coverage 红 |
+| 转录 | `node tests/playthrough.mjs` | 逐线实跑，stdout 剧本落盘（人工阅读留存） | 可随时跑 |
+| **总门** | `npm run test:coverage` | 43 个结局逐个必须有 **T**（traverse）或 **E**（e2e）来源；双缺 → 退出码 1 并列出缺口，同时生成 `docs/TEST-COVERAGE.md` 矩阵 | 自动审计 + 明文清单 |
+
+> 现状（2026-09-08）：traverse 结构-状态覆盖 24/43；e2e 路径断言覆盖 22/43；并集 34/43，**9 条深链结局（traverse 到不了、e2e 尚无直达）列为待补**（见 `docs/TEST-COVERAGE.md` 双缺行）。
 
 ## 架构
 
