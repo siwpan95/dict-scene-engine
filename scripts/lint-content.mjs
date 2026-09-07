@@ -116,8 +116,10 @@ const numRead = new Set()
 const numWrite = new Set()
 
 const collectExprVars = (expr, target) => {
-  for (const m of String(expr).matchAll(/\b(flags|items)\.([\w]+)/g)) {
-    target.add(`${m[1]}.${m[2]}`)
+  // 收集完整点路径（'flags.loop.n >= 3' → flags.loop.n，M11 引入多级 flags 后
+  // 修：旧实现只抓首段，把 flags.loop.n 截成 flags.loop 导致账本误报）
+  for (const m of String(expr).matchAll(/\b(flags|items)(?:\.[\w]+)+/g)) {
+    target.add(m[0])
   }
 }
 const collectEffectVars = (effects) => {
@@ -282,8 +284,9 @@ try {
   const start = raw.indexOf('## 1. 状态清单')
   const end = raw.indexOf('## 2.')
   const ledger = start >= 0 ? raw.slice(start, end > start ? end : undefined) : raw
-  for (const m of ledger.matchAll(/`(flags|items)\.([\w]+)`/g)) {
-    ledgerDeclared.add(`${m[1]}.${m[2]}`)
+  // 收集完整点路径（M11 后账本含多级声明如 `flags.loop.n`；旧正则只抓首段）
+  for (const m of ledger.matchAll(/`(flags|items)(?:\.[\w]+)+`/g)) {
+    ledgerDeclared.add(m[0].slice(1, -1))
   }
 } catch {
   warn('[账本] 未找到 docs/NARRATIVE-LEDGER.md，跳过变量一致性检查')
