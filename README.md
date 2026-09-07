@@ -27,7 +27,7 @@ cd dict-scene-engine
 npm install
 npm start          # 开始游戏
 npm run start:hmr  # 开启插件级热重载（官方 HMR，需 --expose-internals）
-npm test           # 端到端验证（407 项断言，spawn 真实进程驱动）
+npm test           # 端到端验证（521 项断言，spawn 真实进程驱动）
 npm run test:cli   # CLI 接口验证（48 项断言）
 npm run test:all   # 两者都跑
 npm run lint:content  # 内容校验：悬空 goto / 不可达场景 / 结局可达 / 死变量
@@ -109,7 +109,7 @@ dict-scene-engine/
 │   ├── build-hmr.mjs     # 从本地 cordis-4.0.0-rc.9 源码构建官方 HMR
 │   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 契约 / 数值字段）
 ├── tests/
-│   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：25 组 407 项断言
+│   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：26 组 521 项断言
 │   ├── cli.mjs           # CLI 接口测试（命令行/脚本输入）：48 项断言
 │   ├── traverse.mjs      # 结构-状态遍历（从 entry DFS 全图：执行每条 goto 边/效果/条件）
 │   ├── coverage.mjs      # 结局覆盖审计（traverse ∪ e2e 双缺 == 0；生成 docs/TEST-COVERAGE.md）
@@ -119,7 +119,7 @@ dict-scene-engine/
 │                         #   L 重放回归 / M 退出竞态 / N 内容校验 / O 古堡探索 / P 商人结局
 │                         #   Q 侦探真结局 / R 侦探冤案 / S 商队三结局 / T 经营三结局
 │                         #   U 武侠刀客 / V 空间站疑云 / W 古宅惊魂 / X 跨包彩蛋
-│                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志（真结局+冤狱）
+│                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志 / BB 结局直达补全
 ├── docs/
 │   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～4）
 │   ├── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
