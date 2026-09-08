@@ -1,5 +1,5 @@
-// 由 scripts/ai/convert.mjs 从 JSON 草稿生成（AI 产线 P0）—— 修改请改草稿后重新生成。
-// 草稿：scripts/ai/examples/lantern.draft.json
+// 由 scripts/ai/convert.mjs 从 JSON 草稿生成（AI 产线 P0/P1）—— 修改请改草稿后重新生成。
+// 草稿：scripts\ai\examples\lantern.draft.json
 export default {
   "lantern.start": {
     "title": "夜巷 · 一盏孤灯",
