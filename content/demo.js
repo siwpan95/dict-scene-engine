@@ -33,6 +33,7 @@ export default {
       { text: '桥头雪夜里，一间热汤面摊还亮着（市井短篇）', goto: 'noodle.start' },
       { text: '村口的皮影班今夜唱《钟馗》，幕布后多了一个影子（民俗志怪）', goto: 'shadow.start' },
       { text: '夏夜城外，一个提灯的孩子说要带你去萤火巷（童趣幻想）', goto: 'firefly.start' },
+      { text: '翻开一册一九一一年的旧札记，替那个人做几个决定（新主线《藏晖室札记》）', goto: 'hushi.start' },
     ],
   },
 

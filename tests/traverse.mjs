@@ -44,6 +44,7 @@ await scenes[Service.init]()
 const MODE_NEXT = {
   battle: (s) => [s?.battle?.onWin, s?.battle?.onFlee, s?.battle?.onLose],
   trade: (s) => [s?.trade?.onEnd],
+  diary: (s) => [s?.diary?.onExit],   // M14：日记回溯（只读，重读完回 onExit）
 }
 
 const V = 40    // 每分支同场景最大访问次数（极端兜底）

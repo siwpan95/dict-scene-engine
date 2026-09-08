@@ -1437,6 +1437,58 @@ async function runLoopToConfront(g) {
   await quit(g, 'CC11 千灯收尾')
 }
 
+// ---------- 路线 DD：M14《藏晖室札记》新主线（幕一 + 日记回溯关卡） ----------
+{
+  console.log('\n[M14 藏晖室札记] 入口 → 幕一 → 日记回溯（mode: diary）')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '一九一一年的旧札记'), 'DD1 入口进入《藏晖室札记》')
+  await g.waitFor('孛可诺松林')
+  assert(await choose(g, '问绍唐'), 'DD2 进入追问场景 hushi.start.ask')
+  await g.waitFor('孛可诺松林 · 会后')
+  assert(await choose(g, '回屋去'), 'DD3 追问后折回受洗抉择')
+  await g.waitFor('孛可诺松林')
+  assert(await choose(g, '起立'), 'DD4 受洗：toleration +1')
+  await g.waitFor('effect toleration: 0 -> 1')
+  assert(await choose(g, '翻一翻来美国后记的这几册札记'), 'DD5 进入日记回溯关卡')
+  assert(await g.waitFor('可重读的篇目'), 'DD6 diary 插件接管 scene/mode 并渲染目录')
+  // 只读约束（M14 实现红线）：重读绝不能走 engine.goto，否则会重放 onEnter 副作用
+  const effectsBefore = g.output().split('effect ').length - 1
+  g.send('1')
+  assert(await g.waitFor('Pocono 山顶'), 'DD7 按编号重读第 1 篇')
+  const effectsAfter = g.output().split('effect ').length - 1
+  assert(effectsAfter === effectsBefore, 'DD8 重读不产生任何状态变更（只读，无 effect 日志）')
+  g.send('back')
+  assert(await g.waitFor('赔款学生会'), 'DD9 back 走 diary.onExit 正规流转')
+  await quit(g, 'DD10 藏晖室札记收尾')
+}
+
+// ---------- 路线 DE：M14 结局 end-decline（traverse 到不了，e2e 直达） ----------
+{
+  console.log('\n[M14 结局] end-decline · 均不能满意')
+  const g = launch({ env: { DSE_ENTRY: 'hushi.p5.cards' } })
+  assert(await g.waitFor('一九六〇年十一月二十四日 · 南港'), 'DE1 DSE_ENTRY 直达终局场景')
+  assert(await choose(g, '均不能满意'), 'DE2 未接任 → 辞电分支（!flags.hushi.tookPost）')
+  assert(await g.waitFor('结局 · 均不能满意'), 'DE3 抵达 end-decline')
+  await quit(g, 'DE4 end-decline 收尾')
+}
+
+// ---------- 路线 DF：M14 结局 end-deserter（traverse 到不了，e2e 直达） ----------
+{
+  console.log('\n[M14 结局] end-deserter · 逃兵')
+  const g = launch({ env: { DSE_ENTRY: 'hushi.p5.pier' } })
+  assert(await g.waitFor('送冬秀上船'), 'DF1 DSE_ENTRY 直达幕五送别场景')
+  assert(await choose(g, '同她上船去'), 'DF2 同上船（flags.hushi.sawWifeOff，虚构分支）')
+  await g.waitFor('一张破纸')
+  assert(await choose(g, '夹进书里'), 'DF3 收下牛奶收据（items.milk_receipt）')
+  await g.waitFor('诤臣')
+  assert(await choose(g, '逆耳'), 'DF4 当面进言（flags.hushi.remonstrated）')
+  assert(await g.waitFor('一九六〇年十一月二十四日 · 南港'), 'DF5 抵达终局牌桌')
+  assert(await choose(g, '「逃兵」'), 'DF6 逃兵分支')
+  assert(await g.waitFor('结局 · 逃兵'), 'DF7 抵达 end-deserter')
+  await quit(g, 'DF8 end-deserter 收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')

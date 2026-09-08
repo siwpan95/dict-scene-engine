@@ -94,6 +94,15 @@
 | `flags.noodle.soldier` | 《深夜面摊》与巡夜老卒攀谈过 | `noodle.soldier` 选项 | `noodle.bowl` 选项去重 |
 | `flags.noodle.book` | 《深夜面摊》与赶考书生说过话 | `noodle.book` 选项 | `noodle.bowl` 选项去重 |
 | `flags.noodle.singer` | 《深夜面摊》给卖唱姑娘倒过水 | `noodle.singer` 选项 | `noodle.bowl` 选项去重 |
+| `flags.hushi.questionWord` | M14《藏晖室札记》1914 总纲之问的答案（`'both'` = 原文答案「家庭从东方、政治从西方」） | `hushi.p2.question` 第三选项 | `hushi.p5.cards` 真结局选项条件 |
+| `flags.hushi.haven` | M14 住进 92 Haven Ave（本韦女士旧寓） | `hushi.p3.haven` 选项 | `hushi.p3.diaries` 选项条件 |
+| `flags.hushi.eightFocus` | M14 把八事中「不避俗字俗语」单独提出另作一文 | `hushi.p3.eight` 第三选项 | `hushi.p3.essay` 第三选项条件 |
+| `flags.hushi.accepted` | M14 1938 拟电**允**就大使职 | `hushi.p4.telegram` 第二选项 | `hushi.p4.sacrifice` 第三选项条件 |
+| `flags.hushi.declined` | M14 1938 拟电**辞**大使职 | `hushi.p4.telegram` 第一选项 | `hushi.p4.sacrifice` 第四选项条件 |
+| `flags.hushi.tookPost` | M14 1938 赴任驻美大使 | `hushi.p4.sacrifice` 第一选项 | `hushi.p5.cards` 结局分流（end-sacrifice / end-decline） |
+| `flags.hushi.willGo` | M14 1949.1.8 总统官邸答应出去看看 | `hushi.p5.mansion` 第一/三选项 | `hushi.p5.pier` 第三选项条件 |
+| `flags.hushi.sawWifeOff` | M14 1949.1.21 同冬秀上船赴台〔虚构分支〕 | `hushi.p5.pier` 第二选项 | `hushi.p5.cards` 结局分流（end-deserter） |
+| `flags.hushi.remonstrated` | M14 1953 当面进逆耳之言（诤臣一百人） | `hushi.p5.remonstrate` 第一/三选项 | `hushi.p5.cards` 结局分流（end-remonstrator） |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -114,6 +123,10 @@
 | `items.blade` | 旧刀（师门遗物） | `start` 入口选项 | 战斗 ATK+4（combat.weapons） |
 | `items.antidote` | 解药（防陈九爪毒） | `wuxia.town` 选项（10 金） | `wuxia.cliff` 阴损选项条件 |
 | `items.candle` | 蜡烛（古宅行动次数） | `horror.start`/`horror.kitchen` 选项 | `horror.hall` 各选项条件、`horror.cellar` 宅主结局 |
+| `items.photo` | M14 全家福照片（吾母与冬秀皆在焉） | `hushi.p2.photo`/`hushi.p2.letter` 选项 | `hushi.p2.letter` 第三选项条件（另写信托付本人） |
+| `items.willow` | M14 垂柳图（折柳赠别；含雪中之柳则 +2） | `hushi.p2.willow` 第一/二选项 | `hushi.p2.leave` 第一选项条件 |
+| `items.letters` | M14 致韦女士旧函百余封（**解锁日记回溯关卡**） | `hushi.p3.diaries` 第一选项 | `hushi.p3.diaries`/`hushi.p3.return` 的 `hushi.diary2` 入口条件 |
+| `items.milk_receipt` | M14 北大农学院牛奶收据破纸（￥440 / 31 瓶） | `hushi.p5.milk` 第一选项 | `hushi.p5.remonstrate` 第四选项条件 |
 
 ### 1.3 数值
 
@@ -133,6 +146,10 @@
 | `tradeProfit` | 东市收市净赚 | 0 | `trade` 插件收市结算（gold − base） | `town.settle` 文本插值、`town.judge` 结局分流（≥60 / ≥10 / <10） |
 | `loopMoves` | 《子夜集》每夜行动力 | 3 | `loop.awaken` 出门选项 `-1`（每处地点 1 分） | `loop.awaken` 各地点选项条件 `loopMoves >= 1`；`@loop:` 重置回 3 |
 | `riveEvidence` | 《江畔·县志》铁证计数（forgery/ledger/arsenic） | 0 | 三处铁证 do `+1` | `river.court` 指认主簿条件 `>= 2`（否则走反噬/冤枉线） |
+| `toleration` | M14《藏晖室札记》**为人的容忍**（Altruistic Toleration，为爱我者屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
+| `independence` | M14《藏晖室札记》**不容忍**（对一己不可不诚，不可为人屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
+| `cardsPlayed` | M14 与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应） | 0 | `hushi.p1.cards` 第一选项 `+1` | `hushi.p2.leave` 第二选项条件 |
+| `diaryRead` | M14 日记回溯已读篇目 ID 数组（有序去重） | `[]` | `plugins/diary.js` 监听 `scene/enter` 追加 | `plugins/diary.js` 渲染目录（**只读重读，不回写状态**） |
 
 ---
 

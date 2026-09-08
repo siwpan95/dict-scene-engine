@@ -35,6 +35,7 @@
       - ./content/noodle.js           # AI-P1：《深夜面摊》(市井温情)
       - ./content/shadow.js           # AI-P1：《皮影班》(民俗志怪)
       - ./content/firefly.js          # AI-P1：《萤火巷》(童趣幻想)
+      - ./content/hushi.js            # M14：新主线《藏晖室札记》(基于胡适日记 1911—1960)
 
 - id: state
   name: ./plugins/state.js
@@ -59,6 +60,10 @@
       case2flags: {}        # M5：第二案推理标记
       case2Evidence: 0      # M5：第二案证据计数
       karma: 0               # M6：荒漠商队善恶值（善举 +1，恶举 -1）
+      toleration: 0          # M14：为人的容忍（Altruistic Toleration）—— 为爱我者屈
+      independence: 0        # M14：不容忍 —— 对一己不可不诚，不可为人屈
+      cardsPlayed: 0         # M14：与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应）
+      diaryRead: []          # M14：日记回溯已读篇目 ID 数组（plugins/diary.js 读写，存档可恢复）
       stock: {}              # M8：东市经营库存（trade 插件读写）
       tradeDay: null         # M8：东市经营天数（trade 插件读写，存档可恢复）
       tradeBaseGold: null    # M8：开市基线资金（trade 插件 begin 记录）
@@ -75,6 +80,7 @@
         river: {}            # M13：江畔县志节拍中间层（flags.river.autopsy 等，同上理）
         lantern: {}          # AI-P0：千灯铺愿望标记中间层（flags.lantern.red/river）
         noodle: {}           # AI-P1：面摊客访标记中间层（flags.noodle.soldier/book/singer）
+        hushi: {}            # M14：藏晖室札记节拍中间层（flags.hushi.*，P1 幕二起用）
 
 - id: io
   name: ./plugins/console-io.js
@@ -104,6 +110,11 @@
       - { id: river-truth,  name: 江水为证, desc: 《江畔·县志》：铁证定谳，画工的堤不漏了, when: 'scene === "river.end-truth"' }
       - { id: river-remand, name: 疑案,     desc: 《江畔·县志》：你退堂了，志书照改,      when: 'scene === "river.end-open"' }
       - { id: lantern-keep, name: 守灯人,   desc: 《千灯》：接下了这间灯笼铺,            when: 'scene === "lantern.end-keep"' }
+      # M14《藏晖室札记》（胡适日记 1911—1960）
+      - { id: hushi-wherehome,    name: 吾乡真在何处, desc: 《藏晖室札记》：留了下来，一辈子没答出那一问,   when: 'scene === "hushi.end-wherehome"' }
+      - { id: hushi-sacrifice,    name: 为国家牺牲了, desc: 《藏晖室札记》：二十一年的独立自由，今日起交出去, when: 'scene === "hushi.end-sacrifice"' }
+      - { id: hushi-remonstrator, name: 诤臣一百人,   desc: 《藏晖室札记》：当面说了那句逆耳的话,           when: 'scene === "hushi.end-remonstrator"' }
+      - { id: hushi-cards,        name: 过五关,       desc: 《藏晖室札记》：真结局——用五十年前的牌，压住今晚, when: 'scene === "hushi.end-cards"' }
 
 - id: combat
   name: ./plugins/combat.js
@@ -138,6 +149,9 @@
       - [12, 10, 15, 12, 11]  # 茶：第 3 天茶会看涨
       - [5, 7, 5, 6, 5]       # 盐：第 2 天雨天看涨
       - [3, 3, 2, 4, 6]       # 布：第 5 天大集看涨
+
+- id: diary
+  name: ./plugins/diary.js   # M14：日记回溯（接管 mode: 'diary'，只读重读已走过的篇目）
 
 - id: sound
   name: ./plugins/sound.js

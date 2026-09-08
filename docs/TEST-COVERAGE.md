@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-08 · 51 个结局 · 覆盖 51/51 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-08 · 58 个结局 · 覆盖 58/58 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -27,6 +27,13 @@
 | `horror.end-eaten` | 结局 · 古宅 · 烛灭 | ✗ | ✓ |
 | `horror.end-master` | 结局 · 古宅 · 宅主 | ✗ | ✓ |
 | `horror.end-rain` | 结局 · 夜路 · 雨 | ✓ | ✗ |
+| `hushi.end-cards` | 结局 · 过五关（真结局） | ✓ | ✗ |
+| `hushi.end-decline` | 结局 · 均不能满意 | ✗ | ✓ |
+| `hushi.end-deserter` | 结局 · 逃兵 | ✗ | ✓ |
+| `hushi.end-remonstrator` | 结局 · 诤臣一百人 | ✓ | ✗ |
+| `hushi.end-sacrifice` | 结局 · 为国家牺牲了 | ✓ | ✗ |
+| `hushi.end-stay` | 结局 · 留下 | ✓ | ✗ |
+| `hushi.end-wherehome` | 结局 · 吾乡真在何处 | ✓ | ✗ |
 | `lantern.end-carry` | 结局 · 送灯人 | ✓ | ✗ |
 | `lantern.end-keep` | 结局 · 守灯人 | ✓ | ✓ |
 | `loop.end-arson` | 结局 · 一了百了 | ✗ | ✓ |

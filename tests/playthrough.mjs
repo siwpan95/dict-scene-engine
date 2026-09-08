@@ -156,6 +156,40 @@ async function loopThreeNights(c) {
   await c.waitFor('祠堂 · 子夜')
 }
 
+/** M14《藏晖室札记》：从村庄入口一路走到终局牌桌（1960 南港），共 22 步。
+ *  走完时终局可见 4 个选项（真结局 / 诤臣 / 为国家牺牲了 / 留下），
+ *  由调用方发最后一条输入决定去哪个结局。
+ *
+ *  导航用 send（编号）+ waitFor（场景标题）而非 choose：本线场景标题唯一、
+ *  无同名干扰，编号比关键词更稳；且这些选项都没有副作用分支歧义。
+ */
+async function driveHushiToFinale(c) {
+  await c.waitFor('村庄 · 晨雾')
+  await c.choose('一九一一年的旧札记'); await c.waitFor('孛可诺松林')
+  c.send('1'); await c.waitFor('绮色佳寓所')        // 起立受洗（容忍 +1）
+  c.send('1'); await c.waitFor('赔款学生会')        // 赴牌局（cardsPlayed +1）
+  c.send('1'); await c.waitFor('韦莲司之问')        // 接下学生会社职
+  c.send('3'); await c.waitFor('得家中照片')        // 总纲：家庭从东方、政治从西方（双轴各 +1）
+  c.send('1'); await c.waitFor('秋柳')              // 收照片回信（items.photo）
+  c.send('2'); await c.waitFor('得冬秀书')          // 赠垂柳图 + 雪中之柳（items.willow +2）
+  c.send('1'); await c.waitFor('别矣绮色佳')        // 就这样回信
+  c.send('3'); await c.waitFor('九十二号')          // 入哥伦比亚
+  c.send('1'); await c.waitFor('白话诗引起的风波')  // 住进 92 Haven Ave
+  c.send('1'); await c.waitFor('八事')              // 「一次完全失败，何妨再来？」
+  c.send('1'); await c.waitFor('近作文字')          // 八事抄寄《新青年》
+  c.send('1'); await c.waitFor('读致韦女士旧函')    // 寄出去
+  c.send('1'); await c.waitFor('归国记')            // 借回旧函（items.letters）
+  c.send('1'); await c.waitFor('巴黎转来的电报')    // 归国
+  c.send('2'); await c.waitFor('似有鬼')            // 拟电允了（flags.hushi.accepted）
+  c.send('1'); await c.waitFor('二十一年')          // 「似有鬼」——当作笑话
+  c.send('1'); await c.waitFor('南京')              // 赴任（flags.hushi.tookPost）
+  c.send('1'); await c.waitFor('总统官邸')          // 「你就是逃兵」
+  c.send('1'); await c.waitFor('送冬秀上船')        // 答应去（flags.hushi.willGo）
+  c.send('1'); await c.waitFor('一张破纸')          // 送她上船，你留下
+  c.send('1'); await c.waitFor('诤臣')              // 夹进书里（items.milk_receipt）
+  c.send('1'); await c.waitFor('南港')              // 说，逆耳的话（flags.hushi.remonstrated）
+}
+
 const ROUTES = [
   {
     id: 'A', title: '情报 → 还价 → 胜利', ending: '结局 · 剑之认主',
@@ -697,6 +731,26 @@ const ROUTES = [
       c.send('quit')
     },
   },
+  {
+    id: 'DD1', title: '藏晖室札记 · 五幕主线 → 真结局', ending: '结局 · 过五关',
+    drive: async (c) => {
+      await driveHushiToFinale(c)
+      // ⚠️ 终局按关键词选，不用编号：cards 的选项带 if 条件，可见数量随状态浮动
+      // （首次实现用 send('1')/send('2')，插入新条件选项后编号即错位）
+      await c.choose('再摆一次')         // 用地牌做「配」
+      await c.waitFor('结局 · 过五关')
+      c.send('quit')
+    },
+  },
+  {
+    id: 'DD2', title: '藏晖室札记 · 五幕主线 → 诤臣', ending: '结局 · 诤臣一百人',
+    drive: async (c) => {
+      await driveHushiToFinale(c)
+      await c.choose('大失望，大失望')   // 「你想说的其实只有六个字」
+      await c.waitFor('结局 · 诤臣一百人')
+      c.send('quit')
+    },
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -728,7 +782,14 @@ const sfxDir = mkdtempSync(join(tmpdir(), 'dse-playthrough-'))
 const env = { DSE_SFX_DIR: sfxDir }
 const results = []
 
-for (const route of ROUTES) {
+// 调试用：--only=DD1,DD2 只跑指定路线（全量约 9 分钟，调单条时不必等）。
+// 默认行为不变（跑全部 + 存档路线 + 写转录文件）。
+const onlyArg = process.argv.find((a) => a.startsWith('--only='))
+const only = onlyArg ? onlyArg.slice('--only='.length).split(',').map((s) => s.trim()).filter(Boolean) : null
+const routes = only ? ROUTES.filter((r) => only.includes(r.id)) : ROUTES
+if (only) console.log(`（--only 模式：只跑 ${routes.map((r) => r.id).join(', ')}）`)
+
+for (const route of routes) {
   const g = launch({ env }); const c = makeCtrl(g)
   let status = 'OK', detail = ''
   try {

@@ -42,6 +42,7 @@ const isSpecialGoto = (t) => SPECIAL_GOTO.has(t) || t.startsWith(LOOP_PREFIX)
 const MODE_EDGES = {
   battle: ['onWin', 'onLose', 'onFlee'],
   trade: ['onEnd'],
+  diary: ['onExit'],        // M14：日记回溯（plugins/diary.js），重读完回此场景
 }
 
 /** ID 命名空间：<标识>[.<标识>]*，标识为小写字母数字（允许 - _ 连接）
@@ -60,7 +61,13 @@ const EXPR_EXTRA = new Set(['scene', 'choice', 'effects', 'true', 'false', 'null
   'in', 'of', 'function', 'return', 'if', 'else', 'Math', 'Number', 'String',
   'Object', 'Array', 'JSON', 'length'])
 /** 提取表达式里的点路径标识符 token（'gold >= 10' → ['gold']；'flags.a' → ['flags.a']） */
-const exprPathTokens = (expr) => String(expr).match(/[A-Za-z_$][\w$]*(?:\.[\w$]+)*/g) ?? []
+// ⚠️ 先剥离字符串字面量再取标识符：否则 `flags.hushi.questionWord === "both"`
+//    里的 "both" 会被当成顶层数值字段，报「cordis.yml 未声明」的假警告
+//    （M14 引入字面量比较时发现并修复）。
+const exprPathTokens = (expr) =>
+  String(expr)
+    .replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`/g, "''")
+    .match(/[A-Za-z_$][\w$]*(?:\.[\w$]+)*/g) ?? []
 /** effects 键是否是动态域（flags.xxx / clues.xxx / ...）或引擎字段 */
 const isNumDynamicKey = (key) => NUM_DYNAMIC.has(String(key).split('.')[0])
 
