@@ -1412,6 +1412,31 @@ async function runLoopToConfront(g) {
   await quit(g, 'BB104 献祭结局收尾')
 }
 
+// ---------- 路线 CC：AI-P0《千灯》—— 红绳+河灯 → 守灯结局 ----------
+{
+  console.log('\n[AI-P0 千灯] 系愿 → 放河灯 → 守灯人')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '千灯'), 'CC1 入口进入《千灯》')
+  await g.waitFor('夜巷 · 一盏孤灯')
+  assert(await choose(g, '推门进去'), 'CC2 入铺')
+  await g.waitFor('千灯铺 · 铺内')
+  assert(await choose(g, '红绳'), 'CC3 看红绳灯')
+  await g.waitFor('红绳灯 · 等归人')
+  assert(await choose(g, '归'), 'CC4 系红绳愿（flags.lantern.red）')
+  await g.waitFor('千灯铺 · 铺内')
+  assert(await choose(g, '河灯'), 'CC5 看河灯')
+  await g.waitFor('河灯 · 渡故人')
+  assert(await choose(g, '逆流'), 'CC6 放河灯愿（flags.lantern.river）')
+  await g.waitFor('千灯铺 · 铺内')
+  assert(await choose(g, '面对面坐下'), 'CC7 夜谈')
+  await g.waitFor('千灯铺 · 三更')
+  assert(await choose(g, '留下来'), 'CC8 接过铺子')
+  assert(await g.waitFor('结局 · 守灯人'), 'CC9 守灯结局')
+  assert(await g.waitFor('成就解锁：守灯人'), 'CC10 成就随结局解锁')
+  await quit(g, 'CC11 千灯收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')

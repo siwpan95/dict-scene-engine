@@ -89,6 +89,8 @@
 | `flags.river.autopsy` | 《江畔·县志》验尸定论：非溺死、胃有砒霜 | `river.clinic` 选项 | `river.hub` 上堂选项条件 |
 | `flags.river.blocked` | 《江畔·县志》索阅《河工卷》被主簿拦下 | `river.yamen` 选项 | `river.yamen` 夜探选项条件（被拒后解锁） |
 | `flags.river.sawScribe` | 《江畔·县志》找书办宋七坐过 | `river.yamen` 选项 | `river.yamen` 后续选项去重 |
+| `flags.lantern.red` | 《千灯》系过红绳愿 | `lantern.red` 选项 | `lantern.shop`/`lantern.ask` 红绳选项去重 |
+| `flags.lantern.river` | 《千灯》放过河灯愿 | `lantern.river` 选项 | `lantern.shop`/`lantern.ask` 河灯选项去重 |
 
 ### 1.2 items（物品，含武器加成）
 

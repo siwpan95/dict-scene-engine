@@ -27,7 +27,7 @@ cd dict-scene-engine
 npm install
 npm start          # 开始游戏
 npm run start:hmr  # 开启插件级热重载（官方 HMR，需 --expose-internals）
-npm test           # 端到端验证（521 项断言，spawn 真实进程驱动）
+npm test           # 端到端验证（533 项断言，spawn 真实进程驱动）
 npm run test:cli   # CLI 接口验证（48 项断言）
 npm run test:all   # 两者都跑
 npm run lint:content  # 内容校验：悬空 goto / 不可达场景 / 结局可达 / 死变量
@@ -109,7 +109,7 @@ dict-scene-engine/
 │   ├── build-hmr.mjs     # 从本地 cordis-4.0.0-rc.9 源码构建官方 HMR
 │   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 契约 / 数值字段）
 ├── tests/
-│   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：26 组 521 项断言
+│   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：27 组 533 项断言
 │   ├── cli.mjs           # CLI 接口测试（命令行/脚本输入）：48 项断言
 │   ├── traverse.mjs      # 结构-状态遍历（从 entry DFS 全图：执行每条 goto 边/效果/条件）
 │   ├── coverage.mjs      # 结局覆盖审计（traverse ∪ e2e 双缺 == 0；生成 docs/TEST-COVERAGE.md）
@@ -119,7 +119,7 @@ dict-scene-engine/
 │                         #   L 重放回归 / M 退出竞态 / N 内容校验 / O 古堡探索 / P 商人结局
 │                         #   Q 侦探真结局 / R 侦探冤案 / S 商队三结局 / T 经营三结局
 │                         #   U 武侠刀客 / V 空间站疑云 / W 古宅惊魂 / X 跨包彩蛋
-│                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志 / BB 结局直达补全
+│                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志 / BB 结局直达 / CC AI-P0 千灯
 ├── docs/
 │   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～4）
 │   ├── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
@@ -131,12 +131,12 @@ dict-scene-engine/
 
 | 指标 | 数值 |
 | --- | --- |
-| 场景 | 202（古堡主线 48 + 星港 DLC 4 + 侦探两案 29 + 商队 19 + 经营 12 + 短篇三则 40 + 子夜集 17 + 驿路 13 + 江畔县志 20） |
-| 正文字数 | 37,609（均长 186 字/场景） |
-| 结局 | 43（全部可达） |
-| 状态变量 | flags 74 / items 15（无死变量） |
+| 场景 | 210（古堡主线 48 + 星港 DLC 4 + 侦探两案 29 + 商队 19 + 经营 12 + 短篇三则 40 + 子夜集 17 + 驿路 13 + 江畔县志 20 + 千灯 8） |
+| 正文字数 | 39,588（均长 189 字/场景） |
+| 结局 | 45（全部可达） |
+| 状态变量 | flags 76 / items 15（无死变量） |
 | 成就 | 9 |
-| 内容包 | 13（demo / starport / case×2 / caravan / town-trade / 武侠 / 科幻 / 恐怖 / 子夜集 / 驿路 / 江畔县志） |
+| 内容包 | 14（demo / starport / case×2 / caravan / town-trade / 武侠 / 科幻 / 恐怖 / 子夜集 / 驿路 / 江畔县志 / 千灯） |
 | 跨包彩蛋 | 商队铜符可在东市卖 30 金（caravan ↔ town）；新篇文字呼应（药铺提东市、后山提商队） |
 | 结构 | branch-and-bottleneck（主线）+ hub-and-spoke（侦探/商队/江畔，枢纽可重访）+ 时间循环（子夜集） |
 

@@ -31,6 +31,7 @@
       - ./content/loop.js            # M11：时间循环短篇《子夜集》
       - ./content/post.js            # M12：情感短篇《驿路》
       - ./content/river.js           # M13：历史推理中篇《江畔·县志》
+      - ./content/lantern.js          # AI-P0：《千灯》(由 AI 产线转换生成)
 
 - id: state
   name: ./plugins/state.js
@@ -69,6 +70,7 @@
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
         post: {}             # M12：驿路立场中间层（flags.post.adviceGo 等，同上理）
         river: {}            # M13：江畔县志节拍中间层（flags.river.autopsy 等，同上理）
+        lantern: {}          # AI-P0：千灯铺愿望标记中间层（flags.lantern.red/river）
 
 - id: io
   name: ./plugins/console-io.js
@@ -97,6 +99,7 @@
       - { id: cross-pass,   name: 出关,     desc: 《驿路》：你履约，带她去看驿道那头, when: 'scene === "post.end-go"' }
       - { id: river-truth,  name: 江水为证, desc: 《江畔·县志》：铁证定谳，画工的堤不漏了, when: 'scene === "river.end-truth"' }
       - { id: river-remand, name: 疑案,     desc: 《江畔·县志》：你退堂了，志书照改,      when: 'scene === "river.end-open"' }
+      - { id: lantern-keep, name: 守灯人,   desc: 《千灯》：接下了这间灯笼铺,            when: 'scene === "lantern.end-keep"' }
 
 - id: combat
   name: ./plugins/combat.js
