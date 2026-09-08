@@ -32,6 +32,9 @@
       - ./content/post.js            # M12：情感短篇《驿路》
       - ./content/river.js           # M13：历史推理中篇《江畔·县志》
       - ./content/lantern.js          # AI-P0：《千灯》(由 AI 产线转换生成)
+      - ./content/noodle.js           # AI-P1：《深夜面摊》(市井温情)
+      - ./content/shadow.js           # AI-P1：《皮影班》(民俗志怪)
+      - ./content/firefly.js          # AI-P1：《萤火巷》(童趣幻想)
 
 - id: state
   name: ./plugins/state.js
@@ -71,6 +74,7 @@
         post: {}             # M12：驿路立场中间层（flags.post.adviceGo 等，同上理）
         river: {}            # M13：江畔县志节拍中间层（flags.river.autopsy 等，同上理）
         lantern: {}          # AI-P0：千灯铺愿望标记中间层（flags.lantern.red/river）
+        noodle: {}           # AI-P1：面摊客访标记中间层（flags.noodle.soldier/book/singer）
 
 - id: io
   name: ./plugins/console-io.js

@@ -17,6 +17,8 @@
     "test:traverse": "node tests/traverse.mjs",
     "test:coverage": "node tests/coverage.mjs",
     "ai:convert": "node scripts/ai/convert.mjs",
+    "ai:batch": "node scripts/ai/batch.mjs",
+    "ai:report": "node scripts/ai/report.mjs --write docs/ai-content-stats.md",
     "test:all": "node tests/e2e.mjs && node tests/cli.mjs && node tests/traverse.mjs"
   },
   "engines": {

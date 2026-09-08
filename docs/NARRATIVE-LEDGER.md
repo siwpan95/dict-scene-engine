@@ -91,6 +91,9 @@
 | `flags.river.sawScribe` | 《江畔·县志》找书办宋七坐过 | `river.yamen` 选项 | `river.yamen` 后续选项去重 |
 | `flags.lantern.red` | 《千灯》系过红绳愿 | `lantern.red` 选项 | `lantern.shop`/`lantern.ask` 红绳选项去重 |
 | `flags.lantern.river` | 《千灯》放过河灯愿 | `lantern.river` 选项 | `lantern.shop`/`lantern.ask` 河灯选项去重 |
+| `flags.noodle.soldier` | 《深夜面摊》与巡夜老卒攀谈过 | `noodle.soldier` 选项 | `noodle.bowl` 选项去重 |
+| `flags.noodle.book` | 《深夜面摊》与赶考书生说过话 | `noodle.book` 选项 | `noodle.bowl` 选项去重 |
+| `flags.noodle.singer` | 《深夜面摊》给卖唱姑娘倒过水 | `noodle.singer` 选项 | `noodle.bowl` 选项去重 |
 
 ### 1.2 items（物品，含武器加成）
 
