@@ -38,6 +38,7 @@ export default {
       { text: '雾夜江渡出了人命——船夫与更夫各执一词（同一夜多视角中篇）', goto: 'crossing.start' },
       { text: '边塞三年，一封家书——烽火与归期之间（双篇章历史中篇）', goto: 'garrison.start' },
       { text: '花灯夜进城——一夜六个时辰，六个人各见真相的一块（群像多视角长线）', goto: 'midnight.start' },
+      { text: '雾起江渡——古堡、商道、江畔、民国的四个过客在此交汇（跨世界观群像长线）', goto: 'ferry.start' },
     ],
   },
 

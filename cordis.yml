@@ -40,6 +40,7 @@
       - ./content/crossing.js         # M15：同一夜多视角《渡口·子丑》(首个 dialogue mode 包)
       - ./content/garrison.js         # M15：双篇章历史《戍卒·家书》(记篇当下+忆篇追忆)
       - ./content/midnight.js         # M16：群像多视角《同一夜·十二时辰》(6 POV 时序锁)
+      - ./content/ferry.js            # M17：跨世界观群像《渡口纪年》(四时四 POV 块茎网)
 
 - id: state
   name: ./plugins/state.js
@@ -83,6 +84,8 @@
       crossingClues: {}      # M15：渡口子丑证词（crossingClues.splash 等，须先声明，条件链不抛错）
       midEvidence: 0         # M16：十二时辰关键追问计数（>=4 可拼齐真相）
       midnightClues: {}      # M16：十二时辰六块碎片（midnightClues.zi 等，须先声明，条件链不抛错）
+      ferryEvidence: 0       # M17：渡口纪年关键追问计数（>=4 各渡各岸；>=6 且问过老渡工则渡工自渡）
+      ferryClues: {}         # M17：渡口纪年线索（ferryClues.boatman 等，须先声明，条件链不抛错）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）

@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-09 · 77 个结局 · 覆盖 77/77 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 84 个结局 · 覆盖 84/84 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -25,6 +25,13 @@
 | `ending.sword` | 结局 · 完整的剑 | ✗ | ✓ |
 | `ending.truth` | 结局 · 真凶归案 | ✗ | ✓ |
 | `ending.tyrant` | 结局 · 僭主 | ✓ | ✗ |
+| `ferry.end-cross` | 结局 · 摆渡人 | ✗ | ✓ |
+| `ferry.end-fog` | 结局 · 雾锁渡口 | ✓ | ✗ |
+| `ferry.end-letter` | 结局 · 十年与三吊钱 | ✗ | ✓ |
+| `ferry.end-river` | 结局 · 笔下有数 | ✗ | ✓ |
+| `ferry.end-sword` | 结局 · 空剑鞘 | ✗ | ✓ |
+| `ferry.end-trail` | 结局 · 货与路 | ✗ | ✓ |
+| `ferry.end-truth` | 结局 · 各渡各岸 | ✗ | ✓ |
 | `firefly.end-keep` | 结局 · 守巷人 | ✓ | ✗ |
 | `firefly.end-return` | 结局 · 萤火明灭 | ✓ | ✗ |
 | `garrison.end-ash` | 结局 · 灰烬 | ✗ | ✓ |
