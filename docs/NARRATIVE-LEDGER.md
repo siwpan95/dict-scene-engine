@@ -103,6 +103,16 @@
 | `flags.hushi.willGo` | M14 1949.1.8 总统官邸答应出去看看 | `hushi.p5.mansion` 第一/三选项 | `hushi.p5.pier` 第三选项条件 |
 | `flags.hushi.sawWifeOff` | M14 1949.1.21 同冬秀上船赴台〔虚构分支〕 | `hushi.p5.pier` 第二选项 | `hushi.p5.cards` 结局分流（end-deserter） |
 | `flags.hushi.remonstrated` | M14 1953 当面进逆耳之言（诤臣一百人） | `hushi.p5.remonstrate` 第一/三选项 | `hushi.p5.cards` 结局分流（end-remonstrator） |
+| `flags.snow.autopsy` | M15 雪庄八客 郎中验出砒霜、开堂对质之门 | `snow.doctor` 选项 | `snow.hub` 选项「查得够了——当厅对质」条件 |
+| `flags.garrison.chap` | M15 戍卒家书 当前篇章（'record'/'memory'） | `garrison.start` 两选项、`garrison.hub.record`/`.memory` 切换项 | 两 hub 的切换项判断（写入值本身） |
+| `flags.garrison.sawGap` | M15 巡城记下西北角缺口 | `garrison.record.wall` 选项 | 背景信息，暂无直接读取 |
+| `flags.garrison.hold` | M15 夜战选择死守 | `garrison.record.night` 第一选项 | `garrison.merge` 死守结局条件（hold+keep） |
+| `flags.garrison.break` | M15 夜战选择突围 | `garrison.record.night` 第二选项 | `garrison.merge` 归乡结局条件 |
+| `flags.garrison.fall` | M15 夜战溃散城破 | `garrison.record.night` 第三选项 | `garrison.merge` 城破结局条件 |
+| `flags.garrison.keep` | M15 诀别半页纸留好 | `garrison.memory.farewell` 第一选项 | `garrison.merge` 死守结局条件（hold+keep） |
+| `flags.garrison.burn` | M15 诀别半页纸烧了 | `garrison.memory.farewell` 第二选项 | `garrison.merge` 灰烬结局条件 |
+| `flags.garrison.recordDone` | M15 记篇走完（夜战三选一后） | `garrison.record.night` 三选项 | `garrison.hub.record` merge 入口条件（+memoryDone） |
+| `flags.garrison.memoryDone` | M15 忆篇走完（诀别二选一后） | `garrison.memory.farewell` 两选项 | `garrison.hub.record` merge 入口条件（+recordDone） |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -127,6 +137,7 @@
 | `items.willow` | M14 垂柳图（折柳赠别；含雪中之柳则 +2） | `hushi.p2.willow` 第一/二选项 | `hushi.p2.leave` 第一选项条件 |
 | `items.letters` | M14 致韦女士旧函百余封（**解锁日记回溯关卡**） | `hushi.p3.diaries` 第一选项 | `hushi.p3.diaries`/`hushi.p3.return` 的 `hushi.diary2` 入口条件 |
 | `items.milk_receipt` | M14 北大农学院牛奶收据破纸（￥440 / 31 瓶） | `hushi.p5.milk` 第一选项 | `hushi.p5.remonstrate` 第四选项条件 |
+| `items.letter` | M15 戍卒家书（妻捎来的信，贴身三年，跨两篇章信物） | `garrison.start` onEnter | `garrison.hub.record` 选项「把家书摸出来，再念一念」条件 |
 
 ### 1.3 数值
 

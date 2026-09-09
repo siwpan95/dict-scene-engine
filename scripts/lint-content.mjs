@@ -43,6 +43,7 @@ const MODE_EDGES = {
   battle: ['onWin', 'onLose', 'onFlee'],
   trade: ['onEnd'],
   diary: ['onExit'],        // M14：日记回溯（plugins/diary.js），重读完回此场景
+  dialogue: ['onEnd'],      // M15：对话/谈判（plugins/dialogue.js），结束对话回此场景
 }
 
 /** ID 命名空间：<标识>[.<标识>]*，标识为小写字母数字（允许 - _ 连接）

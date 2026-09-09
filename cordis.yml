@@ -36,6 +36,9 @@
       - ./content/shadow.js           # AI-P1：《皮影班》(民俗志怪)
       - ./content/firefly.js          # AI-P1：《萤火巷》(童趣幻想)
       - ./content/hushi.js            # M14：新主线《藏晖室札记》(基于胡适日记 1911—1960)
+      - ./content/snow.js             # M15：暴风雪山庄本格《雪庄·八客》(指认可错纠错)
+      - ./content/crossing.js         # M15：同一夜多视角《渡口·子丑》(首个 dialogue mode 包)
+      - ./content/garrison.js         # M15：双篇章历史《戍卒·家书》(记篇当下+忆篇追忆)
 
 - id: state
   name: ./plugins/state.js
@@ -64,6 +67,7 @@
       independence: 0        # M14：不容忍 —— 对一己不可不诚，不可为人屈
       cardsPlayed: 0         # M14：与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应）
       diaryRead: []          # M14：日记回溯已读篇目 ID 数组（plugins/diary.js 读写，存档可恢复）
+      dialogueAsked: []      # M15：对话模式已问话题 ID 数组（plugins/dialogue.js 读写，存档可恢复）
       stock: {}              # M8：东市经营库存（trade 插件读写）
       tradeDay: null         # M8：东市经营天数（trade 插件读写，存档可恢复）
       tradeBaseGold: null    # M8：开市基线资金（trade 插件 begin 记录）
@@ -73,6 +77,9 @@
       loopMoves: 3           # M11：子夜集每夜行动力（每次出门-1，@loop 重置回 3）
       riveEvidence: 0        # M13：江畔县志铁证计数（forgery/ledger/arsenic 齐 ≥2 可定罪）
       riverClues: {}         # M13：江畔县志线索（riverClues.ferry 等，须先声明，条件链不抛错）
+      snowEvidence: 0        # M15：雪庄八客铁证计数（forgery/ledger/arsenic 齐 ≥2 可定罪）
+      snowClues: {}          # M15：雪庄八客线索（snowClues.bailiff 等，须先声明，条件链不抛错）
+      crossingClues: {}      # M15：渡口子丑证词（crossingClues.splash 等，须先声明，条件链不抛错）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
@@ -81,6 +88,8 @@
         lantern: {}          # AI-P0：千灯铺愿望标记中间层（flags.lantern.red/river）
         noodle: {}           # AI-P1：面摊客访标记中间层（flags.noodle.soldier/book/singer）
         hushi: {}            # M14：藏晖室札记节拍中间层（flags.hushi.*，P1 幕二起用）
+        snow: {}             # M15：雪庄八客节拍中间层（flags.snow.autopsy 等，同上理）
+        garrison: {}         # M15：戍卒家书节拍中间层（flags.garrison.chap 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js
@@ -115,6 +124,8 @@
       - { id: hushi-sacrifice,    name: 为国家牺牲了, desc: 《藏晖室札记》：二十一年的独立自由，今日起交出去, when: 'scene === "hushi.end-sacrifice"' }
       - { id: hushi-remonstrator, name: 诤臣一百人,   desc: 《藏晖室札记》：当面说了那句逆耳的话,           when: 'scene === "hushi.end-remonstrator"' }
       - { id: hushi-cards,        name: 过五关,       desc: 《藏晖室札记》：真结局——用五十年前的牌，压住今晚, when: 'scene === "hushi.end-cards"' }
+      - { id: snow-truth,          name: 旧债有主,   desc: 《雪庄·八客》：铁证定谳，柳记的旧账翻出来了,         when: 'scene === "snow.end-truth"' }
+      - { id: snow-open,           name: 雪化人散,   desc: 《雪庄·八客》：退了堂，旧账永沉雪庄,                 when: 'scene === "snow.end-open"' }
 
 - id: combat
   name: ./plugins/combat.js
@@ -152,6 +163,9 @@
 
 - id: diary
   name: ./plugins/diary.js   # M14：日记回溯（接管 mode: 'diary'，只读重读已走过的篇目）
+
+- id: dialogue
+  name: ./plugins/dialogue.js  # M15：对话/谈判（接管 mode: 'dialogue'，话题询问+注意点预算）
 
 - id: sound
   name: ./plugins/sound.js

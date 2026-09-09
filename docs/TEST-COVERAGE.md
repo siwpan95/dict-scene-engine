@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-08 · 58 个结局 · 覆盖 58/58 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-08 · 71 个结局 · 覆盖 71/71 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -10,6 +10,10 @@
 | `arena-lose` | 结局 · 试炼场之殇 | ✓ | ✓ |
 | `case2.ending.miscarry` | 结局 · 连环案 · 冤判 | ✓ | ✗ |
 | `case2.ending.truth` | 结局 · 连环案 · 真相 | ✗ | ✓ |
+| `crossing.end-fog` | 结局 · 雾锁渡口 | ✓ | ✗ |
+| `crossing.end-half` | 结局 · 半拼 | ✗ | ✓ |
+| `crossing.end-truth` | 结局 · 拼夜 | ✗ | ✓ |
+| `crossing.end-wrong` | 结局 · 冤 | ✗ | ✓ |
 | `ending-lose` | 结局 · 荒山野岭 | ✓ | ✗ |
 | `ending-win` | 结局 · 剑之认主 | ✓ | ✓ |
 | `ending.caravan-broke` | 结局 · 商队散伙 | ✓ | ✓ |
@@ -23,6 +27,10 @@
 | `ending.tyrant` | 结局 · 僭主 | ✓ | ✗ |
 | `firefly.end-keep` | 结局 · 守巷人 | ✓ | ✗ |
 | `firefly.end-return` | 结局 · 萤火明灭 | ✓ | ✗ |
+| `garrison.end-ash` | 结局 · 灰烬 | ✗ | ✓ |
+| `garrison.end-fall` | 结局 · 城破 | ✗ | ✓ |
+| `garrison.end-hold` | 结局 · 死守 | ✗ | ✓ |
+| `garrison.end-home` | 结局 · 归乡 | ✗ | ✓ |
 | `horror.end-dawn` | 结局 · 古宅 · 天亮 | ✓ | ✓ |
 | `horror.end-eaten` | 结局 · 古宅 · 烛灭 | ✗ | ✓ |
 | `horror.end-master` | 结局 · 古宅 · 宅主 | ✗ | ✓ |
@@ -57,6 +65,11 @@
 | `scifi.end-lost` | 结局 · 远望七号 · 沉没 | ✓ | ✗ |
 | `shadow.end-keep` | 结局 · 入戏 | ✓ | ✗ |
 | `shadow.end-send` | 结局 · 渡河 | ✓ | ✗ |
+| `snow.end-open` | 结局 · 雪化人散 | ✓ | ✗ |
+| `snow.end-silenced` | 结局 · 被灭口 | ✓ | ✗ |
+| `snow.end-truth` | 结局 · 旧债有主 | ✗ | ✓ |
+| `snow.end-wrong-su` | 结局 · 冤狱 | ✓ | ✓ |
+| `snow.end-wrong-zhao` | 结局 · 冤狱 | ✓ | ✓ |
 | `starport-win` | 结局 · 数据核心 | ✓ | ✓ |
 | `town.end-mid` | 结局 · 东市 · 小本营生 | ✗ | ✓ |
 | `town.end-poor` | 结局 · 东市 · 铺子没保住 | ✓ | ✓ |

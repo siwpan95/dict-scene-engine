@@ -34,6 +34,9 @@ export default {
       { text: '村口的皮影班今夜唱《钟馗》，幕布后多了一个影子（民俗志怪）', goto: 'shadow.start' },
       { text: '夏夜城外，一个提灯的孩子说要带你去萤火巷（童趣幻想）', goto: 'firefly.start' },
       { text: '翻开一册一九一一年的旧札记，替那个人做几个决定（新主线《藏晖室札记》）', goto: 'hushi.start' },
+      { text: '风雪封山，被困雪庄——翌晨主人暴毙，凶手在八客之中（暴风雪山庄本格中篇）', goto: 'snow.start' },
+      { text: '雾夜江渡出了人命——船夫与更夫各执一词（同一夜多视角中篇）', goto: 'crossing.start' },
+      { text: '边塞三年，一封家书——烽火与归期之间（双篇章历史中篇）', goto: 'garrison.start' },
     ],
   },
 
