@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-09 · 84 个结局 · 覆盖 84/84 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 91 个结局 · 覆盖 91/91 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -10,10 +10,17 @@
 | `arena-lose` | 结局 · 试炼场之殇 | ✓ | ✓ |
 | `case2.ending.miscarry` | 结局 · 连环案 · 冤判 | ✓ | ✗ |
 | `case2.ending.truth` | 结局 · 连环案 · 真相 | ✗ | ✓ |
+| `castle-pre.end-burial` | 结局 · 埋剑 | ✓ | ✗ |
+| `castle-pre.end-seal` | 结局 · 封印 | ✓ | ✓ |
+| `castle-pre.end-split` | 结局 · 断剑 | ✓ | ✗ |
 | `crossing.end-fog` | 结局 · 雾锁渡口 | ✓ | ✗ |
 | `crossing.end-half` | 结局 · 半拼 | ✗ | ✓ |
 | `crossing.end-truth` | 结局 · 拼夜 | ✗ | ✓ |
 | `crossing.end-wrong` | 结局 · 冤 | ✗ | ✓ |
+| `echo.end-echo` | 结局 · 回声 | ✗ | ✓ |
+| `echo.end-open` | 结局 · 悬案 | ✓ | ✗ |
+| `echo.end-truth` | 结局 · 回声落地 | ✗ | ✓ |
+| `echo.end-wrong` | 结局 · 冤 | ✓ | ✓ |
 | `ending-lose` | 结局 · 荒山野岭 | ✓ | ✗ |
 | `ending-win` | 结局 · 剑之认主 | ✓ | ✓ |
 | `ending.caravan-broke` | 结局 · 商队散伙 | ✓ | ✓ |

@@ -113,6 +113,7 @@
 | `flags.garrison.burn` | M15 诀别半页纸烧了 | `garrison.memory.farewell` 第二选项 | `garrison.merge` 灰烬结局条件 |
 | `flags.garrison.recordDone` | M15 记篇走完（夜战三选一后） | `garrison.record.night` 三选项 | `garrison.hub.record` merge 入口条件（+memoryDone） |
 | `flags.garrison.memoryDone` | M15 忆篇走完（诀别二选一后） | `garrison.memory.farewell` 两选项 | `garrison.hub.record` merge 入口条件（+recordDone） |
+| `flags.echo.autopsy` | M18 星港回声 调度册签名可疑、开问案之门 | `echo.office` 拓签名选项 | `echo.hub` 选项「证据够了——当面问案」条件 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -159,6 +160,7 @@
 | `riveEvidence` | 《江畔·县志》铁证计数（forgery/ledger/arsenic） | 0 | 三处铁证 do `+1` | `river.court` 指认主簿条件 `>= 2`（否则走反噬/冤枉线） |
 | `midEvidence` | M16《同一夜·十二时辰》关键追问计数（六块碎片拼合度） | 0 | 六个 dialogue 话题 do `+1`（最多 8） | `midnight.merge` 结局分流（>=4 真相 / 2-3 拼错 / <2 悬案） |
 | `ferryEvidence` | M17《渡口纪年》关键追问计数（四段往事听全度） | 0 | 四个 POV 的 key 话题 + 老渡工话题 do `+1`（最多 9） | `ferry.merge` 结局分流（>=4 各渡各岸 / >=6+渡工 自渡） |
+| `echoEvidence` | M18《星港·回声》铁证计数（slip/tide/account） | 0 | 三处勘验 do `+1` | `echo.accuse` 指认小崔条件 `>= 2`（否则走冤案/悬案/回声线） |
 | `toleration` | M14《藏晖室札记》**为人的容忍**（Altruistic Toleration，为爱我者屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `independence` | M14《藏晖室札记》**不容忍**（对一己不可不诚，不可为人屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `cardsPlayed` | M14 与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应） | 0 | `hushi.p1.cards` 第一选项 `+1` | `hushi.p2.leave` 第二选项条件 |

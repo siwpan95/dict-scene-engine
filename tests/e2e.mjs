@@ -2194,6 +2194,82 @@ async function runLoopToConfront(g) {
   await quit(g, 'DY19 十年与三吊钱收尾')
 }
 
+// ---------- 路线 DZ：M18 古堡前史 DLC —— 封印结局 ----------
+{
+  console.log('\n[M18 古堡前史] 三子祭剑之夜 → 封印')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '回到建堡的年代'), 'DZ1 入口进入《筑堡者》')
+  await g.waitFor('建堡 · 应招')
+  assert(await choose(g, '跟着工头上山'), 'DZ2 上山')
+  await g.waitFor('建堡 · 工地')
+  assert(await choose(g, '去听长子言伯说'), 'DZ3 听长子')
+  await g.waitFor('建堡 · 长子')
+  assert(await choose(g, '长子要封剑'), 'DZ4 长子封剑之念')
+  await g.waitFor('建堡 · 工地')
+  assert(await choose(g, '天黑了'), 'DZ5 子时封剑台')
+  await g.waitFor('建堡 · 子时')
+  assert(await choose(g, '封剑镇堡'), 'DZ6 听长子封剑')
+  assert(await g.waitFor('结局 · 封印'), 'DZ7 castle-pre.end-seal')
+  await quit(g, 'DZ8 封印收尾')
+}
+
+// ---------- 路线 EA：M18 星港第二季 DLC —— 真凶归案 ----------
+{
+  console.log('\n[M18 星港回声] 三铁证 → 指认小崔')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '再访星港'), 'EA1 入口进入《回声》')
+  await g.waitFor('星港 · 第七码头')
+  assert(await choose(g, '站住了'), 'EA2 接案')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '去码头现场'), 'EA3 勘码头')
+  await g.waitFor('现场 · 第七码头')
+  assert(await choose(g, '记下：东头有拖拽痕'), 'EA4 拖拽痕（echoClues.dock）')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '去调度室'), 'EA5 翻调度册')
+  await g.waitFor('调度室 · 老贾的册子')
+  assert(await choose(g, '拓下调度册最后几页的签名'), 'EA6 铁证一：笔迹（evidence 1 + autopsy）')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '去港务借潮汐表'), 'EA7 对潮汐')
+  await g.waitFor('勘验 · 潮汐表')
+  assert(await choose(g, '记下：退潮落水'), 'EA8 铁证二：潮位（evidence 2）')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '证据够了'), 'EA9 开堂问案')
+  await g.waitFor('问案 · 码头货棚')
+  assert(await choose(g, '当众亮出实证'), 'EA10 指认小崔')
+  assert(await g.waitFor('结局 · 回声落地'), 'EA11 echo.end-truth')
+  await quit(g, 'EA12 真相收尾')
+}
+
+// ---------- 路线 EB：M18 星港第二季 DLC —— 回声（放人） ----------
+{
+  console.log('\n[M18 星港回声] 指认却放人 → 回声')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '再访星港'), 'EB1 入口进入《回声》')
+  await g.waitFor('星港 · 第七码头')
+  assert(await choose(g, '站住了'), 'EB2 接案')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '去码头现场'), 'EB3 勘码头')
+  await g.waitFor('现场 · 第七码头')
+  assert(await choose(g, '记下：东头有拖拽痕'), 'EB4 拖拽痕')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '去调度室'), 'EB5 翻调度册')
+  await g.waitFor('调度室 · 老贾的册子')
+  assert(await choose(g, '拓下调度册最后几页的签名'), 'EB6 铁证一（evidence 1）')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '去港务借潮汐表'), 'EB7 对潮汐')
+  await g.waitFor('勘验 · 潮汐表')
+  assert(await choose(g, '记下：退潮落水'), 'EB8 铁证二（evidence 2）')
+  await g.waitFor('调查板 · 第七码头案')
+  assert(await choose(g, '证据够了'), 'EB9 开堂问案')
+  await g.waitFor('问案 · 码头货棚')
+  assert(await choose(g, '你指了小崔，却在最后摆了摆手'), 'EB10 指认却放人')
+  assert(await g.waitFor('结局 · 回声'), 'EB11 echo.end-echo')
+  await quit(g, 'EB12 回声收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')

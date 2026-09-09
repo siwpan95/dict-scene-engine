@@ -39,6 +39,8 @@ export default {
       { text: '边塞三年，一封家书——烽火与归期之间（双篇章历史中篇）', goto: 'garrison.start' },
       { text: '花灯夜进城——一夜六个时辰，六个人各见真相的一块（群像多视角长线）', goto: 'midnight.start' },
       { text: '雾起江渡——古堡、商道、江畔、民国的四个过客在此交汇（跨世界观群像长线）', goto: 'ferry.start' },
+      { text: '回到建堡的年代——三子祭剑之夜（古堡前史 DLC·平行扩展）', goto: 'castle-pre.start' },
+      { text: '再访星港——调度长溺毙第七码头，旧案的余波（星港第二季 DLC·平行扩展）', goto: 'echo.start' },
     ],
   },
 

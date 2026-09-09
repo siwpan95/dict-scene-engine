@@ -41,6 +41,8 @@
       - ./content/garrison.js         # M15：双篇章历史《戍卒·家书》(记篇当下+忆篇追忆)
       - ./content/midnight.js         # M16：群像多视角《同一夜·十二时辰》(6 POV 时序锁)
       - ./content/ferry.js            # M17：跨世界观群像《渡口纪年》(四时四 POV 块茎网)
+      - ./content/castle-pre.js       # M18：古堡前史 DLC《筑堡者》(三子祭剑之夜，本体已完整)
+      - ./content/starport-echo.js    # M18：星港第二季 DLC《回声》(调度长溺毙案，本体已完整)
 
 - id: state
   name: ./plugins/state.js
@@ -86,6 +88,8 @@
       midnightClues: {}      # M16：十二时辰六块碎片（midnightClues.zi 等，须先声明，条件链不抛错）
       ferryEvidence: 0       # M17：渡口纪年关键追问计数（>=4 各渡各岸；>=6 且问过老渡工则渡工自渡）
       ferryClues: {}         # M17：渡口纪年线索（ferryClues.boatman 等，须先声明，条件链不抛错）
+      echoEvidence: 0        # M18：星港回声铁证计数（slip/tide/account 齐 >=2 可定罪）
+      echoClues: {}          # M18：星港回声线索（echoClues.dock 等，须先声明，条件链不抛错）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
@@ -96,6 +100,7 @@
         hushi: {}            # M14：藏晖室札记节拍中间层（flags.hushi.*，P1 幕二起用）
         snow: {}             # M15：雪庄八客节拍中间层（flags.snow.autopsy 等，同上理）
         garrison: {}         # M15：戍卒家书节拍中间层（flags.garrison.chap 等，同上理）
+        echo: {}             # M18：星港回声节拍中间层（flags.echo.autopsy 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js
