@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-09 · 127 个结局 · 覆盖 127/127 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 135 个结局 · 覆盖 135/135 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -58,6 +58,9 @@
 | `gear.end-ruin` | 结局 · 机关反噬 | ✓ | ✗ |
 | `grad.end-hide` | 结局 · 没说出 | ✗ | ✓ |
 | `grad.end-say` | 结局 · 说出口 | ✓ | ✓ |
+| `harbor3.end-open` | 结局 · 悬案 | ✓ | ✗ |
+| `harbor3.end-truth` | 结局 · 归港 | ✗ | ✓ |
+| `harbor3.end-wrong` | 结局 · 冤 | ✓ | ✓ |
 | `horror.end-dawn` | 结局 · 古宅 · 天亮 | ✓ | ✓ |
 | `horror.end-eaten` | 结局 · 古宅 · 烛灭 | ✗ | ✓ |
 | `horror.end-master` | 结局 · 古宅 · 宅主 | ✗ | ✓ |
@@ -74,6 +77,9 @@
 | `hushi.end-wherehome` | 结局 · 吾乡真在何处 | ✓ | ✗ |
 | `lantern.end-carry` | 结局 · 送灯人 | ✓ | ✗ |
 | `lantern.end-keep` | 结局 · 守灯人 | ✓ | ✓ |
+| `layer3.end-ash` | 结局 · 焚层 | ✓ | ✗ |
+| `layer3.end-free` | 结局 · 释放 | ✓ | ✗ |
+| `layer3.end-seal` | 结局 · 再封印 | ✗ | ✓ |
 | `loop.end-arson` | 结局 · 一了百了 | ✗ | ✓ |
 | `loop.end-deep` | 结局 · 夜行人 | ✗ | ✓ |
 | `loop.end-forever` | 结局 · 第七夜 | ✓ | ✗ |
@@ -101,6 +107,8 @@
 | `river.end-truth` | 结局 · 铁证定谳 | ✗ | ✓ |
 | `river.end-wrong-li` | 结局 · 冤狱 | ✓ | ✓ |
 | `river.end-wrong-sun` | 结局 · 冤狱 | ✓ | ✓ |
+| `rpg.end-fire` | 结局 · 团魂 | ✓ | ✓ |
+| `rpg.end-scatter` | 结局 · 散团 | ✓ | ✗ |
 | `scifi.end-coexist` | 结局 · 远望七号 · 交易 | ✓ | ✗ |
 | `scifi.end-escape` | 结局 · 远望七号 · 弃站 | ✗ | ✓ |
 | `scifi.end-fix` | 结局 · 远望七号 · 重启 | ✗ | ✓ |

@@ -2886,6 +2886,84 @@ async function runLoopToConfront(g) {
   await quit(g, 'EZ14 留下收尾')
 }
 
+// ---------- 路线 FA：P6《星港·归港》—— 两铁证 → 归案 ----------
+{
+  console.log('\n[P6 星港归港] 两铁证 → 独眼归案')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '三案已结'), 'FA1 入口进入《归港》')
+  await g.waitFor('星港 · 归航')
+  assert(await choose(g, '去案卷桌'), 'FA2 捡线头')
+  await g.waitFor('调查板 · 归港案')
+  assert(await choose(g, '去港务司'), 'FA3 查卷宗库')
+  await g.waitFor('港务司 · 卷宗库')
+  assert(await choose(g, '记下：独眼借走了'), 'FA4 铁证一：调包痕（evidence 1）')
+  await g.waitFor('调查板 · 归港案')
+  assert(await choose(g, '去医生的住所'), 'FA5 找暗号')
+  await g.waitFor('医生住所 · 暗号')
+  assert(await choose(g, '记下：医生留了暗号'), 'FA6 铁证二：暗号（evidence 2）')
+  await g.waitFor('调查板 · 归港案')
+  assert(await choose(g, '线头够了'), 'FA7 开堂问案')
+  await g.waitFor('问案 · 港务司')
+  assert(await choose(g, '当众亮出实证'), 'FA8 布网抓人')
+  assert(await g.waitFor('结局 · 归港'), 'FA9 harbor3.end-truth')
+  await quit(g, 'FA10 归港收尾')
+}
+
+// ---------- 路线 FB：P6《古堡·燃薪层》—— 持断剑 → 再封印 ----------
+{
+  console.log('\n[P6 古堡第三层] 持断剑 → 再封印')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  g.send('2') // 林间小路
+  await g.waitFor('林间小路')
+  g.send('1')
+  await g.waitFor('岔路深处')
+  g.send('1') // 正面迎战 → wolf-win（得断剑）
+  assert(await g.waitFor('狼穴'), 'FB1 取得断剑')
+  g.send('2') // 回村
+  await g.waitFor('老橡木酒馆')
+  assert(await choose(g, '回十字路口'), 'FB2 回村庄枢纽')
+  await g.waitFor('十字路口')
+  assert(await choose(g, '回村口'), 'FB3 回开场')
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '古堡地下层之下'), 'FB4 进第三层')
+  await g.waitFor('古堡 · 更深处')
+  assert(await choose(g, '沿石阶往下走'), 'FB5 下灰烬层')
+  await g.waitFor('第三层 · 灰烬')
+  assert(await choose(g, '顺着风箱声'), 'FB6 去旧锻炉')
+  await g.waitFor('第三层 · 旧锻炉')
+  assert(await choose(g, '去铁链室看看'), 'FB7 铁链室')
+  await g.waitFor('第三层 · 铁链室')
+  assert(await choose(g, '往祭台去'), 'FB8 祭台')
+  await g.waitFor('第三层 · 祭台')
+  assert(await choose(g, '往最深处去'), 'FB9 燃薪核心')
+  await g.waitFor('第三层 · 燃薪核心')
+  assert(await choose(g, '把断剑放进祭台'), 'FB10 再封印')
+  assert(await g.waitFor('结局 · 再封印'), 'FB11 layer3.end-seal')
+  await quit(g, 'FB12 再封印收尾')
+}
+
+// ---------- 路线 FC：P6《跑团夜》—— 投骰 → 团魂 ----------
+{
+  console.log('\n[P6 跑团夜] 投骰 → 团魂')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '周五夜'), 'FC1 入口进入《跑团夜》')
+  await g.waitFor('跑团夜 · 围桌')
+  assert(await choose(g, '我推开古堡的门'), 'FC2 开场')
+  await g.waitFor('跑团夜 · 桌上')
+  assert(await choose(g, '投个检定——侦查长廊'), 'FC3 第一骰')
+  await g.waitFor('跑团夜 · 第一骰')
+  assert(await choose(g, '好险'), 'FC4 记下（flags.rpg.d1）')
+  await g.waitFor('跑团夜 · 桌上')
+  assert(await choose(g, '夜色深了'), 'FC5 收尾')
+  await g.waitFor('跑团夜 · 团终')
+  assert(await choose(g, '下次，我还来'), 'FC6 团魂')
+  assert(await g.waitFor('结局 · 团魂'), 'FC7 rpg.end-fire')
+  await quit(g, 'FC8 团魂收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')

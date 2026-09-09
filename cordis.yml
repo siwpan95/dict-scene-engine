@@ -54,6 +54,9 @@
       - ./content/promote.js          # M22：官场讽刺短篇《升官图》(正/曲双计数)
       - ./content/whisper.js          # M22：心理恐怖短篇《深巷·低语》(理智值 sanity)
       - ./content/cubicle.js          # M22：都市职场短篇《格子间》(勇气 flag)
+      - ./content/harbor3.js          # P6：星港第三季 DLC《归港》(三案总清算，本体已完整)
+      - ./content/layer3.js           # P6：古堡第三层 DLC《燃薪层》(石像鬼源头，本体已完整)
+      - ./content/rpg.js              # P6：元叙事短篇《跑团夜》(TRPG 联动)
 
 - id: state
   name: ./plugins/state.js
@@ -114,6 +117,8 @@
       promoteRight: 0        # M22：升官图 正道计数（拒礼/读书/断案/大考写正 +1）
       promoteBend: 0         # M22：升官图 曲道计数（送礼/钻营/大考写曲 +1）
       sanity: 5              # M22：深巷低语 理智值（听低语 -1，破庙 +1 一次）
+      harbor3Evidence: 0     # P6：星港归港铁证计数（slip/ledger/code 齐 >=2 可定罪）
+      harbor3Clues: {}       # P6：星港归港线索（harbor3Clues.dock 等，须先声明）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
@@ -131,6 +136,8 @@
         hushiX: {}           # M21：藏晖室余墨节拍中间层（flags.hushiX.nuli 等，同上理）
         cubicle: {}          # M22：格子间节拍中间层（flags.cubicle.spoke 等，同上理）
         whisper: {}          # M22：深巷低语节拍中间层（flags.whisper.wall 等，同上理）
+        harbor3: {}          # P6：星港归港节拍中间层（flags.harbor3.ready 等，同上理）
+        rpg: {}              # P6：跑团夜节拍中间层（flags.rpg.d1 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js
@@ -167,6 +174,24 @@
       - { id: hushi-cards,        name: 过五关,       desc: 《藏晖室札记》：真结局——用五十年前的牌，压住今晚, when: 'scene === "hushi.end-cards"' }
       - { id: snow-truth,          name: 旧债有主,   desc: 《雪庄·八客》：铁证定谳，柳记的旧账翻出来了,         when: 'scene === "snow.end-truth"' }
       - { id: snow-open,           name: 雪化人散,   desc: 《雪庄·八客》：退了堂，旧账永沉雪庄,                 when: 'scene === "snow.end-open"' }
+      # Phase 5 各里程碑代表作（P6 成就扩展）
+      - { id: crossing-truth,      name: 拼夜,       desc: 《渡口·子丑》：船夫与更夫的证词拼上了,               when: 'scene === "crossing.end-truth"' }
+      - { id: garrison-hold,       name: 城在人在,   desc: 《戍卒·家书》：死守到底，家书与城都在,               when: 'scene === "garrison.end-hold"' }
+      - { id: midnight-truth,      name: 昭雪,       desc: 《同一夜·十二时辰》：六块碎片拼出了真相,             when: 'scene === "midnight.end-truth"' }
+      - { id: ferry-cross,         name: 摆渡人,     desc: 《渡口纪年》：摆渡的人，渡了自己,                     when: 'scene === "ferry.end-cross"' }
+      - { id: castlepre-seal,      name: 封印,       desc: 《筑堡者》：封剑镇堡，诅咒自此而生,                   when: 'scene === "castle-pre.end-seal"' }
+      - { id: echo-truth,          name: 回声落地,   desc: 《回声》：调度长沉冤得雪，走私网断了线,               when: 'scene === "echo.end-truth"' }
+      - { id: tea-deep,            name: 共守,       desc: 《茶肆·三遇》：留下来，招牌与茶都没停,               when: 'scene === "tea.end-deep"' }
+      - { id: gear-open,           name: 天工开匣,   desc: 《机巧阁》：机关全解，鲁班手记得手,                   when: 'scene === "gear.end-open"' }
+      - { id: water-share,         name: 分水,       desc: 《最后的水》：把水全端了出去，楼里没死一个人,         when: 'scene === "water.end-share"' }
+      - { id: grad-say,            name: 说出口,     desc: 《毕业那年》：追上去，把那句话说完了,                 when: 'scene === "grad.end-say"' }
+      - { id: siege-hold,          name: 死守,       desc: 《城破·记与忆》：城在人在，援军到的那天你还在,         when: 'scene === "siege.end-hold"' }
+      - { id: changan-truth,       name: 归案,       desc: 《长安·西市》：密信追回，钱老板下了狱,                 when: 'scene === "changan.end-truth"' }
+      - { id: husxi-ink,           name: 写下去,     desc: 《藏晖室·余墨》：余墨一篇一篇，成了书,                 when: 'scene === "hushi-extra.end-ink"' }
+      - { id: loop2-good,          name: 雾散还人,   desc: 《子夜集·第二夜》：香灭了，人送过了江,                 when: 'scene === "loop2.end-good"' }
+      - { id: promote-fall,        name: 罢官,       desc: 《升官图》：官丢了，夜里不做亏心的梦,                 when: 'scene === "promote.end-fall"' }
+      - { id: whisper-escape,      name: 逃出,       desc: 《深巷·低语》：捂着耳朵，跑进了巷口的灯里,             when: 'scene === "whisper.end-escape"' }
+      - { id: cubicle-quit,        name: 辞职,       desc: 《格子间》：把辞职信拍在桌上，走出了写字楼,             when: 'scene === "cubicle.end-quit"' }
 
 - id: combat
   name: ./plugins/combat.js

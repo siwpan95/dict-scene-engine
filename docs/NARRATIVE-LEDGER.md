@@ -139,6 +139,10 @@
 | `flags.whisper.wall` | M22 深巷低语 听过墙的低语 | `whisper.wall` onEnter | `whisper.hub` 等天亮选项条件 |
 | `flags.whisper.well` | M22 深巷低语 看过井 | `whisper.well` onEnter | `whisper.hub` 等天亮选项条件 |
 | `flags.whisper.door` | M22 深巷低语 推过门 | `whisper.door` onEnter | `whisper.hub` 等天亮选项条件 |
+| `flags.harbor3.ready` | P6 星港归港 铁证到手、开问案之门 | `harbor3.office`/`.clinic` 铁证选项 | `harbor3.hub` 问案选项条件 |
+| `flags.rpg.d1` | P6 跑团夜 第一骰已投 | `rpg.dice1` 选项 | `rpg.hub` 收尾入口条件 |
+| `flags.rpg.d2` | P6 跑团夜 第二骰已投 | `rpg.dice2` 选项 | `rpg.hub` 收尾入口条件 |
+| `flags.rpg.d3` | P6 跑团夜 第三骰已投 | `rpg.dice3` 选项 | `rpg.hub` 收尾入口条件 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -201,6 +205,7 @@
 | `promoteRight` | M22《升官图》正道计数 | 0 | 拒礼/读书/断案/大考写正 `+1` | `promote.merge` 罢官结局条件 `>= 2` |
 | `promoteBend` | M22《升官图》曲道计数 | 0 | 送礼/钻营/大考写曲 `+1` | `promote.merge` 升官结局条件 `>= 2` |
 | `sanity` | M22《深巷·低语》理智值 | 5 | 听低语 `-1`，破庙 `+1`（一次） | `whisper.hub` 逃出条件 `>= 3`、沉沦条件 `<= 0` |
+| `harbor3Evidence` | P6《星港·归港》铁证计数（slip/ledger/code） | 0 | 三处铁证 do `+1` | `harbor3.accuse` 指认独眼条件 `>= 2` |
 | `toleration` | M14《藏晖室札记》**为人的容忍**（Altruistic Toleration，为爱我者屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `independence` | M14《藏晖室札记》**不容忍**（对一己不可不诚，不可为人屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `cardsPlayed` | M14 与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应） | 0 | `hushi.p1.cards` 第一选项 `+1` | `hushi.p2.leave` 第二选项条件 |

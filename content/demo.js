@@ -52,6 +52,9 @@ export default {
       { text: '候补七年，得了一张升官图——正与曲，一步一选（官场讽刺短篇）', goto: 'promote.start' },
       { text: '夜入老城深巷——墙会说话，井会数人，门会问路（心理恐怖短篇）', goto: 'whisper.start' },
       { text: '周一的格子间，又五天——晨会、加班与辞职信（都市职场短篇）', goto: 'cubicle.start' },
+      { text: '三案已结，星港又起暗流——第二案的证人昨夜失踪（星港第三季 DLC·平行扩展）', goto: 'harbor3.start' },
+      { text: '古堡地下层之下，还有第三层——热烘烘的炭气往上涌（古堡第三层 DLC·平行扩展）', goto: 'layer3.start' },
+      { text: '周五夜，老朋友围桌跑团——骰子滚到哪，故事走到哪（元叙事短篇）', goto: 'rpg.start' },
     ],
   },
 
