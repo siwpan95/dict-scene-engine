@@ -1,0 +1,239 @@
+// 《城破·记与忆》—— M20 双篇章历史长线（Phase 5 / PHASE5-CONTENT-PLAN §6.3-L2）
+//
+// ⚠️ ESM 模块，加载即执行 —— 只装载可信来源（见 README 安全须知）
+//
+// 题材定位（调研 §4-②）：对标《哀鸿·城破十日记》双篇章——比 N3 戍卒家书更长的
+// 长线版。记篇=围城当下（点兵/断粮/箭雨/民变/破城，残酷现在）；忆篇=城未破时
+// （西市/友人/心上人/上元灯会/欠下的债，繁华追忆）。半块玉佩跨两篇。
+//
+// 结构：flags.siege.chap 切换篇章。记篇 gauntlet（粮 siegeGrain / 士气 siegeMorale
+// 数值），忆篇 branch（情感 flag）。信物 items.halfJade 两篇皆被读取。
+//
+// 结局（5）：
+//   siege.end-hold   死守到援军（hold 且士气 >= 3）
+//   siege.end-fall   城破（hold 但士气 < 3）
+//   siege.end-hide   出逃（break 选密道）
+//   siege.end-ash    焚城（break 选焚城）
+//   siege.end-echo   余生（忆篇 debt+love+friend 听全）
+
+export default {
+  // ---------- 序幕 ----------
+  'siege.start': {
+    title: '孤城 · 围城第四十七日',
+    text: '你叫郑三，是这孤城的一个小吏。围城第四十七天，城里的粮快尽了，守军的箭快尽了，人心也快尽了。\n天不亮，你被鼓声惊醒。北门的斥候回来报：敌军在城外架起了云梯，明日攻城。\n你摸出怀里半块玉佩，贴在心口。玉佩是温的——那是三年前上元节，那个人掰成两半，给你的一半。\n城外，号角声又响了。',
+    onEnter: { 'items.halfJade': +1 },
+    choices: [
+      { text: '先去城头——守军点兵，你是小吏，得去记名', goto: 'siege.record.hub' },
+      { text: '先闭上眼——三年前的城，还在心里', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  // ---------- 记篇 ----------
+  'siege.record.hub': {
+    title: '城头 · 当下',
+    text: '城头上，守军排开阵势。弩车蒙着油布，箭垛后蹲着一排排士兵，脸都瘦脱了相。\n都尉在点兵，念一个名字，应一声。你捧着名册跟在后面，笔尖的墨冻成冰碴子，得呵口气才能写。\n城下，敌军的营寨连成一片，篝火映红了半边天。明日攻城——这消息已经传遍了，城头静得只剩风声。',
+    choices: [
+      { text: '去北门，看云梯逼近的方向', goto: 'siege.record.gate' },
+      { text: '去粮仓，看还剩多少粮', goto: 'siege.record.grain' },
+      { text: '去城墙下，帮着运石头', goto: 'siege.record.wall' },
+      { text: '去水井，看井水还清不清', goto: 'siege.record.water' },
+      { text: '都尉有封信，让你读给守军听', goto: 'siege.record.letter' },
+      { text: '城外有动静——民巷里乱起来了', goto: 'siege.record.mutiny' },
+      { text: '入夜了——敌军的火把动了', goto: 'siege.record.night' },
+      { text: '天明了——去城头，做个最后的了断', if: 'flags.siege.recordDone', goto: 'siege.merge' },
+      { text: '心乱如麻——摸出半块玉佩，想一想从前', if: 'items.halfJade >= 1', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  'siege.record.gate': {
+    title: '北门 · 点兵',
+    text: '北门是敌军主攻的方向。城楼上的旗子被风吹得哗哗响，云梯的影子已经架到了护城河边上。\n守门的把总说，北门只配了四百人，敌军至少两千。弩箭一人三支，射完就得上肉搏。\n你在名册上记下四百个名字。写完最后一个，把总拍拍你的肩："郑三，明日城头，帮我数着点儿。"',
+    choices: [
+      { text: '（四百人对两千人——记下了）', goto: 'siege.record.hub' },
+    ],
+  },
+
+  'siege.record.grain': {
+    title: '粮仓 · 见底',
+    text: '粮仓里，存粮见了底。你翻着账册算：剩下的粮，守军一天两顿稀的，只够吃三天。\n仓外的百姓排着长队，一人领一捧，个个面黄肌瘦。一个妇人抱着孩子挤到前头，被差役推开，孩子饿得哭不出声。\n管粮的把你拉到一边："郑三，你说这粮，是先紧着守军，还是分给百姓？守军饿着，城守不住；百姓饿着，人心先乱。"',
+    choices: [
+      { text: '先紧着守军——城在，百姓才在', do: { siegeGrain: -1, siegeMorale: +1 }, goto: 'siege.record.hub' },
+      { text: '分给百姓——守军饿一天，百姓活一家', do: { siegeGrain: -1, siegeMorale: -1 }, goto: 'siege.record.hub' },
+      { text: '（这话你答不上来——先记下，去别处看看）', goto: 'siege.record.hub' },
+    ],
+  },
+
+  'siege.record.wall': {
+    title: '城墙 · 箭雨',
+    text: '午后，敌军放了一轮箭雨，试城防。你跟着百姓往城下运石头，头顶上箭矢嗖嗖地飞，钉在木盾上，像落了一层雹子。\n一个后生跑得慢了，被箭射中小腿。你把他拖进墙根，撕了衣襟给他裹伤。他疼得打颤，还冲你笑："郑三哥，明日守城，我能上墙。"\n箭雨停了。城墙上插满了箭，敌军的箭，成了城里的第二份军械。',
+    onEnter: { siegeMorale: +1 },
+    choices: [
+      { text: '（箭雨一日，明日就真要攻城了）', goto: 'siege.record.hub' },
+    ],
+  },
+
+  'siege.record.water': {
+    title: '水井 · 守井',
+    text: '城里的水井有三口，敌军往上游投了病死的牲口，水浑了两口。只剩一口井，水还是清的，守井的老卒日夜不离。\n你去看时，井边排着长队。守井的规矩：先守军，后百姓，一人一碗。有插队的，被老卒一杖打回去。\n"这口井，是城里的命。"老卒的眼窝深陷，"郑三，你要走，就带着水囊，别学那些后生，渴死在半路上。"',
+    choices: [
+      { text: '（记下：井水一日少过一日）', goto: 'siege.record.hub' },
+    ],
+  },
+
+  'siege.record.letter': {
+    title: '城头 · 劝降信',
+    text: '敌军射来一封劝降信，都尉让你当众读。\n信上说，开城者不杀，守城者屠尽。你念到"屠尽"两个字，城头上静了一瞬，随即有人啐了一口："屠就屠！这城里的老小，谁不是这么想的——死，也要死在家里。"\n都尉把信撕了，扔进火里。火光一腾，照得满城头都是红的。\n你把信纸的灰踩灭。',
+    onEnter: { siegeMorale: +1 },
+    choices: [
+      { text: '（劝降信烧了——城里没人想降）', goto: 'siege.record.hub' },
+    ],
+  },
+
+  'siege.record.mutiny': {
+    title: '民巷 · 民变',
+    text: '天快黑时，民巷里乱了。饿急了的百姓砸开一家米铺，和差役动起手来。你赶到时，地上躺了几个，米撒了一地。\n一个老汉跪在地上捧米，捧起来又漏下去，哭得不成声。守军要弹压，你拦住了："都住手！明日敌军攻城，咱们先自己把自己打散了？"\n巷子静下来。人们看着你，眼里有愧，也有饿。',
+    choices: [
+      { text: '把米铺的米按户分了——一人一捧，多一粒没有', do: { siegeGrain: -1, siegeMorale: +1 }, goto: 'siege.record.hub' },
+      { text: '弹压下去——乱世用重典，城里不能再乱', do: { siegeMorale: -1 }, goto: 'siege.record.hub' },
+      { text: '（你管不了这事——转身走了）', goto: 'siege.record.hub' },
+    ],
+  },
+
+  'siege.record.night': {
+    title: '城头 · 夜袭',
+    text: '当夜，敌军突袭北门。\n火把的洪流涌到城下，云梯架上了墙，杀声震天。你跟着把总在城头奔走，石头、滚木、热油，一股脑往下砸。\n身边的人一个个倒下去，又有人补上来。那个腿上中过箭的后生也上了墙，端着半截枪，朝城下捅。\n天快亮时，敌军退了。城还在。可守军折了三分之一，弩箭一支不剩。\n都尉瘫坐在箭垛后，哑着嗓子说："明日，敌军总攻。"',
+    onEnter: { siegeMorale: -1, siegeGrain: -1 },
+    choices: [
+      { text: '（明日总攻——该做个了断了）', goto: 'siege.record.break' },
+    ],
+  },
+
+  'siege.record.break': {
+    title: '城头 · 天明前',
+    text: '天快亮了。敌军在城外列阵，黑压压的，一眼望不到头。\n都尉把你叫到一边，声音低得只有你听见："郑三，城是守不住了。西墙根下有条旧密道，通城外三里。你带人走，还是——"\n他顿了顿："还是留下来，死守到最后一刻？"\n城头静得能听见自己的心跳。半块玉佩贴在胸口，隔着衣裳发烫。',
+    choices: [
+      { text: '死守——你转身回了城头，和都尉并肩站下', do: { 'flags.siege.hold': true, 'flags.siege.recordDone': true }, goto: 'siege.record.hub' },
+      { text: '从密道出城——你带上了几个还能走的孩子', do: { 'flags.siege.hide': true, 'flags.siege.recordDone': true }, goto: 'siege.record.hub' },
+      { text: '点燃全城——不给敌军留一片瓦', do: { 'flags.siege.ash': true, 'flags.siege.recordDone': true }, goto: 'siege.record.hub' },
+    ],
+  },
+
+  // ---------- 忆篇 ----------
+  'siege.memory.hub': {
+    title: '心里 · 三年前',
+    text: '你闭上眼。三年前的孤城，还是热热闹闹的一座城。\n西市的炊烟、友人的笑骂、上元节的灯，还有那个把玉佩掰成两半的人——一样一样，都在心里摆着。\n围城四十七天，这些事你天天想，越想越真，越想越远。\n该想哪一段？',
+    choices: [
+      { text: '想西市的繁华', goto: 'siege.memory.market' },
+      { text: '想友人的约定', goto: 'siege.memory.friend' },
+      { text: '想那个掰玉佩的人', goto: 'siege.memory.love' },
+      { text: '想上元节的灯会', goto: 'siege.memory.festival' },
+      { text: '想自己的家', goto: 'siege.memory.home' },
+      { text: '想欠下的债', goto: 'siege.memory.debt' },
+      { text: '想一支老歌谣', goto: 'siege.memory.song' },
+      { text: '回到眼前——城头还等着你', goto: 'siege.record.hub' },
+    ],
+  },
+
+  'siege.memory.market': {
+    title: '三年前 · 西市',
+    text: '三年前的西市，人挤人。卖胡饼的、贩丝绸的、耍把式的，叫卖声从早响到晚。\n你那时还在市署当差，管收几个摊位的税。摊贩见你就笑，给你塞饼子。你推，他们就说："郑三，收税的，吃个饼算什么。"\n那时的城，谁想得到有今天？',
+    choices: [
+      { text: '（繁华如梦——继续想）', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  'siege.memory.friend': {
+    title: '三年前 · 友人',
+    text: '你有个好友，姓陆，是西市的牙人，一张嘴能把死人说活。\n三年前他出城贩货，临走前和你在城门口喝了碗酒："郑三，等我回来，带你去长安看看。咱兄弟，得见见大世面。"\n他走了。围城那日，他还没回来。\n你后来听说，他死在官道上，货被人劫了。那碗酒的碗底，还刻着你们的姓。',
+    onEnter: { 'flags.siege.memory.friend': true },
+    choices: [
+      { text: '（陆兄，这长安，我去不成了）', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  'siege.memory.love': {
+    title: '三年前 · 心上人',
+    text: '上元节那晚，满城的灯。你和她在桥上走散了，又在大钟下遇着。\n她笑着把一块玉佩掰成两半，一半塞给你："拿着。走散了，拿这个来找我。"\n后来她说亲了。你喝了一夜的酒，没去拦。半块玉佩，你一直贴着心口揣着。\n围城前，她随夫家出城了。不知道走到哪了。',
+    onEnter: { 'flags.siege.memory.love': true },
+    choices: [
+      { text: '（走散了，就拿这个来找我——你还记得）', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  'siege.memory.festival': {
+    title: '三年前 · 上元灯会',
+    text: '上元节的灯，从东门挂到西门。鱼龙灯、莲花灯、走马灯，一盏接一盏，把整条长街照得通明。\n你记得那晚的雪，不大，落在灯上就化了。满街的人都在笑，孩子们举着糖人跑，猜灯谜的摊前挤破了头。\n城楼上的大钟敲响，声音荡开去，满城的灯都跟着晃了晃。',
+    choices: [
+      { text: '（那时的城，是真的好）', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  'siege.memory.home': {
+    title: '三年前 · 家宅',
+    text: '你家在城南一条小巷里，两间瓦房，一棵枣树。\n娘还在世的时候，年年中秋在枣树下摆供。她说，城里的枣甜，是城养人。\n后来娘没了，枣树还在。围城前你回去看过一次，枣子熟了，落了一地，没人捡。\n那两间瓦房，如今空着。门上的锁，都锈了。',
+    choices: [
+      { text: '（枣树该落叶了）', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  'siege.memory.debt': {
+    title: '三年前 · 欠下的债',
+    text: '你欠过一个人。\n西市裁缝铺的乔掌柜，你娘病重那年，他免了你家的账，说"人要紧"。你后来攒了钱去还，他摆手："郑三，你娘没了，这账我替你烧了。"\n围城前，乔掌柜瘫在床上，药钱都断了。你答应他，等开春去城外进药。\n开春没来，围城先来了。这笔债，你没还上。',
+    onEnter: { 'flags.siege.memory.debt': true },
+    choices: [
+      { text: '（乔掌柜，你的药，我没进成）', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  'siege.memory.song': {
+    title: '三年前 · 歌谣',
+    text: '城里流传一支老歌谣，你娘常哼：\n"城头的钟，城根的河，城里的人啊，莫蹉跎。"\n调子很慢，像从城墙缝里渗出来的。你小时候听，如今再想起，每个字都沉甸甸的。\n围城的夜里，城根下的河水早干了。可那支歌谣，还在你心里流着。',
+    choices: [
+      { text: '（城里的人啊，莫蹉跎）', goto: 'siege.memory.hub' },
+    ],
+  },
+
+  // ---------- 汇流 ----------
+  'siege.merge': {
+    title: '天明 · 城头',
+    text: '天亮了。\n你站在城头，手里攥着那半块玉佩。城外是黑压压的敌军，城内是四十七天的围困，和满城的回忆。\n该做的事，都做过了；该想的人，都想过了。剩下的，就是最后这一步。\n玉佩贴着手心，凉的，又像烫的。',
+    choices: [
+      { text: '死守到最后一刻——城在人在', if: 'flags.siege.hold && siegeMorale >= 3', goto: 'siege.end-hold' },
+      { text: '城破了——火光吞没了一切', if: 'flags.siege.hold && siegeMorale < 3', goto: 'siege.end-fall' },
+      { text: '从密道出城——活着，比什么都强', if: 'flags.siege.hide', goto: 'siege.end-hide' },
+      { text: '点燃全城——不留片瓦给敌人', if: 'flags.siege.ash', goto: 'siege.end-ash' },
+      { text: '（你闭上眼——三年前的事，一桩桩浮上来）', if: 'flags.siege.memory.debt && flags.siege.memory.love && flags.siege.memory.friend', goto: 'siege.end-echo' },
+    ],
+  },
+
+  // ---------- 结局 ----------
+  'siege.end-hold': {
+    title: '结局 · 城在人在',
+    text: '你留在了城头。\n总攻那天，敌军冲了七次，被打了下去七次。城头的石头打完了，就拆了房子接着砸。后生们一个接一个倒下，可没人退一步。\n第七天清晨，援军的号角在山那头响了。城里的守军还剩下九十七个人，个个都脱了相，可都还站着。\n敌军退了。\n你瘫坐在城头，摸出那半块玉佩。天边的云裂开一道缝，光落下来，正照在城楼的钟上。\n钟声自己响了三下，沉沉的，像这城在说：我在。\n城在，人在。活下来的人，把四十七天，讲给后来的人听。',
+    choices: [{ text: '再走一遭这围城', goto: '@restart' }],
+  },
+
+  'siege.end-fall': {
+    title: '结局 · 城破',
+    text: '城破了。\n总攻那天，守军的箭早就没了，石头也尽了。敌军像潮水一样漫上城头，你看见都尉的背影在人群里倒下去，再没起来。\n满城大火。你被人流裹着，跑，又停下，回头望——那两间瓦房、那棵枣树、那口大钟，都烧在火里。\n你怀里那半块玉佩，被血和汗浸透。\n后来，孤城成了一片焦土。你活了下来，在每个夜里，梦见城头的钟声，梦见没守住的城。\n城没了。可你记得它每一块砖的样子。',
+    choices: [{ text: '再走一遭这围城', goto: '@restart' }],
+  },
+
+  'siege.end-hide': {
+    title: '结局 · 出城',
+    text: '你从密道出了城。\n身后，孤城燃起大火，敌军入城了。你带着几个孩子，在黑夜里深一脚浅一脚地走，不敢回头。\n孩子们问你去哪。你说，往南，往有河的地方。\n天亮时，你们走出了山。回头望，孤城的方向，烟柱冲天。\n后来你在南边安了家。可每年的围城那日，你都要朝北坐一晚上，摸出半块玉佩，一声不响。\n活着。可那座城，你把它留在了身后。',
+    choices: [{ text: '再走一遭这围城', goto: '@restart' }],
+  },
+
+  'siege.end-ash': {
+    title: '结局 · 焚城',
+    text: '你点燃了全城。\n火从西市烧起来，从你家那两间瓦房烧起来，从枣树烧到大钟。满城的火，把半边天都烤红了。\n敌军退了——他们什么都没得到，除了一座烧光的城。\n你站在城外，看着火慢慢熄下去。风一吹，灰扬起来，像一场黑雪。\n半块玉佩在你手里，被烤得发烫。你把它埋在了城根下，和这座城一起。\n后来，路过的人说，孤城遗址上长出一片野枣林。年年开花，年年结果，没人摘。',
+    choices: [{ text: '再走一遭这围城', goto: '@restart' }],
+  },
+
+  'siege.end-echo': {
+    title: '结局 · 余生',
+    text: '城破之后，你活了下来。\n每年的上元节，你都要点一盏灯，不挂出去，就放在窗台上。灯照着那半块玉佩，也照着三个人的影子：陆兄、乔掌柜，还有她。\n你把围城四十七天，一天一天记下来，写在一卷旧纸上。写到"城头钟响"那夜，笔停住了。\n纸卷被风翻动，哗哗地响，像城还在，像人在喊。\n有一年，你回到孤城遗址。野枣林正开花，白茫茫一片。你听见风里有人唱歌谣：城头的钟，城根的河，城里的人啊，莫蹉跎。\n你跟着哼，哼着哼着，泪就下来了。\n城没了，人还在。记得的人，替它活着。',
+    choices: [{ text: '再走一遭这围城', goto: '@restart' }],
+  },
+}

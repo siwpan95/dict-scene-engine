@@ -115,6 +115,14 @@
 | `flags.garrison.memoryDone` | M15 忆篇走完（诀别二选一后） | `garrison.memory.farewell` 两选项 | `garrison.hub.record` merge 入口条件（+recordDone） |
 | `flags.echo.autopsy` | M18 星港回声 调度册签名可疑、开问案之门 | `echo.office` 拓签名选项 | `echo.hub` 选项「证据够了——当面问案」条件 |
 | `flags.grad.said` | M19 毕业那年 把字条上的话说出了口 | `grad.letter` 第一选项 | `grad.merge` 追上去结局条件 |
+| `flags.siege.hold` | M20 城破 夜战选择死守 | `siege.record.break` 第一选项 | `siege.merge` 死守/城破分流（+morale 判） |
+| `flags.siege.hide` | M20 城破 选择密道出城 | `siege.record.break` 第二选项 | `siege.merge` 出城结局条件 |
+| `flags.siege.ash` | M20 城破 选择焚城 | `siege.record.break` 第三选项 | `siege.merge` 焚城结局条件 |
+| `flags.siege.recordDone` | M20 城破 记篇走完（破城三选一后） | `siege.record.break` 三选项 | `siege.record.hub` merge 入口条件 |
+| `flags.siege.memory.debt` | M20 城破 忆篇欠债已想 | `siege.memory.debt` onEnter | `siege.merge` 余生结局条件（+love+friend） |
+| `flags.siege.memory.love` | M20 城破 忆篇心上人已想 | `siege.memory.love` onEnter | `siege.merge` 余生结局条件 |
+| `flags.siege.memory.friend` | M20 城破 忆篇友人已想 | `siege.memory.friend` onEnter | `siege.merge` 余生结局条件 |
+| `flags.changan.ready` | M20 长安西市 铁证/消息到手、开对质之门 | `changan.bosi`/`.pawn`/`.tea` 选项 | `changan.cross` 对质选项条件 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -144,6 +152,7 @@
 | `items.gear_gear` | M19 机巧阁 铜齿轮（开楼梯栅门，装上后消耗） | `gear.wheel` 选项 | `gear.hall` 选项「装进楼梯口的槽」条件 |
 | `items.gear_spring` | M19 机巧阁 机簧（开天工匣） | `gear.hall2` 选项 | `gear.top` 开匣选项条件 |
 | `items.gear_axle` | M19 机巧阁 玉轴（开天工匣） | `gear.clock` 选项 | `gear.top` 开匣选项条件 |
+| `items.halfJade` | M20 城破记与忆 半块玉佩（跨两篇章信物） | `siege.start` onEnter | `siege.record.hub` 选项「摸出半块玉佩」条件 |
 
 ### 1.3 数值
 
@@ -169,6 +178,9 @@
 | `trust` | M19《茶肆·三遇》信任轴 | 0 | 各幕选项 ±1 | `tea.merge` 结局分流（>=2 且 closeness>=2 深交） |
 | `closeness` | M19《茶肆·三遇》亲近轴 | 0 | 各幕选项 ±1 | `tea.merge` 结局分流（>=2 且 trust<2 温情告别） |
 | `waterLeft` | M19《最后的水》剩余水量 | 2 | 分水选项 `-1` | `water.merge` 分水结局条件 `>= 1` |
+| `siegeGrain` | M20《城破·记与忆》粮 | 3 | 分配/夜战 `-1` | 生存数值（记篇资源） |
+| `siegeMorale` | M20《城破·记与忆》士气 | 3 | 守城选项 `±1` | `siege.merge` 死守结局条件 `>= 3`（否则城破） |
+| `changanEvidence` | M20《长安·西市》铁证计数 | 0 | 三处铁证 do `+1` | `changan.accuse` 指认条件 `>= 2`（不足则惊蛇/悬案/受贿线） |
 | `toleration` | M14《藏晖室札记》**为人的容忍**（Altruistic Toleration，为爱我者屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `independence` | M14《藏晖室札记》**不容忍**（对一己不可不诚，不可为人屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `cardsPlayed` | M14 与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应） | 0 | `hushi.p1.cards` 第一选项 `+1` | `hushi.p2.leave` 第二选项条件 |

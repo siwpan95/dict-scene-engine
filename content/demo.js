@@ -45,6 +45,8 @@ export default {
       { text: '后山深处一座机巧阁——机关连环，天工有手记（解谜中篇）', goto: 'gear.start' },
       { text: '断水的第七天，家里还有两桶水（末日生存短篇）', goto: 'water.start' },
       { text: '毕业前夜，口袋里有张没送出去的字条（校园青春短篇）', goto: 'grad.start' },
+      { text: '围城第四十七天，敌军明日总攻——半块玉佩，一半城破，一半从前（双篇章历史长线）', goto: 'siege.start' },
+      { text: '长安西市，一封边关密信失踪——商贾、歌姬、金吾卫各执一词（历史都市主线）', goto: 'changan.start' },
     ],
   },
 

@@ -47,6 +47,8 @@
       - ./content/gear.js             # M19：解谜中篇《机巧阁》(if/do+items 机关链)
       - ./content/water.js            # M19：末日生存短篇《最后的水》(水量资源管理)
       - ./content/grad.js             # M19：校园青春短篇《毕业那年》(关系 flag)
+      - ./content/siege.js            # M20：双篇章历史长线《城破·记与忆》(记篇当下+忆篇繁华)
+      - ./content/changan.js          # M20：历史都市主线《长安·西市》(多 hub 密信案)
 
 - id: state
   name: ./plugins/state.js
@@ -97,6 +99,10 @@
       trust: 0               # M19：茶肆三遇 信任轴（你信不信她的话）
       closeness: 0           # M19：茶肆三遇 亲近轴（你肯不肯多坐一会儿）
       waterLeft: 2           # M19：最后的水 剩余水量（分水 -1）
+      siegeGrain: 3          # M20：城破记与忆 粮（分配/夜战 -1）
+      siegeMorale: 3         # M20：城破记与忆 士气（守城 +/-，死守结局需 >=3）
+      changanEvidence: 0     # M20：长安西市铁证计数（bosi/pawn/night 齐 >=2 可定罪）
+      changanClues: {}       # M20：长安西市线索（changanClues.bosi 等，须先声明，条件链不抛错）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
@@ -109,6 +115,8 @@
         garrison: {}         # M15：戍卒家书节拍中间层（flags.garrison.chap 等，同上理）
         echo: {}             # M18：星港回声节拍中间层（flags.echo.autopsy 等，同上理）
         grad: {}             # M19：毕业那年节拍中间层（flags.grad.said 等，同上理）
+        siege: {}            # M20：城破记与忆节拍中间层（flags.siege.hold 等，同上理）
+        changan: {}          # M20：长安西市节拍中间层（flags.changan.ready 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js

@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-09 · 102 个结局 · 覆盖 102/102 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 113 个结局 · 覆盖 113/113 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -13,6 +13,12 @@
 | `castle-pre.end-burial` | 结局 · 埋剑 | ✓ | ✗ |
 | `castle-pre.end-seal` | 结局 · 封印 | ✓ | ✓ |
 | `castle-pre.end-split` | 结局 · 断剑 | ✓ | ✗ |
+| `changan.end-bribe` | 结局 · 受贿 | ✗ | ✓ |
+| `changan.end-escape` | 结局 · 惊蛇 | ✓ | ✗ |
+| `changan.end-letter` | 结局 · 送信 | ✗ | ✓ |
+| `changan.end-open` | 结局 · 悬案 | ✓ | ✗ |
+| `changan.end-truth` | 结局 · 归案 | ✗ | ✓ |
+| `changan.end-wrong` | 结局 · 冤 | ✓ | ✓ |
 | `crossing.end-fog` | 结局 · 雾锁渡口 | ✓ | ✗ |
 | `crossing.end-half` | 结局 · 半拼 | ✗ | ✓ |
 | `crossing.end-truth` | 结局 · 拼夜 | ✗ | ✓ |
@@ -90,6 +96,11 @@
 | `scifi.end-lost` | 结局 · 远望七号 · 沉没 | ✓ | ✗ |
 | `shadow.end-keep` | 结局 · 入戏 | ✓ | ✗ |
 | `shadow.end-send` | 结局 · 渡河 | ✓ | ✗ |
+| `siege.end-ash` | 结局 · 焚城 | ✗ | ✓ |
+| `siege.end-echo` | 结局 · 余生 | ✗ | ✓ |
+| `siege.end-fall` | 结局 · 城破 | ✓ | ✓ |
+| `siege.end-hide` | 结局 · 出城 | ✗ | ✓ |
+| `siege.end-hold` | 结局 · 城在人在 | ✗ | ✓ |
 | `snow.end-open` | 结局 · 雪化人散 | ✓ | ✗ |
 | `snow.end-silenced` | 结局 · 被灭口 | ✓ | ✗ |
 | `snow.end-truth` | 结局 · 旧债有主 | ✗ | ✓ |
