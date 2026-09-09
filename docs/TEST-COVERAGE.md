@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-09 · 91 个结局 · 覆盖 91/91 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 102 个结局 · 覆盖 102/102 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -45,6 +45,11 @@
 | `garrison.end-fall` | 结局 · 城破 | ✗ | ✓ |
 | `garrison.end-hold` | 结局 · 死守 | ✗ | ✓ |
 | `garrison.end-home` | 结局 · 归乡 | ✗ | ✓ |
+| `gear.end-leave` | 结局 · 知难而退 | ✓ | ✗ |
+| `gear.end-open` | 结局 · 天工开匣 | ✓ | ✓ |
+| `gear.end-ruin` | 结局 · 机关反噬 | ✓ | ✗ |
+| `grad.end-hide` | 结局 · 没说出 | ✗ | ✓ |
+| `grad.end-say` | 结局 · 说出口 | ✓ | ✓ |
 | `horror.end-dawn` | 结局 · 古宅 · 天亮 | ✓ | ✓ |
 | `horror.end-eaten` | 结局 · 古宅 · 烛灭 | ✗ | ✓ |
 | `horror.end-master` | 结局 · 古宅 · 宅主 | ✗ | ✓ |
@@ -91,9 +96,15 @@
 | `snow.end-wrong-su` | 结局 · 冤狱 | ✓ | ✓ |
 | `snow.end-wrong-zhao` | 结局 · 冤狱 | ✓ | ✓ |
 | `starport-win` | 结局 · 数据核心 | ✓ | ✓ |
+| `tea.end-deep` | 结局 · 共守 | ✓ | ✓ |
+| `tea.end-miss` | 结局 · 错过 | ✗ | ✓ |
+| `tea.end-trust` | 结局 · 托付 | ✗ | ✓ |
+| `tea.end-warm` | 结局 · 温情告别 | ✗ | ✓ |
 | `town.end-mid` | 结局 · 东市 · 小本营生 | ✗ | ✓ |
 | `town.end-poor` | 结局 · 东市 · 铺子没保住 | ✓ | ✓ |
 | `town.end-rich` | 结局 · 东市 · 商会入主 | ✗ | ✓ |
+| `water.end-hold` | 结局 · 独活 | ✓ | ✗ |
+| `water.end-share` | 结局 · 分水 | ✓ | ✓ |
 | `wuxia.end-dead` | 结局 · 刀客 · 死 | ✓ | ✗ |
 | `wuxia.end-letgo` | 结局 · 刀客 · 放下 | ✓ | ✗ |
 | `wuxia.end-mutual` | 结局 · 刀客 · 毒 | ✗ | ✓ |

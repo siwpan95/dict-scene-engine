@@ -41,6 +41,10 @@ export default {
       { text: '雾起江渡——古堡、商道、江畔、民国的四个过客在此交汇（跨世界观群像长线）', goto: 'ferry.start' },
       { text: '回到建堡的年代——三子祭剑之夜（古堡前史 DLC·平行扩展）', goto: 'castle-pre.start' },
       { text: '再访星港——调度长溺毙第七码头，旧案的余波（星港第二季 DLC·平行扩展）', goto: 'echo.start' },
+      { text: '城南老巷一间没招牌的茶肆——三年三遇（情感中篇）', goto: 'tea.start' },
+      { text: '后山深处一座机巧阁——机关连环，天工有手记（解谜中篇）', goto: 'gear.start' },
+      { text: '断水的第七天，家里还有两桶水（末日生存短篇）', goto: 'water.start' },
+      { text: '毕业前夜，口袋里有张没送出去的字条（校园青春短篇）', goto: 'grad.start' },
     ],
   },
 

@@ -114,6 +114,7 @@
 | `flags.garrison.recordDone` | M15 记篇走完（夜战三选一后） | `garrison.record.night` 三选项 | `garrison.hub.record` merge 入口条件（+memoryDone） |
 | `flags.garrison.memoryDone` | M15 忆篇走完（诀别二选一后） | `garrison.memory.farewell` 两选项 | `garrison.hub.record` merge 入口条件（+recordDone） |
 | `flags.echo.autopsy` | M18 星港回声 调度册签名可疑、开问案之门 | `echo.office` 拓签名选项 | `echo.hub` 选项「证据够了——当面问案」条件 |
+| `flags.grad.said` | M19 毕业那年 把字条上的话说出了口 | `grad.letter` 第一选项 | `grad.merge` 追上去结局条件 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -139,6 +140,10 @@
 | `items.letters` | M14 致韦女士旧函百余封（**解锁日记回溯关卡**） | `hushi.p3.diaries` 第一选项 | `hushi.p3.diaries`/`hushi.p3.return` 的 `hushi.diary2` 入口条件 |
 | `items.milk_receipt` | M14 北大农学院牛奶收据破纸（￥440 / 31 瓶） | `hushi.p5.milk` 第一选项 | `hushi.p5.remonstrate` 第四选项条件 |
 | `items.letter` | M15 戍卒家书（妻捎来的信，贴身三年，跨两篇章信物） | `garrison.start` onEnter | `garrison.hub.record` 选项「把家书摸出来，再念一念」条件 |
+| `items.gear_wedge` | M19 机巧阁 木楔（开无眼锁，进门后消耗） | `gear.gate` 选项 | `gear.gate` 选项条件（防重复）、`gear.gate.open` onEnter 消耗 |
+| `items.gear_gear` | M19 机巧阁 铜齿轮（开楼梯栅门，装上后消耗） | `gear.wheel` 选项 | `gear.hall` 选项「装进楼梯口的槽」条件 |
+| `items.gear_spring` | M19 机巧阁 机簧（开天工匣） | `gear.hall2` 选项 | `gear.top` 开匣选项条件 |
+| `items.gear_axle` | M19 机巧阁 玉轴（开天工匣） | `gear.clock` 选项 | `gear.top` 开匣选项条件 |
 
 ### 1.3 数值
 
@@ -161,6 +166,9 @@
 | `midEvidence` | M16《同一夜·十二时辰》关键追问计数（六块碎片拼合度） | 0 | 六个 dialogue 话题 do `+1`（最多 8） | `midnight.merge` 结局分流（>=4 真相 / 2-3 拼错 / <2 悬案） |
 | `ferryEvidence` | M17《渡口纪年》关键追问计数（四段往事听全度） | 0 | 四个 POV 的 key 话题 + 老渡工话题 do `+1`（最多 9） | `ferry.merge` 结局分流（>=4 各渡各岸 / >=6+渡工 自渡） |
 | `echoEvidence` | M18《星港·回声》铁证计数（slip/tide/account） | 0 | 三处勘验 do `+1` | `echo.accuse` 指认小崔条件 `>= 2`（否则走冤案/悬案/回声线） |
+| `trust` | M19《茶肆·三遇》信任轴 | 0 | 各幕选项 ±1 | `tea.merge` 结局分流（>=2 且 closeness>=2 深交） |
+| `closeness` | M19《茶肆·三遇》亲近轴 | 0 | 各幕选项 ±1 | `tea.merge` 结局分流（>=2 且 trust<2 温情告别） |
+| `waterLeft` | M19《最后的水》剩余水量 | 2 | 分水选项 `-1` | `water.merge` 分水结局条件 `>= 1` |
 | `toleration` | M14《藏晖室札记》**为人的容忍**（Altruistic Toleration，为爱我者屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `independence` | M14《藏晖室札记》**不容忍**（对一己不可不诚，不可为人屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `cardsPlayed` | M14 与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应） | 0 | `hushi.p1.cards` 第一选项 `+1` | `hushi.p2.leave` 第二选项条件 |

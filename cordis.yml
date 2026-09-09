@@ -43,6 +43,10 @@
       - ./content/ferry.js            # M17：跨世界观群像《渡口纪年》(四时四 POV 块茎网)
       - ./content/castle-pre.js       # M18：古堡前史 DLC《筑堡者》(三子祭剑之夜，本体已完整)
       - ./content/starport-echo.js    # M18：星港第二季 DLC《回声》(调度长溺毙案，本体已完整)
+      - ./content/teahouse.js         # M19：情感中篇《茶肆·三遇》(双轴 trust/closeness)
+      - ./content/gear.js             # M19：解谜中篇《机巧阁》(if/do+items 机关链)
+      - ./content/water.js            # M19：末日生存短篇《最后的水》(水量资源管理)
+      - ./content/grad.js             # M19：校园青春短篇《毕业那年》(关系 flag)
 
 - id: state
   name: ./plugins/state.js
@@ -90,6 +94,9 @@
       ferryClues: {}         # M17：渡口纪年线索（ferryClues.boatman 等，须先声明，条件链不抛错）
       echoEvidence: 0        # M18：星港回声铁证计数（slip/tide/account 齐 >=2 可定罪）
       echoClues: {}          # M18：星港回声线索（echoClues.dock 等，须先声明，条件链不抛错）
+      trust: 0               # M19：茶肆三遇 信任轴（你信不信她的话）
+      closeness: 0           # M19：茶肆三遇 亲近轴（你肯不肯多坐一会儿）
+      waterLeft: 2           # M19：最后的水 剩余水量（分水 -1）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
@@ -101,6 +108,7 @@
         snow: {}             # M15：雪庄八客节拍中间层（flags.snow.autopsy 等，同上理）
         garrison: {}         # M15：戍卒家书节拍中间层（flags.garrison.chap 等，同上理）
         echo: {}             # M18：星港回声节拍中间层（flags.echo.autopsy 等，同上理）
+        grad: {}             # M19：毕业那年节拍中间层（flags.grad.said 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js
