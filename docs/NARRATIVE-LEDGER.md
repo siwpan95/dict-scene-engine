@@ -123,6 +123,10 @@
 | `flags.siege.memory.love` | M20 城破 忆篇心上人已想 | `siege.memory.love` onEnter | `siege.merge` 余生结局条件 |
 | `flags.siege.memory.friend` | M20 城破 忆篇友人已想 | `siege.memory.friend` onEnter | `siege.merge` 余生结局条件 |
 | `flags.changan.ready` | M20 长安西市 铁证/消息到手、开对质之门 | `changan.bosi`/`.pawn`/`.tea` 选项 | `changan.cross` 对质选项条件 |
+| `flags.hushiX.nuli` | M21 藏晖室余墨 看过《努力》切片 | `hushi-extra.nuli` onEnter | `hushi-extra.hub` merge 入口条件 |
+| `flags.hushiX.gushi` | M21 藏晖室余墨 看过国故切片 | `hushi-extra.gushi` onEnter | `hushi-extra.hub` merge 入口条件 |
+| `flags.hushiX.yuefu` | M21 藏晖室余墨 看过白话诗切片 | `hushi-extra.yuefu` onEnter | `hushi-extra.hub` merge 入口条件 |
+| `flags.hushiX.shanghai` | M21 藏晖室余墨 看过上海切片 | `hushi-extra.shanghai` onEnter | `hushi-extra.hub` merge 入口条件 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -171,6 +175,7 @@
 | `tradeBaseGold` | 东市开市基线资金 | `null` | `trade` 插件 begin | 收市时结算 `tradeProfit` |
 | `tradeProfit` | 东市收市净赚 | 0 | `trade` 插件收市结算（gold − base） | `town.settle` 文本插值、`town.judge` 结局分流（≥60 / ≥10 / <10） |
 | `loopMoves` | 《子夜集》每夜行动力 | 3 | `loop.awaken` 出门选项 `-1`（每处地点 1 分） | `loop.awaken` 各地点选项条件 `loopMoves >= 1`；`@loop:` 重置回 3 |
+| `loop2Moves` | M21《子夜集·第二夜》每夜行动力 | 3 | `loop2.hub` 出门选项 `-1` | `loop2.hub` 各地点选项条件 `loop2Moves >= 1`；`@loop:loop2.start` 重置回 3（不在 loopKeep） |
 | `riveEvidence` | 《江畔·县志》铁证计数（forgery/ledger/arsenic） | 0 | 三处铁证 do `+1` | `river.court` 指认主簿条件 `>= 2`（否则走反噬/冤枉线） |
 | `midEvidence` | M16《同一夜·十二时辰》关键追问计数（六块碎片拼合度） | 0 | 六个 dialogue 话题 do `+1`（最多 8） | `midnight.merge` 结局分流（>=4 真相 / 2-3 拼错 / <2 悬案） |
 | `ferryEvidence` | M17《渡口纪年》关键追问计数（四段往事听全度） | 0 | 四个 POV 的 key 话题 + 老渡工话题 do `+1`（最多 9） | `ferry.merge` 结局分流（>=4 各渡各岸 / >=6+渡工 自渡） |

@@ -47,6 +47,8 @@ export default {
       { text: '毕业前夜，口袋里有张没送出去的字条（校园青春短篇）', goto: 'grad.start' },
       { text: '围城第四十七天，敌军明日总攻——半块玉佩，一半城破，一半从前（双篇章历史长线）', goto: 'siege.start' },
       { text: '长安西市，一封边关密信失踪——商贾、歌姬、金吾卫各执一词（历史都市主线）', goto: 'changan.start' },
+      { text: '藏晖室案头的余墨——1920s 的稿子、旧刊与信（胡适札记 DLC·平行扩展）', goto: 'hushi-extra.start' },
+      { text: '雾镇起了第二场雾——货郎的铜铃丢了（子夜集第二夜 DLC·平行扩展）', goto: 'loop2.start' },
     ],
   },
 

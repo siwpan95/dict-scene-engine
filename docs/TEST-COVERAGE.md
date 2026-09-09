@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-09 · 113 个结局 · 覆盖 113/113 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 119 个结局 · 覆盖 119/119 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -60,6 +60,9 @@
 | `horror.end-eaten` | 结局 · 古宅 · 烛灭 | ✗ | ✓ |
 | `horror.end-master` | 结局 · 古宅 · 宅主 | ✗ | ✓ |
 | `horror.end-rain` | 结局 · 夜路 · 雨 | ✓ | ✗ |
+| `hushi-extra.end-fire` | 结局 · 烧掉 | ✓ | ✗ |
+| `hushi-extra.end-home` | 结局 · 回乡 | ✓ | ✗ |
+| `hushi-extra.end-ink` | 结局 · 写下去 | ✓ | ✓ |
 | `hushi.end-cards` | 结局 · 过五关（真结局） | ✓ | ✗ |
 | `hushi.end-decline` | 结局 · 均不能满意 | ✗ | ✓ |
 | `hushi.end-deserter` | 结局 · 逃兵 | ✗ | ✓ |
@@ -73,6 +76,9 @@
 | `loop.end-deep` | 结局 · 夜行人 | ✗ | ✓ |
 | `loop.end-forever` | 结局 · 第七夜 | ✓ | ✗ |
 | `loop.end-good` | 结局 · 雾散·还人 | ✗ | ✓ |
+| `loop2.end-deep` | 结局 · 守雾人 | ✗ | ✓ |
+| `loop2.end-good` | 结局 · 雾散还人 | ✗ | ✓ |
+| `loop2.end-lost` | 结局 · 困 | ✗ | ✓ |
 | `midnight.end-flee` | 结局 · 烧账 | ✗ | ✓ |
 | `midnight.end-fog` | 结局 · 悬案 | ✓ | ✗ |
 | `midnight.end-half` | 结局 · 各怀一块 | ✓ | ✗ |
