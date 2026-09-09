@@ -51,6 +51,9 @@
       - ./content/changan.js          # M20：历史都市主线《长安·西市》(多 hub 密信案)
       - ./content/hushi-extra.js      # M21：胡适 DLC《藏晖室·余墨》(1920s/1930s 切片，复用 diary mode)
       - ./content/loop2.js            # M21：时间循环 DLC《子夜集·第二夜》(复用 @loop)
+      - ./content/promote.js          # M22：官场讽刺短篇《升官图》(正/曲双计数)
+      - ./content/whisper.js          # M22：心理恐怖短篇《深巷·低语》(理智值 sanity)
+      - ./content/cubicle.js          # M22：都市职场短篇《格子间》(勇气 flag)
 
 - id: state
   name: ./plugins/state.js
@@ -108,6 +111,9 @@
       siegeMorale: 3         # M20：城破记与忆 士气（守城 +/-，死守结局需 >=3）
       changanEvidence: 0     # M20：长安西市铁证计数（bosi/pawn/night 齐 >=2 可定罪）
       changanClues: {}       # M20：长安西市线索（changanClues.bosi 等，须先声明，条件链不抛错）
+      promoteRight: 0        # M22：升官图 正道计数（拒礼/读书/断案/大考写正 +1）
+      promoteBend: 0         # M22：升官图 曲道计数（送礼/钻营/大考写曲 +1）
+      sanity: 5              # M22：深巷低语 理智值（听低语 -1，破庙 +1 一次）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
@@ -123,6 +129,8 @@
         siege: {}            # M20：城破记与忆节拍中间层（flags.siege.hold 等，同上理）
         changan: {}          # M20：长安西市节拍中间层（flags.changan.ready 等，同上理）
         hushiX: {}           # M21：藏晖室余墨节拍中间层（flags.hushiX.nuli 等，同上理）
+        cubicle: {}          # M22：格子间节拍中间层（flags.cubicle.spoke 等，同上理）
+        whisper: {}          # M22：深巷低语节拍中间层（flags.whisper.wall 等，同上理）
 
 - id: io
   name: ./plugins/console-io.js

@@ -49,6 +49,9 @@ export default {
       { text: '长安西市，一封边关密信失踪——商贾、歌姬、金吾卫各执一词（历史都市主线）', goto: 'changan.start' },
       { text: '藏晖室案头的余墨——1920s 的稿子、旧刊与信（胡适札记 DLC·平行扩展）', goto: 'hushi-extra.start' },
       { text: '雾镇起了第二场雾——货郎的铜铃丢了（子夜集第二夜 DLC·平行扩展）', goto: 'loop2.start' },
+      { text: '候补七年，得了一张升官图——正与曲，一步一选（官场讽刺短篇）', goto: 'promote.start' },
+      { text: '夜入老城深巷——墙会说话，井会数人，门会问路（心理恐怖短篇）', goto: 'whisper.start' },
+      { text: '周一的格子间，又五天——晨会、加班与辞职信（都市职场短篇）', goto: 'cubicle.start' },
     ],
   },
 

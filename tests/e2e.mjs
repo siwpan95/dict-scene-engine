@@ -2754,6 +2754,138 @@ async function runLoopToConfront(g) {
   await quit(g, 'EU12 困收尾')
 }
 
+// ---------- 路线 EV：M22《升官图》—— 曲道 → 升官 ----------
+{
+  console.log('\n[M22 升官图] 曲道 → 升官')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '候补七年'), 'EV1 入口进入《升官图》')
+  await g.waitFor('候补 · 得图')
+  assert(await choose(g, '把图折好'), 'EV2 揣图')
+  await g.waitFor('衙门 · 候补房')
+  assert(await choose(g, '去帮王主簿抄卷'), 'EV3 送礼')
+  await g.waitFor('衙门 · 送土产')
+  assert(await choose(g, '这一笔，值了'), 'EV4 收礼成效（bend 1）')
+  await g.waitFor('衙门 · 候补房')
+  assert(await choose(g, '去同知大人的宴上'), 'EV5 钻营')
+  await g.waitFor('同知宴 · 混脸熟')
+  assert(await choose(g, '腰弯下去'), 'EV6 弯腰（bend 2）')
+  await g.waitFor('衙门 · 候补房')
+  assert(await choose(g, '图的尽头'), 'EV7 了断')
+  await g.waitFor('衙门 · 图的尽头')
+  assert(await choose(g, '照着红圈走到底'), 'EV8 升官（bend>=2）')
+  assert(await g.waitFor('结局 · 升官'), 'EV9 promote.end-rise')
+  await quit(g, 'EV10 升官收尾')
+}
+
+// ---------- 路线 EW：M22《升官图》—— 正道 → 罢官 ----------
+{
+  console.log('\n[M22 升官图] 正道 → 罢官')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '候补七年'), 'EW1 入口进入《升官图》')
+  await g.waitFor('候补 · 得图')
+  assert(await choose(g, '把图折好'), 'EW2 揣图')
+  await g.waitFor('衙门 · 候补房')
+  assert(await choose(g, '把土产原样提回'), 'EW3 拒礼')
+  await g.waitFor('衙门 · 拒礼')
+  assert(await choose(g, '香，可是路远了'), 'EW4 拒礼（right 1）')
+  await g.waitFor('衙门 · 候补房')
+  assert(await choose(g, '闭门读书'), 'EW5 读书')
+  await g.waitFor('衙门 · 读书')
+  assert(await choose(g, '书不会骗人'), 'EW6 磨文章（right 2）')
+  await g.waitFor('衙门 · 候补房')
+  assert(await choose(g, '图的尽头'), 'EW7 了断')
+  await g.waitFor('衙门 · 图的尽头')
+  assert(await choose(g, '把黑圈一个个走穿'), 'EW8 罢官（right>=2）')
+  assert(await g.waitFor('结局 · 罢官'), 'EW9 promote.end-fall')
+  await quit(g, 'EW10 罢官收尾')
+}
+
+// ---------- 路线 EX：M22《深巷·低语》—— 理智耗尽 → 沉沦 ----------
+{
+  console.log('\n[M22 深巷低语] 理智耗尽 → 沉沦')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '夜入老城深巷'), 'EX1 入口进入《深巷·低语》')
+  await g.waitFor('深巷 · 夜')
+  assert(await choose(g, '往前走'), 'EX2 入巷')
+  await g.waitFor('深巷 · 巷心')
+  for (let i = 0; i < 5; i++) {
+    assert(await choose(g, '把耳朵贴到墙上'), `EX${3 + i}a 听墙（sanity -1）`)
+    await g.waitFor('深巷 · 墙')
+    assert(await choose(g, '用力把手撕下来'), `EX${3 + i}b 回巷心`)
+    await g.waitFor('深巷 · 巷心')
+  }
+  assert(await choose(g, '你听不清了'), 'EX13 沉沦（sanity<=0）')
+  assert(await g.waitFor('结局 · 沉沦'), 'EX14 whisper.end-lost')
+  await quit(g, 'EX15 沉沦收尾')
+}
+
+// ---------- 路线 EY：M22《格子间》—— 顶过嘴 → 辞职 ----------
+{
+  console.log('\n[M22 格子间] 顶过嘴 → 辞职')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '周一的格子间'), 'EY1 入口进入《格子间》')
+  await g.waitFor('格子间 · 周一')
+  assert(await choose(g, '开始这一周'), 'EY2 开始')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '去开晨会'), 'EY3 晨会')
+  await g.waitFor('格子间 · 晨会')
+  assert(await choose(g, '有问题。上季度的目标'), 'EY4 顶嘴（spoke）')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '午休，下楼走走'), 'EY5 午休')
+  await g.waitFor('格子间 · 午休')
+  assert(await choose(g, '把盒饭吃完'), 'EY6 回工位')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '今晚加班吗'), 'EY7 加班')
+  await g.waitFor('格子间 · 加班')
+  assert(await choose(g, '把方案关掉'), 'EY8 今天到此为止（dare）')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '去开项目会'), 'EY9 项目会')
+  await g.waitFor('格子间 · 项目会')
+  assert(await choose(g, '需求方改了三次'), 'EY10 会上顶锅（said）')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '周五了'), 'EY11 周五决定')
+  await g.waitFor('格子间 · 周五')
+  assert(await choose(g, '把辞职信拍在经理桌上'), 'EY12 辞职')
+  assert(await g.waitFor('结局 · 辞职'), 'EY13 cubicle.end-quit')
+  await quit(g, 'EY14 辞职收尾')
+}
+
+// ---------- 路线 EZ：M22《格子间》—— 全沉默 → 留下 ----------
+{
+  console.log('\n[M22 格子间] 全沉默 → 留下')
+  const g = launch()
+  await g.waitFor('村庄 · 晨雾')
+  assert(await choose(g, '周一的格子间'), 'EZ1 入口进入《格子间》')
+  await g.waitFor('格子间 · 周一')
+  assert(await choose(g, '开始这一周'), 'EZ2 开始')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '去开晨会'), 'EZ3 晨会')
+  await g.waitFor('格子间 · 晨会')
+  assert(await choose(g, '把头低下去'), 'EZ4 沉默')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '午休，下楼走走'), 'EZ5 午休')
+  await g.waitFor('格子间 · 午休')
+  assert(await choose(g, '把盒饭吃完'), 'EZ6 回工位')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '今晚加班吗'), 'EZ7 加班')
+  await g.waitFor('格子间 · 加班')
+  assert(await choose(g, '再改第八遍'), 'EZ8 接着改')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '去开项目会'), 'EZ9 项目会')
+  await g.waitFor('格子间 · 项目会')
+  assert(await choose(g, '是我的问题'), 'EZ10 认锅')
+  await g.waitFor('格子间 · 一天')
+  assert(await choose(g, '周五了'), 'EZ11 周五决定')
+  await g.waitFor('格子间 · 周五')
+  assert(await choose(g, '把纸团扔进垃圾桶'), 'EZ12 留下')
+  assert(await g.waitFor('结局 · 留下'), 'EZ13 cubicle.end-stay')
+  await quit(g, 'EZ14 留下收尾')
+}
+
 // ---------- 路线 N：内容校验器（lint:content） ----------
 {
   console.log('\n[内容校验] lint:content')

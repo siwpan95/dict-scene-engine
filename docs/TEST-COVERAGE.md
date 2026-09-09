@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-09 · 119 个结局 · 覆盖 119/119 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 127 个结局 · 覆盖 127/127 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -23,6 +23,8 @@
 | `crossing.end-half` | 结局 · 半拼 | ✗ | ✓ |
 | `crossing.end-truth` | 结局 · 拼夜 | ✗ | ✓ |
 | `crossing.end-wrong` | 结局 · 冤 | ✗ | ✓ |
+| `cubicle.end-quit` | 结局 · 辞职 | ✗ | ✓ |
+| `cubicle.end-stay` | 结局 · 留下 | ✗ | ✓ |
 | `echo.end-echo` | 结局 · 回声 | ✗ | ✓ |
 | `echo.end-open` | 结局 · 悬案 | ✓ | ✗ |
 | `echo.end-truth` | 结局 · 回声落地 | ✗ | ✓ |
@@ -68,7 +70,7 @@
 | `hushi.end-deserter` | 结局 · 逃兵 | ✗ | ✓ |
 | `hushi.end-remonstrator` | 结局 · 诤臣一百人 | ✓ | ✗ |
 | `hushi.end-sacrifice` | 结局 · 为国家牺牲了 | ✓ | ✗ |
-| `hushi.end-stay` | 结局 · 留下 | ✓ | ✗ |
+| `hushi.end-stay` | 结局 · 留下 | ✓ | ✓ |
 | `hushi.end-wherehome` | 结局 · 吾乡真在何处 | ✓ | ✗ |
 | `lantern.end-carry` | 结局 · 送灯人 | ✓ | ✗ |
 | `lantern.end-keep` | 结局 · 守灯人 | ✓ | ✓ |
@@ -91,6 +93,9 @@
 | `post.end-go` | 结局 · 出关 | ✗ | ✓ |
 | `post.end-part` | 结局 · 各安 | ✓ | ✗ |
 | `post.end-stay` | 结局 · 留灯 | ✓ | ✓ |
+| `promote.end-fall` | 结局 · 罢官 | ✗ | ✓ |
+| `promote.end-idle` | 结局 · 闲居 | ✓ | ✗ |
+| `promote.end-rise` | 结局 · 升官 | ✗ | ✓ |
 | `river.end-open` | 结局 · 疑案 | ✓ | ✗ |
 | `river.end-ousted` | 结局 · 被逐 | ✓ | ✗ |
 | `river.end-truth` | 结局 · 铁证定谳 | ✗ | ✓ |
@@ -122,6 +127,9 @@
 | `town.end-rich` | 结局 · 东市 · 商会入主 | ✗ | ✓ |
 | `water.end-hold` | 结局 · 独活 | ✓ | ✗ |
 | `water.end-share` | 结局 · 分水 | ✓ | ✓ |
+| `whisper.end-dawn` | 结局 · 天亮 | ✓ | ✗ |
+| `whisper.end-escape` | 结局 · 逃出 | ✓ | ✗ |
+| `whisper.end-lost` | 结局 · 沉沦 | ✗ | ✓ |
 | `wuxia.end-dead` | 结局 · 刀客 · 死 | ✓ | ✗ |
 | `wuxia.end-letgo` | 结局 · 刀客 · 放下 | ✓ | ✗ |
 | `wuxia.end-mutual` | 结局 · 刀客 · 毒 | ✗ | ✓ |

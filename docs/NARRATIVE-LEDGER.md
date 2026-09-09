@@ -127,6 +127,18 @@
 | `flags.hushiX.gushi` | M21 藏晖室余墨 看过国故切片 | `hushi-extra.gushi` onEnter | `hushi-extra.hub` merge 入口条件 |
 | `flags.hushiX.yuefu` | M21 藏晖室余墨 看过白话诗切片 | `hushi-extra.yuefu` onEnter | `hushi-extra.hub` merge 入口条件 |
 | `flags.hushiX.shanghai` | M21 藏晖室余墨 看过上海切片 | `hushi-extra.shanghai` onEnter | `hushi-extra.hub` merge 入口条件 |
+| `flags.cubicle.morning` | M22 格子间 晨会已过 | `cubicle.morning` onEnter | `cubicle.hub` 周五决定入口条件 |
+| `flags.cubicle.noon` | M22 格子间 午休已过 | `cubicle.noon` onEnter | `cubicle.hub` 周五决定入口条件 |
+| `flags.cubicle.evening` | M22 格子间 加班已过 | `cubicle.evening` onEnter | `cubicle.hub` 周五决定入口条件 |
+| `flags.cubicle.meeting` | M22 格子间 项目会已过 | `cubicle.meeting` onEnter | `cubicle.hub` 周五决定入口条件 |
+| `flags.cubicle.spoke` | M22 格子间 晨会顶嘴 | `cubicle.morning` 第一选项 | `cubicle.merge` 辞职结局条件 |
+| `flags.cubicle.called` | M22 格子间 给母亲打电话 | `cubicle.noon` 第一选项 | `cubicle.merge` 辞职结局条件 |
+| `flags.cubicle.dare` | M22 格子间 下班敢走 | `cubicle.evening` 第一选项 | `cubicle.merge` 辞职结局条件 |
+| `flags.cubicle.said` | M22 格子间 会上顶锅 | `cubicle.meeting` 第一选项 | `cubicle.merge` 辞职结局条件 |
+| `flags.whisper.rested` | M22 深巷低语 破庙避过一次 | `whisper.hub` 破庙选项 | `whisper.hub` 破庙选项条件（防重复回理智） |
+| `flags.whisper.wall` | M22 深巷低语 听过墙的低语 | `whisper.wall` onEnter | `whisper.hub` 等天亮选项条件 |
+| `flags.whisper.well` | M22 深巷低语 看过井 | `whisper.well` onEnter | `whisper.hub` 等天亮选项条件 |
+| `flags.whisper.door` | M22 深巷低语 推过门 | `whisper.door` onEnter | `whisper.hub` 等天亮选项条件 |
 
 ### 1.2 items（物品，含武器加成）
 
@@ -186,6 +198,9 @@
 | `siegeGrain` | M20《城破·记与忆》粮 | 3 | 分配/夜战 `-1` | 生存数值（记篇资源） |
 | `siegeMorale` | M20《城破·记与忆》士气 | 3 | 守城选项 `±1` | `siege.merge` 死守结局条件 `>= 3`（否则城破） |
 | `changanEvidence` | M20《长安·西市》铁证计数 | 0 | 三处铁证 do `+1` | `changan.accuse` 指认条件 `>= 2`（不足则惊蛇/悬案/受贿线） |
+| `promoteRight` | M22《升官图》正道计数 | 0 | 拒礼/读书/断案/大考写正 `+1` | `promote.merge` 罢官结局条件 `>= 2` |
+| `promoteBend` | M22《升官图》曲道计数 | 0 | 送礼/钻营/大考写曲 `+1` | `promote.merge` 升官结局条件 `>= 2` |
+| `sanity` | M22《深巷·低语》理智值 | 5 | 听低语 `-1`，破庙 `+1`（一次） | `whisper.hub` 逃出条件 `>= 3`、沉沦条件 `<= 0` |
 | `toleration` | M14《藏晖室札记》**为人的容忍**（Altruistic Toleration，为爱我者屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `independence` | M14《藏晖室札记》**不容忍**（对一己不可不诚，不可为人屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `cardsPlayed` | M14 与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应） | 0 | `hushi.p1.cards` 第一选项 `+1` | `hushi.p2.leave` 第二选项条件 |
