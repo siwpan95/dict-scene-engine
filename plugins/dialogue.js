@@ -103,6 +103,13 @@ export class DialogueService extends Service {
     }
   }
 
+  /** 当前可见话题（按 if 条件过滤；编号随可见列表重排。M16 时序锁用） */
+  visible() {
+    if (!this.active) return []
+    const s = this.ctx.state
+    return this.active.topics.filter((t) => !t.if || s.check(t.if))
+  }
+
   /** 询问话题：显示 reply、执行 effect、标记已问 */
   doAsk(input) {
     const a = this.active
@@ -110,7 +117,7 @@ export class DialogueService extends Service {
       this.render()
       return { type: 'noop' }
     }
-    const topic = a.topics.find((t, i) =>
+    const topic = this.visible().find((t, i) =>
       t.id === input || t.name === input || String(i + 1) === input)
     if (!topic) {
       this.ctx.io.print(`  没有这个话题：${input}。输入 topics 看话题列表。`)
@@ -155,7 +162,7 @@ export class DialogueService extends Service {
     const a = this.active
     this.ctx.io.blank()
     this.ctx.io.print(`  ── 与${a.npc}对话 ──`)
-    const rows = a.topics
+    const rows = this.visible()
       .map((t, i) => `    ${a.asked.includes(t.id) ? '·' : String(i + 1) + '.'} ${t.name}${a.asked.includes(t.id) ? '（已问过）' : ''}`)
       .join('\n')
     this.ctx.io.print(rows || '    （无话可问）')

@@ -1,6 +1,6 @@
 # 剧情线结局覆盖矩阵（TEST-COVERAGE）
 
-> 生成：2026-09-08 · 71 个结局 · 覆盖 71/71 · 生成器：node tests/coverage.mjs
+> 生成：2026-09-09 · 77 个结局 · 覆盖 77/77 · 生成器：node tests/coverage.mjs
 > 覆盖来源：**T** = tests/traverse.mjs（结构-状态遍历，执行每条边/效果/条件）
 >          **E** = tests/e2e.mjs（真实进程路径断言，按标题 waitFor 实跑）
 > 门：两栏皆空（T✗ E✗）时退出码 1 —— 新结局必须至少落进其中一个来源。
@@ -48,6 +48,12 @@
 | `loop.end-deep` | 结局 · 夜行人 | ✗ | ✓ |
 | `loop.end-forever` | 结局 · 第七夜 | ✓ | ✗ |
 | `loop.end-good` | 结局 · 雾散·还人 | ✗ | ✓ |
+| `midnight.end-flee` | 结局 · 烧账 | ✗ | ✓ |
+| `midnight.end-fog` | 结局 · 悬案 | ✓ | ✗ |
+| `midnight.end-half` | 结局 · 各怀一块 | ✓ | ✗ |
+| `midnight.end-scape` | 结局 · 顶缸 | ✗ | ✓ |
+| `midnight.end-truth` | 结局 · 拼夜 | ✗ | ✓ |
+| `midnight.end-wrong` | 结局 · 冤 | ✗ | ✓ |
 | `noodle.end-carry` | 结局 · 西行一封信 | ✓ | ✗ |
 | `noodle.end-stay` | 结局 · 灶火常明 | ✓ | ✗ |
 | `post.end-betray` | 结局 · 冷 | ✗ | ✓ |

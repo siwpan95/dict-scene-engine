@@ -157,6 +157,7 @@
 | `tradeProfit` | 东市收市净赚 | 0 | `trade` 插件收市结算（gold − base） | `town.settle` 文本插值、`town.judge` 结局分流（≥60 / ≥10 / <10） |
 | `loopMoves` | 《子夜集》每夜行动力 | 3 | `loop.awaken` 出门选项 `-1`（每处地点 1 分） | `loop.awaken` 各地点选项条件 `loopMoves >= 1`；`@loop:` 重置回 3 |
 | `riveEvidence` | 《江畔·县志》铁证计数（forgery/ledger/arsenic） | 0 | 三处铁证 do `+1` | `river.court` 指认主簿条件 `>= 2`（否则走反噬/冤枉线） |
+| `midEvidence` | M16《同一夜·十二时辰》关键追问计数（六块碎片拼合度） | 0 | 六个 dialogue 话题 do `+1`（最多 8） | `midnight.merge` 结局分流（>=4 真相 / 2-3 拼错 / <2 悬案） |
 | `toleration` | M14《藏晖室札记》**为人的容忍**（Altruistic Toleration，为爱我者屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `independence` | M14《藏晖室札记》**不容忍**（对一己不可不诚，不可为人屈） | 0 | `hushi.*` 各幕选项 ±1/±2 | 幕内标题插值、`hushi.p5.cards` 真结局条件（≥3） |
 | `cardsPlayed` | M14 与「牌」的纠葛次数（1911 打牌 → 1960 过五关，五十年呼应） | 0 | `hushi.p1.cards` 第一选项 `+1` | `hushi.p2.leave` 第二选项条件 |

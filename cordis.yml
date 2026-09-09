@@ -39,6 +39,7 @@
       - ./content/snow.js             # M15：暴风雪山庄本格《雪庄·八客》(指认可错纠错)
       - ./content/crossing.js         # M15：同一夜多视角《渡口·子丑》(首个 dialogue mode 包)
       - ./content/garrison.js         # M15：双篇章历史《戍卒·家书》(记篇当下+忆篇追忆)
+      - ./content/midnight.js         # M16：群像多视角《同一夜·十二时辰》(6 POV 时序锁)
 
 - id: state
   name: ./plugins/state.js
@@ -80,6 +81,8 @@
       snowEvidence: 0        # M15：雪庄八客铁证计数（forgery/ledger/arsenic 齐 ≥2 可定罪）
       snowClues: {}          # M15：雪庄八客线索（snowClues.bailiff 等，须先声明，条件链不抛错）
       crossingClues: {}      # M15：渡口子丑证词（crossingClues.splash 等，须先声明，条件链不抛错）
+      midEvidence: 0         # M16：十二时辰关键追问计数（>=4 可拼齐真相）
+      midnightClues: {}      # M16：十二时辰六块碎片（midnightClues.zi 等，须先声明，条件链不抛错）
       items: {}
       flags:
         loop: {}             # M11：子夜集循环计数中间层（flags.loop.n，预声明同上理）
