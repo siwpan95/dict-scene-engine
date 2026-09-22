@@ -4,7 +4,8 @@
 // 复用 e2e.mjs 已验证的输入序列（每条路线都跑到结局），改用真实交互进程驱动，
 // 抓取每次启动的 stdout 作为可读剧本，落盘到 deliverables/gstack/。
 //
-// 覆盖：所有玩家向叙事/机制路线（A/B/C/D/E/H/J/O/P/Q/R/S/T/U/V/W/X）。
+// 覆盖：手写路线（A/B/C/D/E/H/J/O~DD，停在 M14 之前）+ 生成路线（CC~FC，
+// 由 scripts/gen-routes.mjs 从 e2e 实测序列抽取，覆盖千灯 / M15~M22 / P6 新内容）。
 // 排除（属验证程序而非玩家流程，已在 e2e 套件覆盖）：F 热重载改文件、G 音效文件生成、
 // I 官方 HMR 改文件、K 存档安全、L 重放回归、M 退出竞态、N 内容校验器。
 //
@@ -14,7 +15,7 @@
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { execSync } from 'node:child_process'
 
@@ -754,6 +755,45 @@ const ROUTES = [
 ]
 
 // ---------------------------------------------------------------------------
+// 生成路线：由 scripts/gen-routes.mjs 从 tests/e2e.mjs 的实测序列抽取
+// （内容扩充到 39 包 / 135 结局后，手写路线仍停在 M14 之前，新内容靠这里补齐）
+// 步骤是数据（wait 场景标题 / pick 选项文本 / send 原始命令），重跑生成器即可同步。
+// ---------------------------------------------------------------------------
+const GEN_FILE = join(root, 'scripts', 'routes.generated.json')
+function loadGeneratedRoutes() {
+  if (!existsSync(GEN_FILE)) return []
+  try {
+    const j = JSON.parse(readFileSync(GEN_FILE, 'utf8'))
+    return (j.routes ?? []).map((r) => ({
+      id: r.id,
+      title: r.title,
+      ending: r.ending,
+      generated: true,
+      drive: async (c) => {
+        for (const s of r.steps) {
+          if (s.wait) await c.waitFor(s.wait, 15000)
+          if (s.pick) await c.choose(s.pick)
+          if (s.send) c.send(s.send)
+        }
+        c.send('quit')
+      },
+    }))
+  } catch (e) {
+    console.error(`⚠ 生成路线载入失败（${e.message}），本次只跑手写路线`)
+    return []
+  }
+}
+
+const GENERATED = loadGeneratedRoutes()
+const ALL_ROUTES = [...ROUTES, ...GENERATED]
+
+// --list-routes：只打印全部路线 id（JSON），供 scripts/auto-playthrough.mjs 动态取清单
+if (process.argv.includes('--list-routes')) {
+  console.log(JSON.stringify(ALL_ROUTES.map((r) => r.id)))
+  process.exit(0)
+}
+
+// ---------------------------------------------------------------------------
 // C：存档 / 读档（两个进程）
 // ---------------------------------------------------------------------------
 async function runSaveLoad(env) {
@@ -786,7 +826,7 @@ const results = []
 // 默认行为不变（跑全部 + 存档路线 + 写转录文件）。
 const onlyArg = process.argv.find((a) => a.startsWith('--only='))
 const only = onlyArg ? onlyArg.slice('--only='.length).split(',').map((s) => s.trim()).filter(Boolean) : null
-const routes = only ? ROUTES.filter((r) => only.includes(r.id)) : ROUTES
+const routes = only ? ALL_ROUTES.filter((r) => only.includes(r.id)) : ALL_ROUTES
 if (only) console.log(`（--only 模式：只跑 ${routes.map((r) => r.id).join(', ')}）`)
 
 for (const route of routes) {

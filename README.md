@@ -131,25 +131,30 @@ dict-scene-engine/
 ├── vendor/plugin-hmr/    # 官方 HMR 插件（本地构建产物，源码未发布到 npm）
 ├── scripts/
 │   ├── build-hmr.mjs     # 从本地 cordis-4.0.0-rc.9 源码构建官方 HMR
-│   └── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 契约 / 数值字段）
+│   ├── lint-content.mjs  # 内容校验器（悬空 goto / 可达性 / 账本一致性 / 契约 / 数值字段）
+│   ├── gen-routes.mjs    # 从 tests/e2e.mjs 抽取叙事路线 → scripts/routes.generated.json
+│   │                     #   （playthrough 启动自动载入；内容扩充后重跑即同步新内容路线）
+│   └── auto-playthrough.mjs # 每小时自动跑一条「历史最少」路线并归档转录（--route= / --dry-run）
 ├── tests/
 │   ├── e2e.mjs           # 端到端测试（内容/引擎行为）：30 组 558 项断言
 │   ├── cli.mjs           # CLI 接口测试（命令行/脚本输入）：48 项断言
 │   ├── traverse.mjs      # 结构-状态遍历（从 entry DFS 全图：执行每条 goto 边/效果/条件）
 │   ├── coverage.mjs      # 结局覆盖审计（traverse ∪ e2e 双缺 == 0；生成 docs/TEST-COVERAGE.md）
 │   └── playthrough.mjs   # 逐线实跑转录（stdout 落盘 deliverables，供人工阅读留存）
-│                         #   支持 --only=DD1,DD2 只跑指定路线（全量约 9 分钟）
+│                         #   支持 --only=DD1,DD2 只跑指定路线；--list-routes 只打印路线 id
+│                         #   手写 38 条 + 生成 49 条 = 87 条（见 scripts/gen-routes.mjs）
 │                         #   A~E 剧情分支 / F 内容热重载 / G 音效 / H 战斗
 │                         #   I 官方 HMR / J 战斗中命令 / K 存档安全
 │                         #   L 重放回归 / M 退出竞态 / N 内容校验 / O 古堡探索 / P 商人结局
 │                         #   Q 侦探真结局 / R 侦探冤案 / S 商队三结局 / T 经营三结局
 │                         #   U 武侠刀客 / V 空间站疑云 / W 古宅惊魂 / X 跨包彩蛋
-│                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志 / BB 结局直达 / CC AI-P0 千灯
+│                         #   Y 子夜集时间循环 / Z 驿路两线 / AA 江畔县志 / BB 结局直达
+│                         #   CC~FC 生成路线：千灯 / M15~M22 / P6 新内容
 ├── docs/
 │   ├── CONTENT-EXPANSION-PLAN.md  # 内容扩容规划（Phase 1～4）
 │   ├── NARRATIVE-LEDGER.md        # 叙事账本：状态变量的唯一权威清单
 │   ├── M14-HUSHI-DESIGN.md        # M14《藏晖室札记》设计规格：五幕结构 / 结局矩阵 / diary 插件规格
-│   └── TEST-COVERAGE.md           # 结局覆盖矩阵（tests/coverage.mjs 生成，58 结局逐条 T/E 来源）
+│   └── TEST-COVERAGE.md           # 结局覆盖矩阵（tests/coverage.mjs 生成，135 结局逐条 T/E 来源）
 └── saves/                # 存档目录（运行时生成，已 gitignore）
 ```
 
@@ -212,11 +217,11 @@ npm run lint:content
 | 结构 | `npm run lint:content` | 图论层：悬空/可达/结局判定/契约 | 自动（每次跑） |
 | 状态 | `npm run test:traverse` | 从 entry DFS 全图：真实执行每条 goto 边、每个效果、每个条件 | 自动（可达结局进 reached 集合） |
 | 路径 | `npm test` | 真实进程 spawn，逐条完整剧情线断言文本 | 新包深链结局（插件/多轮/计数类 traverse 到不了的）需补一条 e2e 直达，否则 coverage 红 |
-| 转录 | `node tests/playthrough.mjs`（`--only=<id>` 跑单条） | 逐线实跑，stdout 剧本落盘（人工阅读留存） | 可随时跑 |
-| **总门** | `npm run test:coverage` | 58 个结局逐个必须有 **T**（traverse）或 **E**（e2e）来源；双缺 → 退出码 1 并列出缺口，同时生成 `docs/TEST-COVERAGE.md` 矩阵 | 自动审计 + 明文清单 |
+| 转录 | `node tests/playthrough.mjs`（`--only=<id>` 跑单条，`--list-routes` 列清单） | 逐线实跑，stdout 剧本落盘（人工阅读留存）；每小时自动跑一条见 `scripts/auto-playthrough.mjs` | 新内容进 e2e 后跑 `node scripts/gen-routes.mjs` 自动生成路线 |
+| **总门** | `npm run test:coverage` | 135 个结局逐个必须有 **T**（traverse）或 **E**（e2e）来源；双缺 → 退出码 1 并列出缺口，同时生成 `docs/TEST-COVERAGE.md` 矩阵 | 自动审计 + 明文清单 |
 
-> 现状（2026-09-08）：**58 个结局全覆盖 58/58**（traverse 结构-状态覆盖 37；e2e 路径断言覆盖 34；并集 58）。
-> 此前 9 条深链结局已由《藏晖室札记》的 e2e 补测与既有多轮测试补齐，双缺行为 0。
+> 现状（2026-09-10）：**135 个结局全覆盖 135/135**（traverse 结构-状态覆盖 73；traverse 到不了的 62 个由 e2e 路径断言覆盖；并集 135，双缺 0）。
+> 转录层：手写 38 条（停在 M14 之前）+ 生成 49 条（千灯 / M15~M22 / P6）= 87 条，内容再扩充时重跑生成器即可同步。
 
 ## 架构
 
