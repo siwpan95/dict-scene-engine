@@ -1,0 +1,181 @@
+# 由 scripts/migrate/json2yaml.py 从 content/harbor3.js 转换
+# （条件表达式已转 Python 语法；业务内容原样，未人工校对）
+scenes:
+  harbor3.start:
+    title: 星港 · 归航
+    text: '你回到第七星港时，港区正下着冷雨。
+
+      第三桩案子的卷宗刚封存三个月，就出事了：第二案的关键证人——那位医生，昨天夜里被人从住所带走，去向不明。
+
+      港务司的人说，看见绑匪的船出了七号码头，往旧船坞方向去了。
+
+      你在雨里站了一会儿。这星港的案子，像海里的暗流，一浪退了，一浪又起。'
+    choices:
+    - text: 去案卷桌，把这案子的线头捡起来
+      goto: harbor3.hub
+  harbor3.hub:
+    title: 调查板 · 归港案
+    text: '案卷桌上，摊着第三案与第一案、第二案的旧卷宗。你用红笔在旧卷上圈了几处：第一案里漏网的那个人，第二案里没抓到的那个接头人——都是同一个绰号：独眼。
+
+      雨打在货棚的顶子上，密密的。你把这案子在心里过了一遍：救人是头一件，抓人是第二件。'
+    choices:
+    - text: 去七号码头，看绑匪的船痕
+      goto: harbor3.dock
+    - text: 去旧船坞，找独眼的藏身处
+      goto: harbor3.yard
+    - text: 去黑市，问独眼的买卖
+      goto: harbor3.market
+    - text: 去港务司，查卷宗库的进出记录
+      goto: harbor3.office
+    - text: 去灯塔，问守望的老头
+      goto: harbor3.beacon
+    - text: 去牢房，再问大副
+      goto: harbor3.cell
+    - text: 去医生的住所，找留下的东西
+      goto: harbor3.clinic
+    - text: 线头够了——叫齐港务司的人，当面问案
+      if: flags.harbor3.ready
+      goto: harbor3.accuse
+  harbor3.dock:
+    title: 七号码头 · 船痕
+    text: '雨把码头洗得发亮。你蹲下看：系缆桩上有新的绳痕，是快船。地上一道拖痕，从栈桥拖到一辆板车的位置，然后消失了。
+
+      看码头的老何凑过来："昨夜后半夜，一条快船来，几个人抬着个长东西上了车。雾大，车牌没看清。"'
+    choices:
+    - text: 记下：快船夜泊，长东西装车
+      if: not harbor3Clues.dock
+      do:
+        harbor3Clues.dock: 1
+      goto: harbor3.hub
+  harbor3.yard:
+    title: 旧船坞 · 藏身处
+    text: '旧船坞废弃多年，棚顶塌了一半。你在最里头的船架下，找到一床潮被、几个空酒瓶，和半张烧剩的纸。
+
+      纸上只认出几个字："……卷宗……第三码头……夜里"。
+
+      船架下还有一把刀，刀柄缠着旧布，布上有暗红的渍。'
+    choices:
+    - text: 记下：船坞藏身点，半张烧剩的纸
+      if: not harbor3Clues.yard
+      do:
+        harbor3Clues.yard: 1
+      goto: harbor3.hub
+  harbor3.market:
+    title: 黑市 · 交易账
+    text: '黑市的老六蹲在门槛上，见你来，用牙签点点地："独眼这两天在筹货。他要的东西，是「干净」的船，「干净」的人，还有一张出关的通行证。"
+
+      你问他独眼拿什么换。老六伸出三根手指："三箱管制零件，都是第一案那年流出去的货。他手里还压着一本账。"'
+    choices:
+    - text: 记下：独眼要跑，压着一本账（铁证：交易账）
+      if: not harbor3Clues.ledger
+      do:
+        harbor3Clues.ledger: 1
+        harbor3Evidence: 1
+      goto: harbor3.hub
+  harbor3.office:
+    title: 港务司 · 卷宗库
+    text: '卷宗库的值班记录被人撕了两页。你对着台灯照，下一页纸上还留着上一页的字痕：昨夜一点，有人用"调度"的腰牌进了卷宗库，借走的正是第二案那卷。
+
+      管理库的老吏哆嗦着说："借卷的是个生面孔，一只眼罩，说话压着嗓子。"'
+    choices:
+    - text: 记下：独眼借走了第二案卷宗（铁证：调包痕）
+      if: not harbor3Clues.slip
+      do:
+        harbor3Clues.slip: 1
+        harbor3Evidence: 1
+        flags.harbor3.ready: true
+      goto: harbor3.hub
+  harbor3.beacon:
+    title: 灯塔 · 目击
+    text: '灯塔的守望老头把灯罩擦得锃亮："昨夜一点，灯塔的光扫过七号码头两次。第二次，看见快船离岸，往旧船坞方向。船尾站着个独眼的人，朝灯塔的方向看了一眼。"
+
+      老头顿了顿："那人，我见过。三年前第一案那会儿，他就在码头上混。"'
+    choices:
+    - text: 记下：灯塔目击独眼，三年前就在
+      if: not harbor3Clues.beacon
+      do:
+        harbor3Clues.beacon: 1
+      goto: harbor3.hub
+  harbor3.cell:
+    title: 牢房 · 大副
+    text: '大副瘦了一圈，见你来，喉咙里滚出半声笑："独眼抓了医生？他怕了。卷宗一公开，他也跑不掉。"
+
+      你问独眼会把人藏哪。大副眯起眼："他是个谨慎的人。人质和卷宗，不会放在一个地方。人，多半在船上；卷宗，在他自己身上。"'
+    choices:
+    - text: 记下：人质在船上，卷宗在独眼身上
+      if: not harbor3Clues.cell
+      do:
+        harbor3Clues.cell: 1
+      goto: harbor3.hub
+  harbor3.clinic:
+    title: 医生住所 · 暗号
+    text: '医生的住所被翻得乱七八糟。你在门后的一块松动的地板下，摸到半截粉笔。
+
+      门框内侧，有粉笔写的一行极小的字，被翻箱的灰尘盖了一半。你擦开看：是三个数字，和一个"驳"字。
+
+      医生懂一点航务。这是旧港的驳船编号——他被带去哪条船，写在了门框上。'
+    choices:
+    - text: 记下：医生留了暗号——驳船编号（铁证：暗号）
+      if: not harbor3Clues.code
+      do:
+        harbor3Clues.code: 1
+        harbor3Evidence: 1
+        flags.harbor3.ready: true
+      goto: harbor3.hub
+  harbor3.accuse:
+    title: 问案 · 港务司
+    text: '你把港务司的人、黑市的老六、看码头的老何，都叫到了货棚。雨还没停，打在顶子上，像谁在催。
+
+      你把查来的东西一样一样摆上油布：卷宗库的字痕、黑市的交易账、门框上的粉笔暗号。
+
+      "独眼要跑。人质在船上，卷宗在他身上。"你环视一圈，"他跑不掉。"'
+    choices:
+    - text: 当众亮出实证，锁定独眼，布网抓人
+      if: harbor3Evidence >= 2
+      goto: harbor3.end-truth
+    - text: 指着老六：「是你通的风」——可你心里没底
+      goto: harbor3.end-wrong
+    - text: （你把油布上的纸收了收）再查查——别打草惊蛇
+      goto: harbor3.end-open
+  harbor3.end-truth:
+    title: 结局 · 归港
+    text: '你布了网。
+
+      按着驳船编号，港务司的快艇在旧船坞外的浅滩上，截住了独眼的船。医生被蒙着眼捆在舱底，人没事，只是吓得说不出话。
+
+      独眼跳海想跑，被老何一网兜住，像条离了水的鱼。他身上搜出了那本交易账，和第二案的卷宗。
+
+      卷宗公开那天，星港下了一场透雨。三案并结，走私网连根拔起。
+
+      你在货棚里把旧卷宗一页页归档。红笔圈过的那些线头，一个一个，都系上了。
+
+      雨停了。星港的灯全亮着，像在说：船靠了岸，人归了港。'
+    choices:
+    - text: 再走一遭这星港
+      goto: '@restart'
+  harbor3.end-wrong:
+    title: 结局 · 冤
+    text: '你指了老六。
+
+      老六被港务司带走那天，回头看了你一眼，什么都没说。
+
+      第三天，独眼的快船在港外被巡逻艇碰见，跑了。医生被扔在浅滩上，人是活的，可第二案的卷宗，已经烧成了灰。
+
+      后来，有人在黑市看见老六又蹲在门槛上剔牙。他见你路过，往旁边让了让，还是什么都没说。
+
+      你明白自己错了。可有些错，说出口，就收不回来。'
+    choices:
+    - text: 再走一遭这星港
+      goto: '@restart'
+  harbor3.end-open:
+    title: 结局 · 悬案
+    text: '你收了纸，说再查查。
+
+      可独眼比你快。当夜，一条快船出了港，再没回来。第二天，医生在旧船坞里被发现，捆着，活着；第二案的卷宗不见了。
+
+      案子又挂了起来。港务司的人叹气：这星港的暗流，捞不干净。
+
+      你站在码头，看雨停，看船来船往。有些线头，松一松，就再也系不上了。'
+    choices:
+    - text: 再走一遭这星港
+      goto: '@restart'

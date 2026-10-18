@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dict-scene-engine"
+version = "0.3.0"
+description = "字典场景引擎 —— 场景即字典，能力即插件（Python 版 / cordis-py）"
+readme = "MIGRATION.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "全哥 (siwpan)" }]
+keywords = [
+    "text-adventure",
+    "interactive-fiction",
+    "game-engine",
+    "plugin-architecture",
+    "narrative-engine",
+    "dse-core",
+    "cordis-py",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Games/Entertainment",
+]
+# P2 功能（save/achievements）目前在 cordis-py 的 p1-core-engine 分支，尚未发版；
+# 待 dse-core 0.2.0 发布后改为 "dse-core>=0.2.0"（见 MIGRATION.md）
+dependencies = [
+    "dse-core @ git+https://gitee.com/siwpan/cordis-py.git@p1-core-engine",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://gitee.com/siwpan/dict-scene-engine"
+Repository = "https://gitee.com/siwpan/dict-scene-engine"
+Engine = "https://gitee.com/siwpan/cordis-py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests-py"]

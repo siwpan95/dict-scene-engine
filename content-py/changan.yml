@@ -1,0 +1,437 @@
+# 由 scripts/migrate/json2yaml.py 从 content/changan.js 转换
+# （条件表达式已转 Python 语法；业务内容原样，未人工校对）
+scenes:
+  changan.start:
+    title: 长安 · 西市口
+    text: '天宝某年，长安西市，天下商贾云集之地。
+
+      你是个西市署的小吏，管着十字街口那一段的巡铺。这日清早，你刚上值，一个波斯邸的伙计就慌慌张张跑来："官人，邸里丢了一件要紧东西！"
+
+      什么要紧东西？伙计左右看看，压低了嗓子："一封信。我们东家说，这信是替人转的，丢了，要出大事。"
+
+      一封信，在西市，要出大事。你整了整幞头，跟着他往波斯邸去。'
+    choices:
+    - text: 先到西市十字，把早市的情况过一遍
+      goto: changan.cross
+  changan.cross:
+    title: 西市 · 十字街口
+    text: '西市十字，车马如流。胡饼的香气、马粪的气味、胡语的叫卖，混成一片。
+
+      你站在街心，把波斯邸丢信的事在脑子里过了一遍。那封信若真是边关军情，落在谁手里，都是泼天的大祸。
+
+      金吾卫的巡卒阿柱从街角转过来，朝你点点头。西市的各方势力，就铺在这十字的四面。'
+    choices:
+    - text: 去胡商坊，找胡商萨保问话
+      goto: changan.hu
+    - text: 去平康坊，找歌姬绿腰打听
+      goto: changan.pingkang
+    - text: 去金光门，问金吾卫阿柱
+      goto: changan.gate
+    - text: 去波斯邸，翻那封丢信的前后
+      goto: changan.bosi
+    - text: 去钱记绸缎铺，看看钱老板
+      goto: changan.silk
+    - text: 去西市的当铺，问昨夜谁来过
+      goto: changan.pawn
+    - text: 去波斯寺，问寺里的知事
+      goto: changan.temple
+    - text: 去暗巷，看昨夜留下的痕迹
+      goto: changan.alley
+    - text: 去桥头，问摆渡的船家
+      goto: changan.bridge
+    - text: 晨钟响了——去钟楼那边看看
+      goto: changan.bell
+    - text: 口干了——去巷尾的茶肆坐坐
+      goto: changan.tea
+    - text: 问得差不多了——去西市署，当面对质
+      if: flags.changan.ready
+      goto: changan.accuse
+  changan.hu:
+    title: 胡商坊 · 萨保
+    text: '胡商坊是粟特人聚居的地方，酒香混着香料的味儿。萨保是这坊里的头面人物，五十来岁，碧眼深目，一口汉话说得比长安人还地道。
+
+      他见你来，笑眯眯地让进正堂，亲手奉茶："官人，波斯邸丢信的事，我也听说了。西市的事，瞒不过我的耳朵。"'
+    choices:
+    - text: 向萨保细细盘问
+      goto: changan.hu.ask
+    - text: 回十字街口
+      goto: changan.cross
+  changan.hu.ask:
+    title: 胡商坊 · 问萨保
+    text: '萨保的茶是葡萄煎，甜里带酸。他拨着腕上的金镯子，眼睛却一刻没离开你的脸。他把茶盏往你面前推了推，金镯子晃出细碎的光。
+
+      "西市的水深，官人年轻，走路小心些。"他笑得和善，"不过嘛——有用得着我的地方，尽管开口。这坊里，没有我打听不到的事。"'
+    mode: dialogue
+    dialogue:
+      npc: 胡商萨保
+      notes: 3
+      onEnd: changan.cross
+      topics:
+      - id: silk
+        name: 绸缎铺的钱老板
+        reply: 钱老板？绸缎生意做得大，跟谁都有来往。前些日子还托我的商队，往北边带了一批货——绸缎，还有几箱"账册"。
+        effect:
+          changanClues.silk: 1
+      - id: boat
+        name: 昨夜出城的夜船
+        reply: 昨夜后半夜，西市漕渠上确实有船走。摇橹的不像是常客，船吃水很浅，像是送人，不是送货。
+        effect:
+          changanClues.boat: 1
+      - id: money
+        name: 谁和波斯邸有账
+        reply: 波斯邸的账，我可不知道。不过钱老板近来出手阔绰，给庙里捐了整整一百贯——一个绸缎商，哪来这么多香油钱？
+        effect:
+          changanClues.money: 1
+  changan.pingkang:
+    title: 平康坊 · 歌姬
+    text: '平康坊的乐声白日也不歇。歌姬绿腰是这坊里嗓子最好的，一曲《凉州》能唱哭半条巷子。
+
+      她隔着帘子见你，先笑："官人今日来得早。是查案？还是听曲？"廊下的鹦鹉忽然学舌，喊了句"官人慢走"，把你们都逗乐了。
+
+      帘子后的影子动了动，像在等你开口。'
+    choices:
+    - text: 向绿腰细细盘问
+      goto: changan.pingkang.ask
+    - text: 回十字街口
+      goto: changan.cross
+  changan.pingkang.ask:
+    title: 平康坊 · 问绿腰
+    text: '绿腰拨着琵琶，弦声细碎。她说话像唱歌，一句一句，尾音都往上挑。她说着，指尖在弦上一抹，滑出半串音，像笑，又像叹气。
+
+      "官人要知道夜里的事，问我就对了。平康坊的夜，可比白日长。"她抿嘴一笑，"不过我的记性，得靠官人问得巧。"'
+    mode: dialogue
+    dialogue:
+      npc: 歌姬绿腰
+      notes: 3
+      onEnd: changan.cross
+      topics:
+      - id: night
+        name: 昨夜的夜谈
+        reply: 昨夜三更，后窗下有两个男人说话。一个说"边关的信，烫手"，另一个笑，笑声我认得——钱记绸缎铺的钱老板。
+        effect:
+          changanClues.night: 1
+          changanEvidence: 1
+      - id: purse
+        name: 捡到的东西
+        reply: 天亮扫地，我在后窗下捡到一截红绳，绳上系着半块木牌，刻着个"钱"字。官人要，我拿给你。
+        effect:
+          changanClues.purse: 1
+      - id: guest
+        name: 钱老板的客人
+        reply: 钱老板常来，多是谈生意。昨夜那个，口音生，不像长安人，倒像边关那一带的。两人说了小半个时辰。
+        effect:
+          changanClues.guest: 1
+  changan.gate:
+    title: 金光门 · 金吾卫
+    text: '金光门是西市往西出城的门。金吾卫的巡卒阿柱是你同乡，一个憨厚后生，站岗时腰挺得笔直。晨光从门洞里斜进来，照得阿柱的半边脸发亮。
+
+      他见你来，往两边扫了一眼，压低嗓子："三哥，昨夜这门口，有件怪事。出城的人里，有个拿符节的不像官身。"'
+    choices:
+    - text: 向阿柱细细盘问
+      goto: changan.gate.ask
+    - text: 回十字街口
+      goto: changan.cross
+  changan.gate.ask:
+    title: 金光门 · 问阿柱
+    text: '阿柱把你拉到门洞的阴影里，声音压得极低："三哥，我这差事，说错一句就得挨板子。可昨夜的事，我越想越不对。"
+
+      你拍了拍他的肩，让他慢慢说。他把腰刀往墙上一靠，声音更低了，喉结上下滚了滚。晨光从门洞里斜进来，照在他紧张的半张脸上。'
+    mode: dialogue
+    dialogue:
+      npc: 金吾卫阿柱
+      notes: 3
+      onEnd: changan.cross
+      topics:
+      - id: seal
+        name: 那枚出关符节
+        reply: 符节是真的，章也是真的。可持符的人，手在抖。金吾卫的官身，过门哪会抖？我多看了两眼，他还瞪我。
+        effect:
+          changanClues.seal: 1
+      - id: watch
+        name: 当夜还有谁出城
+        reply: 后半夜出城的不多。有个骑快马的，蒙着脸，怀里鼓鼓的。我喊他下马，他拍马就跑，追不上。
+        effect:
+          changanClues.watch: 1
+      - id: duty
+        name: 夜里的值更
+        reply: 我和老周轮流。老周说，四更天时，西市方向有火光一晃，像有人烧纸，又像烧别的什么。天亮去看，灰都没了。
+        effect:
+          changanClues.duty: 1
+  changan.bosi:
+    title: 波斯邸 · 分账
+    text: '波斯邸的账房先生把近月的邸账摊给你看。你翻到一笔：三日前，邸里往"钱记"出过一批西域毯，作价甚高，可钱记没进过这批毯。
+
+      再翻，又一笔：昨夜，邸里支了一百贯，去向写着一个"钱"字。
+
+      账房先生的手抖起来："这……这是东家亲自记的。"
+
+      一进一出，钱记与波斯邸之间，流着一笔见不得光的账。'
+    choices:
+    - text: 记下：邸账有"钱"字分账（铁证）
+      if: not changanClues.bosi
+      do:
+        changanClues.bosi: 1
+        changanEvidence: 1
+        flags.changan.ready: true
+      goto: changan.cross
+    - text: 回十字街口
+      goto: changan.cross
+  changan.silk:
+    title: 钱记 · 绸缎铺
+    text: '钱记绸缎铺门面气派，钱老板是个圆脸胖子，笑起来眼睛眯成缝。他见你来，亲自把你往内堂让："官人查案辛苦，先喝盏茶。"
+
+      内堂的案上摆着几块西域毯的样片，边上压着一叠当票。你眼角扫过，最上面那张当票，写着"信一封，死当，作价十贯"。
+
+      信也能当？钱老板顺着你的目光看过去，不动声色地把当票翻了个面。'
+    choices:
+    - text: 记下：钱记有西域毯样片和一张"信"的当票
+      if: not changanClues.silkShop
+      do:
+        changanClues.silkShop: 1
+      goto: changan.cross
+    - text: 向钱老板当面问那张当票
+      goto: changan.silk.ask
+  changan.silk.ask:
+    title: 钱记 · 问钱老板
+    text: '钱老板还是笑，可端着茶盏的手，指节发白。他笑得眼睛更眯了，可那笑浮在脸上，像贴上去的。
+
+      "官人，我钱某人做的都是正经生意。那张当票……是替朋友收的一件旧物，不值当提。"
+
+      他说着，往你手里塞了个沉甸甸的锦囊："官人查案辛苦，这点茶钱，不成敬意。"'
+    mode: dialogue
+    dialogue:
+      npc: 钱老板
+      notes: 3
+      onEnd: changan.cross
+      topics:
+      - id: ticket
+        name: 那张"信"的当票
+        reply: 朋友的东西。一个做边关生意的老友，托我典当的。死当，就是不要了。官人何必揪着不放？
+        effect:
+          changanClues.ticket: 1
+      - id: rug
+        name: 西域毯的样片
+        reply: 波斯邸送来的样片。我正打算进一批。生意上的往来，跟丢信有什么关系？
+        effect:
+          changanClues.rug: 1
+      - id: bribe
+        name: 那个锦囊
+        reply: （你掂了掂，足有二十贯。他笑得越发和气——这钱，是茶钱，也是封口钱。）
+        effect:
+          changanClues.bribed: 1
+  changan.pawn:
+    title: 当铺 · 兑号
+    text: '西市的老当铺，柜台高过人头。朝奉听说你查丢信的事，从账底抽出一张当票存根："昨夜三更，有个裹着头巾的人来当东西。当了什么？一封信用油纸包着，死当，作价十贯。"
+
+      你拿过存根看，上头签的字，和钱记账本上的"钱"字，一模一样。
+
+      "死当的东西，我们当铺不该经手。"朝奉搓着手，"可那人给的是双倍估价……"'
+    choices:
+    - text: 记下：当票存根笔迹与钱老板一致（铁证）
+      if: not changanClues.pawn
+      do:
+        changanClues.pawn: 1
+        changanEvidence: 1
+        flags.changan.ready: true
+      goto: changan.cross
+    - text: 回十字街口
+      goto: changan.cross
+  changan.temple:
+    title: 波斯寺 · 知事
+    text: '波斯寺的知事是个清瘦的老人，正在擦一座铜香炉。
+
+      "三日前，钱施主来添了一百贯香油钱。"他缓缓说，"我问他为何突然如此慷慨，他说，生意成了，还愿。"
+
+      你问什么生意。知事摇头："他没说。只说他做了一桩买卖，一桩"能把家业翻十番"的买卖。"
+
+      香油钱一百贯，家业翻十番。'
+    choices:
+    - text: 记下：钱老板添香油钱，说"家业翻十番"
+      if: not changanClues.temple
+      do:
+        changanClues.temple: 1
+      goto: changan.cross
+    - text: 回十字街口
+      goto: changan.cross
+  changan.alley:
+    title: 暗巷 · 痕迹
+    text: '波斯邸后墙外的暗巷，窄得只容一人。你蹲下看，墙根有半枚脚印，鞋底是长安少见的花纹——西域货。
+
+      再往前，地上有一小片烧过的纸灰，还沾着油。你用指甲挑起一点，凑近闻：是油纸，正是包信的那种。
+
+      有人在这里，把什么烧了，又没烧净。'
+    choices:
+    - text: 记下：暗巷有西域鞋印和烧剩的油纸
+      if: not changanClues.alley
+      do:
+        changanClues.alley: 1
+      goto: changan.cross
+    - text: 回十字街口
+      goto: changan.cross
+  changan.bridge:
+    title: 桥头 · 船家
+    text: '西市漕渠的桥头，摆渡的船家正晒着太阳。你问他昨夜的事，他眯起眼："后半夜，是有条船出城。摇橹的蒙着脸，舱里坐着一个裹头巾的。到西闸下的船。"
+
+      他啐了口茶沫子："那裹头巾的，下船时掉了个东西，亮闪闪的，我捞起来看，是块腰牌——金吾卫的腰牌。"
+
+      船家把腰牌给你看。你翻过来，牌子背面刻着个"钱"字。'
+    choices:
+    - text: 记下：夜船出西闸，掉的是"钱"字腰牌
+      if: not changanClues.bridge
+      do:
+        changanClues.bridge: 1
+      goto: changan.cross
+    - text: 回十字街口
+      goto: changan.cross
+  changan.bell:
+    title: 钟楼 · 晨钟
+    text: '晨钟响过一百零八下，西市醒了。你在钟楼下站着，看各色人等从四面八方涌进市门。
+
+      忽然有人扯你的袖子。是波斯邸的伙计，跑得气喘："官人！我们东家说了，那封信……那封信若能寻回，邸里愿出五十贯答谢。若是寻不回——"他咽了口唾沫，"东家说，西市要出大事。"'
+    choices:
+    - text: （五十贯答谢，出大事——这信的分量更重了）
+      goto: changan.cross
+  changan.tea:
+    title: 巷尾 · 茶肆
+    text: '巷尾有家小茶肆，没招牌，门楣上一块旧木板刻着个"茶"字。你坐下要了碗粗茶，听邻桌的人闲谈。
+
+      "听说了吗？钱老板要往北边跑。"
+
+      "跑什么？西市的生意不要了？"
+
+      "听说他夜里见了个边关来的人，回来后整夜点灯，天不亮就收拾细软。"
+
+      你端着茶碗，没说话。这长安的茶肆里，消息比衙门还快。'
+    choices:
+    - text: （记下：钱老板要往北边跑）
+      if: not changanClues.tea
+      do:
+        changanClues.tea: 1
+        flags.changan.ready: true
+      goto: changan.cross
+  changan.accuse:
+    title: 西市署 · 对质
+    text: '你把涉案的人都叫到西市署。钱老板、胡商萨保、歌姬绿腰、波斯邸的伙计，站了一屋子。
+
+      波斯邸的东家也在，白着脸说："那封信，是边关的军情。谁截了它，谁就……"
+
+      他没说下去。屋里的空气绷得像根弦。
+
+      你把这半日查来的东西，在案上一字排开。'
+    choices:
+    - text: 当众亮出实证，指认绸缎商钱老板
+      if: changanEvidence >= 2
+      goto: changan.end-truth
+    - text: 指着钱老板：「是你！」——可你手里证据不足，心里发虚
+      if: changanEvidence < 2
+      goto: changan.end-escape
+    - text: 指着歌姬绿腰：后窗夜谈，她听得最清
+      goto: changan.end-wrong
+    - text: （你攥了攥袖子——还是没有十足把握）这案子，容后再议
+      goto: changan.end-open
+    - text: 你收了钱老板的锦囊——这案子，你权当没看见
+      if: changanClues.bribed >= 1
+      goto: changan.end-bribe
+    - text: 你把查到的信与账，连夜托人送去了边关
+      if: changanEvidence >= 2
+      goto: changan.end-letter
+  changan.end-truth:
+    title: 结局 · 归案
+    text: '你把东西一样一样摆上案。
+
+      "第一样，波斯邸的邸账。昨夜支出一百贯，去向写着个"钱"字。"
+
+      "第二样，当铺的存根。三更天，有人当了一封信，死当，作价十贯。存根上的字，和钱记的账本，同一只手。"
+
+      "第三样，平康坊绿腰的证词。三更后窗，两个人说"边关的信，烫手"，其中一个的笑声，是钱老板。"
+
+      钱老板脸上的笑一寸寸僵住。萨保在一旁，金镯子也不转了。
+
+      信追回来了，半页已经烧焦。边关的军情到底没出长安。
+
+      钱老板下了狱。西市署的案卷上，你这一笔，写得工工整整。
+
+      钟楼又敲钟了。西市照旧热闹，像什么也没发生过。'
+    choices:
+    - text: 再走一遭这西市
+      goto: '@restart'
+  changan.end-wrong:
+    title: 结局 · 冤
+    text: '你指了绿腰。
+
+      满屋哗然。绿腰没辩，只拨了一下琵琶，弦"铮"地断了一根："官人，我若真是那截信的人，何必把夜谈的事说给你听？"
+
+      没人听。案子以"歌姬通敌"结了。绿腰被发落出京。
+
+      半月后，边关告急的军报果然到了。信，还是出去了。
+
+      钱老板的绸缎铺关了门，人去了北边。西市少了个钱老板，也少了绿腰的《凉州》。
+
+      你后来再没进过平康坊。那断弦的琵琶声，夜里总响。'
+    choices:
+    - text: 再走一遭这西市
+      goto: '@restart'
+  changan.end-open:
+    title: 结局 · 悬案
+    text: '你终究没指认任何人。
+
+      案子挂了。波斯邸丢了信，也只能吃个哑巴亏。西市署上上下下，再没人提这事。
+
+      半个月后，边关告急。你才明白，那封信到底还是出去了。
+
+      钱老板的铺子还开着，锦缎还是那么鲜亮。绿腰照旧唱她的《凉州》，只是词里多了句"风从北来"。
+
+      你在西市巡铺，一日又一日。有些案子，悬着，像檐角的铃，风一吹，就当没响过。'
+    choices:
+    - text: 再走一遭这西市
+      goto: '@restart'
+  changan.end-escape:
+    title: 结局 · 惊蛇
+    text: '你证据不足，却当众指了钱老板。
+
+      他先是一愣，随即笑了，笑得极和气："官人，饭可以乱吃，话不能乱说。"
+
+      当夜，钱记绸缎铺人去楼空。第二天，金吾卫在金光门外二十里，捡到一匹累死的快马。
+
+      钱老板跑了。信，也没了。
+
+      波斯邸的东家从此闭门谢客。萨保的商队，再没往北边发过货。
+
+      你后来想，若是再沉得住气一些，把那封信先截住——可惊了的蛇，是不会回头的。'
+    choices:
+    - text: 再走一遭这西市
+      goto: '@restart'
+  changan.end-bribe:
+    title: 结局 · 受贿
+    text: '你收了锦囊。
+
+      那二十贯钱，在你箱底压了三天，又被你翻出来，还是花出去了。
+
+      边关告急那天，你正在西市喝茶。军报从街上飞驰而过，马蹄溅起的泥点子，落在你的袍角上。
+
+      你端着茶碗，忽然觉得那碗茶苦得厉害。
+
+      钱老板后来还给你送过一回"茶钱"，你收了。再后来，他搬走了。西市上的人说，钱老板在朔方买了大宅，做边贸，越做越大。
+
+      只有你知道，他的家业是怎么翻的十番。那封信，是你放行的。'
+    choices:
+    - text: 再走一遭这西市
+      goto: '@restart'
+  changan.end-letter:
+    title: 结局 · 送信
+    text: '你没去西市署，也没追钱老板。你带着查到的账与半截焦信，连夜出了金光门，抄近道往边关赶。
+
+      路上你换了三匹马。第三匹也累得口吐白沫时，你到了。
+
+      守将看了信，脸色铁青："这信若落在敌人手里，边关就瞎了。"他拍着你的肩，赏了你一袋金。
+
+      你没收。你只要了一纸回文，说信已到，勿念。
+
+      回长安那天，西市还热闹。钱老板的铺子空着，萨保的商队还在走。绿腰还在唱《凉州》。
+
+      你在巷尾那家没招牌的茶肆坐下，要了碗粗茶。茶烫嘴，你吹了吹，忽然笑了。
+
+      这长安城，总得有人把信送到。'
+    choices:
+    - text: 再走一遭这西市
+      goto: '@restart'

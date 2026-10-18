@@ -1,0 +1,71 @@
+# 由 scripts/migrate/json2yaml.py 从 content/starport.js 转换
+# （条件表达式已转 Python 语法；业务内容原样，未人工校对）
+scenes:
+  starport-hub:
+    title: 星港 · 空港大厅
+    text: '霓虹灯牌在雨幕中化开一道道彩色的水痕。这里是第七星港——走私者的天堂，也是所有人假装看不见彼此的地方。
+
+      接你这趟活的中间人只说了一句话：货舱最深处那枚数据核心，拿到手，钱货两清。至于核心里是什么，他劝你别问。
+
+      雨越下越大。你可以现在就掉头回去——没人会拦你，也没人会记得你来过。'
+    choices:
+    - text: 潜入货舱区
+      goto: starport-cargo
+    - text: 去「红矮星」酒吧打听
+      if: gold >= 1
+      do:
+        gold: -1
+      goto: starport-bar
+    - text: 掉头返回村庄
+      goto: start
+    - text: 港务官在招人查一桩命案
+      if: not flags.caseAccepted
+      goto: case.brief
+    - text: 继续查那桩命案
+      if: flags.caseAccepted
+      goto: case.board
+    - text: 副官在找人查港务官中毒案（第二桩）
+      if: not flags.case2Accepted
+      goto: case2.brief
+    - text: 继续查港务官中毒案
+      if: flags.case2Accepted
+      goto: case2.board
+  starport-cargo:
+    title: 星港 · 货舱区
+    text: '货舱里堆满贴着各色封条的走私箱，空气里混着机油和防锈漆的味道。两个守卫坐在折叠桌旁打牌，其中一个的手边搁着一把上了膛的枪。
+
+      通风口在货舱左上角，栅格是松的——可惜你不知道换班的间隙有多长。你只有一次机会——'
+    choices:
+    - text: 直接冲过去
+      do:
+        hp: -5
+      goto: starport-win
+    - text: 绕通风管道（需要情报）
+      if: flags.starportIntel
+      goto: starport-win
+    - text: 悄悄退回去
+      goto: starport-hub
+  starport-bar:
+    title: 星港 · 红矮星酒吧
+    text: '酒吧里烟雾缭绕，几个赏金猎人趴在吧台上打盹。酒保擦着杯子，收下你的金币，手上的动作没停。
+
+      「看你面生。」他压低声音，「货舱守卫换班前有五分钟空档——不多不少，刚够一个人从通风管道爬进去。」
+
+      他瞥了眼门口：「还有一句，别碰货舱里的黑箱子。上一个碰的，现在还在港外的垃圾场里漂着。」'
+    onEnter:
+      flags.starportIntel: true
+    choices:
+    - text: 返回大厅，前往货舱
+      goto: starport-cargo
+  starport-win:
+    title: 结局 · 数据核心
+    text: '你撬开保险箱，数据核心静静躺在防震盒里，幽蓝的光一下一下地搏动，像某种还在活着的东西。
+
+      第七星港的通天秘密，现在归你了——你终于明白中间人为什么不让你打开它看。
+
+      雨还在下。你把核心揣进怀里，走向泊位，身后整座星港依旧假装什么都没发生。
+
+      （GOOD END）'
+    choices:
+    - text: 返回村庄，再玩一次
+      goto: '@restart'

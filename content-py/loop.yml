@@ -1,0 +1,299 @@
+# 由 scripts/migrate/json2yaml.py 从 content/loop.js 转换
+# （条件表达式已转 Python 语法；业务内容原样，未人工校对）
+scenes:
+  loop.start:
+    title: 夜路 · 听雨客店
+    text: '你是走州过县的货郎，误了宿头，雾里撞见山脚一点灯：一间挂着「听雨」木牌的客店。老板娘阿禾把你让进后厢，只嘱咐一句——
+
+      「夜里听见更声，别数。数清了，就睡不着了。」
+
+      子时，你被更声惊醒：一下，两下……你数到二十四。更声没有停。二十五。
+
+      窗外的雾厚得像能拧出水。你披衣坐起，想起阿禾那句话，忽然明白她不是在开玩笑。'
+    choices:
+    - text: 躺下，闭眼——把这一夜再活一遍（进入循环）
+      do:
+        flags.loop.n: 1
+      goto: loop.awaken
+  loop.awaken:
+    title: 第 {flags.loop.n} 个夜晚 · 客舍
+    text: '你又醒了。窗外的雾薄了些，更声刚歇——你数过，比昨夜又多了一下。
+
+      阿禾在廊下擦灯，见你推门，眼里的神色说不上是惊还是怕：「你……怎么还在这儿？」
+
+      你不答。你只知道一件事：这一夜，你还能走出门去。
+
+      （今夜还剩 {loopMoves} 分力气。每去一处地方，花掉 1 分。）'
+    choices:
+    - text: 去村东更楼，看看打更的哑巴
+      if: loopMoves >= 1
+      do:
+        loopMoves: -1
+      goto: loop.watchtower
+    - text: 去村中祠堂，会一会守香火的路三公
+      if: loopMoves >= 1
+      do:
+        loopMoves: -1
+      goto: loop.temple
+    - text: 去井台看看（那里总有人半夜打水）
+      if: loopMoves >= 1
+      do:
+        loopMoves: -1
+      goto: loop.well
+    - text: 去周家铁匠铺，看周嫂子的铺子还亮不亮灯
+      if: loopMoves >= 1
+      do:
+        loopMoves: -1
+      goto: loop.smith
+    - text: 去村尾药铺，找郎中抓一副「压惊」的药
+      if: loopMoves >= 1
+      do:
+        loopMoves: -1
+      goto: loop.doctor
+    - text: 去后山口，看看雾夜里那条路通向哪里
+      if: loopMoves >= 1  and  clues.loop.ledger >= 1
+      do:
+        loopMoves: -1
+      goto: loop.pass
+    - text: 今夜不去别处——守到祠堂，会一会雾里的东西
+      if: clues.loop.drum >= 1  and  clues.loop.ledger >= 1  and  clues.loop.shrine >= 1
+      goto: loop.confront
+    - text: 睡去，等下一个夜晚
+      if: flags.loop.n < 6
+      do:
+        flags.loop.n: 1
+      goto: '@loop:loop.awaken'
+    - text: 雾已经漫进门槛……你闭上眼，任它来
+      if: flags.loop.n >= 6
+      goto: loop.end-forever
+  loop.watchtower:
+    title: 村东 · 更楼
+    text: '更楼是村里最高的地方，一根孤零零的木柱顶着间小阁。打更的哑巴蹲在檐下，见了你，咧嘴一笑，又焦急地摆手——他在比划：今晚的鼓，多响了一下。
+
+      你顺着他的手看向那面旧更鼓。鼓沿密密麻麻刻着道痕，你数到二十四，最外头有一道新刻的、还带着木屑的印子。'
+    choices:
+    - text: 细看那道新刻痕
+      if: not clues.loop.drum
+      do:
+        clues.loop.drum: 1
+      goto: loop.watchtower
+    - text: 问哑巴：刻痕是谁刻的
+      if: clues.loop.drum >= 1
+      goto: loop.watchtower
+    - text: 上二楼，看看那本更簿
+      if: clues.loop.drum >= 1
+      goto: loop.watchtower.up
+    - text: 回客舍
+      goto: loop.awaken
+  loop.watchtower.up:
+    title: 更楼 · 二楼
+    text: '哑巴见你上楼，没拦，只把脸别开，像是不忍心看你撞破什么。
+
+      二楼的条案上摊着一本更簿，皮面磨得发亮。你翻开来：一页一夜，每页只写一个名字，旁边画着个小小的圈。字迹一笔一划，端正得过分——不像打更人粗糙的手，倒像账房里先生的字。
+
+      最末一页：周铁生。就是昨夜失踪的周家当家的。'
+    choices:
+    - text: 把更簿记在心里（名字旁的圈，是交货的记号）
+      if: not clues.loop.ledger
+      do:
+        clues.loop.ledger: 1
+      goto: loop.watchtower
+    - text: 下楼，假装什么都没看见
+      if: clues.loop.ledger >= 1
+      goto: loop.watchtower
+  loop.temple:
+    title: 村中 · 祠堂
+    text: '祠堂里香火不断，路三公跪在蒲团上，背对着门。听见脚步声，他头也不回：「外乡人，祠堂不是歇脚的地方。」
+
+      你看见神龛前供着三牲，香炉里的灰堆得老高——这家祠的香火，旺得不像样。三公起身添香，手稳得像常年做这事的人。'
+    choices:
+    - text: 套话：村里每年都有人「被雾收走」？
+      goto: loop.temple
+    - text: 等三公起身去拿灯油，绕到神龛后头看看
+      if: flags.loop.n >= 3
+      goto: loop.temple.inner
+    - text: 回客舍
+      goto: loop.awaken
+  loop.temple.inner:
+    title: 祠堂 · 神龛之后
+    text: '三公提着灯油壶进了里间，脚步远了。你飞快绕到神龛后——供桌底下的暗格里，塞着个油布包。
+
+      抖开来：一包碎银，一封没封口的信。信上只一行字：「初七子时，老地方。货要好货，别拿病秧子糊弄。」落款画着个圈——和更簿上那个记号一模一样。
+
+      油布一角还压着半张红纸，是更簿的封面残片。'
+    choices:
+    - text: 把信上的话记牢（碎银与回信——买卖的凭证）
+      if: not clues.loop.shrine
+      do:
+        clues.loop.shrine: 1
+      goto: loop.temple
+    - text: 原样放回，若无其事地退出
+      if: clues.loop.shrine >= 1
+      goto: loop.temple
+  loop.well:
+    title: 井台
+    text: '井台边湿漉漉的，绳子上还挂着水珠——有人刚打过水。可这会儿已是后半夜。
+
+      你探头往井里看，水面上浮着一层薄薄的白雾，井壁的砖缝里卡着半截麻绳头，勒痕是新的。你顺着绳头往另一侧拉，绳子绷直，一直拖向村后荒地的方向——像是夜里有人借着打水的动静，往那边送过什么沉东西。
+
+      井口的青石上，有一道浅浅的辙印，和寻常独轮车碾出来的不一样，窄，深，是矿山里运矿石的那种小车留下的。'
+    choices:
+    - text: 记下辙印与绳痕（都指向后山口）
+      do:
+        clues.loop.well: 1
+      goto: loop.well
+    - text: 回客舍
+      goto: loop.awaken
+  loop.smith:
+    title: 周家铁匠铺
+    text: '铺子没掌灯，门虚掩着。周嫂子坐在门槛上，怀里抱着一把没打完的镰刀，也不哭，就那么坐着。
+
+      「他说，夜里听见更声多了一下，要去祠堂问三公。」她哑着嗓子，「我问过别家——去年卖布的刘婶，前年算命的瘸先生，走的时候，都说听见了二十五下。」
+
+      她抬头看你，眼神直勾勾的：「外乡人，你数得清吗？」'
+    choices:
+    - text: 告诉她：你数过，二十五下
+      do:
+        clues.loop.history: 1
+      goto: loop.smith
+    - text: 问她：可有人去找过？
+      goto: loop.smith.deep
+    - text: 回客舍
+      goto: loop.awaken
+  loop.smith.deep:
+    title: 铁匠铺 · 灯下
+    text: '周嫂子起身点了灯，火光一跳，她的脸在光里显出一丝狠：「找过。我男人头七那天，我跟着三公去过后山。」
+
+      「废矿口子上停着一辆马车，车帘是青布的。三公站在车前，跟车里的人说话，说的不是本地口音。」
+
+      她压低声音：「后来我在祠堂后头的地里，刨出过一身衣裳——是我男人的旧棉袄，洗得干干净净，叠得板板正正，像要出远门。」'
+    choices:
+    - text: 废矿、马车、青布帘子——都记下了
+      if: not clues.loop.history
+      do:
+        clues.loop.history: 1
+      goto: loop.smith
+    - text: 回客舍
+      goto: loop.awaken
+  loop.doctor:
+    title: 村尾 · 药铺
+    text: '郎中还没睡，在灯下碾药。满屋药味里，你闻出一丝若有若无的焦香——像烧纸。
+
+      「外乡人？来抓药？」他抬眼，「劝你一句：明早赶路，别回头。这村的雾，认生。」
+
+      你问他更声的事。他碾药的手顿了一下：「哑巴打更二十年，从不多敲。可这两个月，他总说困，白天睡不醒——我给他配过安神汤，喝下去反倒更沉。」
+
+      他垂着眼：「像是有谁，不想让他醒着听见什么。」'
+    choices:
+    - text: 记下：哑巴被下了药，敲更的另有其人
+      if: not clues.loop.drowsy
+      do:
+        clues.loop.drowsy: 1
+      goto: loop.doctor
+    - text: 问他：东市的药行，比这里的雾干净吧？
+      if: clues.loop.drowsy >= 1
+      goto: loop.doctor.shelf
+    - text: 回客舍
+      goto: loop.awaken
+  loop.doctor.shelf:
+    title: 药铺 · 后柜
+    text: '郎中叹了口气，从后柜摸出个纸包：「东市药行？那是年轻时候的事了。三合铺的何掌柜认得我，还托人带过话——说外头的世道，比村里的雾强。」
+
+      他话锋一转：「你既然问到这个份上，我再送你一句：三公每月十五，都来抓一副安神汤，说是给更夫。可我数过，他抓的分量，够放倒两头牛。」
+
+      「哑巴若是睡死了，那子时的更，是谁在敲？」'
+    choices:
+    - text: （把这句话和更簿的名单放在一处想）
+      if: not clues.loop.drowsy
+      do:
+        clues.loop.drowsy: 1
+      goto: loop.doctor
+    - text: 回客舍
+      goto: loop.awaken
+  loop.pass:
+    title: 后山口
+    text: '顺着井台那道绳痕走，村后的荒路尽头是座废矿。山口的雾比村里还浓，可雾里分明有两道新鲜的车辙，深深浅浅，一直伸进矿洞。
+
+      矿洞口横着一条新锁链，锁是新打的。洞里头隐隐有风，呜呜地响，像有人在哭，又像只是风。
+
+      你想起商队的老把式说过：这一带的山，废矿多，走夜路的商队从来绕行——不是怕塌方，是怕"货"。'
+    choices:
+    - text: 记下矿口与锁链（「货」要在这里过手）
+      if: not clues.loop.mine
+      do:
+        clues.loop.mine: 1
+      goto: loop.pass
+    - text: 回客舍
+      goto: loop.awaken
+  loop.confront:
+    title: 祠堂 · 子夜
+    text: '子时。你守在祠堂外的老槐树影里，数着更声——一下、两下……到二十四下时，更声停了。
+
+      停了很久。然后，祠堂的门无声地开了。路三公提着一盏昏灯走出来，灯下还站着一个人：那人穿着青布长衫，背着个沉甸甸的褡裢，一身外乡人的打扮。
+
+      「货备好了？」长衫客问。
+
+      三公点头，正要开口，忽然看见了你。他手里的灯一晃：「你——」'
+    choices:
+    - text: 抢上前，掀翻灯台，把更簿与那封回信亮给全村看
+      goto: loop.end-good
+    - text: 一不做二不休——火折子扔进神龛，让这把火烧个干净
+      goto: loop.end-arson
+    - text: 上前一步：你们要的「货」，今夜换个活的——我自己
+      goto: loop.end-deep
+  loop.end-good:
+    title: 结局 · 雾散·还人
+    text: '灯台翻倒，火苗舔上供桌，把祠堂照得雪亮。你站在火光前，把更簿和那封回信一样样抖开，声音不大，却让全村都听见了。
+
+      哑巴不知什么时候醒了，站在人群里，喉咙里发出含混的嘶吼——他比划着：他听见了，他早就听见了，可他敲不动那面鼓。
+
+      天亮前，村人举着火把去了后山废矿。矿洞的锁链被砸开，里头关着的人摇摇晃晃走出来——周铁生、卖布的刘婶、算命的瘸先生，还有邻村丢了半年的姑娘。
+
+      路三公和那长衫客被捆在祠堂柱子上。雾散了。你收拾货担走出村口时，阿禾追出来，往你手里塞了一包干粮。
+
+      你回头，看见更楼上，哑巴正用力地敲着鼓——这回，一下不多，一下不少。'
+    choices:
+    - text: 再走一遭这雾里的路
+      goto: '@restart'
+  loop.end-arson:
+    title: 结局 · 一了百了
+    text: '火折子脱手的那一瞬，你就知道这事回不了头了。
+
+      桐油浸过的神幔一碰就着，火舌眨眼蹿上房梁。长衫客骂了句什么，转身就跑；路三公却站在原地，直直看着你，忽然笑了：「烧了好……烧了，就没人再知道这村子的秘密了。」
+
+      火把整座祠堂烧成了白地，连同更簿、供状、那些年攒下的脏银。村人围着余烬站了一夜，没有人说话。
+
+      第二天，村口多了块新碑：客死他乡的货郎，无名无姓。可从那以后，子时的更声再没有多过一下。
+
+      你背着货担翻过山梁时，回头看了一眼——雾里，祠堂的旧址上，哑巴正蹲在那儿，拿手指一笔一画地，在新刻的碑文上描你的名字。'
+    choices:
+    - text: 再走一遭这雾里的路
+      goto: '@restart'
+  loop.end-deep:
+    title: 结局 · 夜行人
+    text: '长衫客眯起眼打量你，像在估一件货的成色：「倒是个胆子大的。」他伸手要拍你的肩。
+
+      你侧身避开，抢先一步走进雾里：「带路吧。废矿的路，我认得。」
+
+      这一走，你就没打算再以货郎的身份回来。矿洞深处的账目、接头的暗号、山客往来的路线——你一样样记在心里，等到能脱身的那天，你把这些都交给了官道上的人。
+
+      多年后，有人在山那边的镇子上见过你：不打更，不贩货，只在入夜后坐在茶摊上，看着每一个走夜路的人。
+
+      你还是在数更声。只不过这回，你数的是人心。'
+    choices:
+    - text: 再走一遭这雾里的路
+      goto: '@restart'
+  loop.end-forever:
+    title: 结局 · 第七夜
+    text: '雾漫进门槛的时候，你忽然明白了——不是你没有破局的本事，是这一夜一夜的循环里，有些门，从来只对你一个人开。
+
+      更声停了。门开了。雾涌进来，像水一样填满整个客店。你坐在床上，看着自己的手一寸寸变得模糊。
+
+      阿禾的声音从很远的地方传来：「别数了……数清了，就睡不着了。」
+
+      你想告诉她：你数清了。二十四下之后的那一下，不是更声——是这村子自己心跳的声音。
+
+      然后，雾合拢。再也没有第 7 个夜晚。'
+    choices:
+    - text: 再走一遭这雾里的路
+      goto: '@restart'
