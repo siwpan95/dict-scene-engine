@@ -1,42 +1,51 @@
-# cordis-py 迁移状态（分支 cordis-py-migration）
+# cordis-py 迁移记录（分支 cordis-py-migration）
 
-> 本文档记录 dict-scene-engine 从 Node/Cordis 架构迁移到 Python（cordis-py）的进度。
-> **master 分支不动**；本分支是迁移工作区。
+> 本文档记录 dict-scene-engine 从 Node/Cordis 架构迁移到 Python（cordis-py）的全过程。
+> **master 分支不动**；本分支是迁移工作区，合并时机由全哥定。
 
-## 已完成（2026-10-18）
+## 终态（2026-10-18，迁移完成）
 
-| 步骤 | 产物 | 验证 |
-|---|---|---|
-| 内容包导出 | `scripts/migrate/export-packs.mjs` → `packs-export.json`（39 包 / 578KB） | node 自身 import，数据保真 |
-| JSON → YAML | `scripts/migrate/json2yaml.py` → `content-py/*.yml`（39 包 / 556KB） | 场景数逐一核对，0 偏差 |
-| 表达式转译 | if/when 的 JS → Python 子集（`===`→`==`、`&&`→`and`、`!x`→`not x`、`true/false/null`→`True/False/None`） | 全量 grep 无 JS 残留 |
-| 清单移植 | `scripts/migrate/port-manifest.py` → `dse.yml`（7 插件条目） | packs 路径改写 content/ → content-py/ |
-| **引擎校验** | `dse check` | ✅ **587 场景 / 135 结局，全部可达，exit 0** |
-
-## 当前边界（诚实清单）
-
-- **能跑的**：normal + battle 模式内容（combat 已移植）、save/achievements 系统层。
-- **暂不能跑的**：trade / diary / dialogue（P3）、sound / hot-reload（P4）——
-  这些插件已从 dse.yml 摘掉，用到这些模式的场景会**响亮报错**（不是静默错乱），
-  `dse doctor` 可静态列出缺口。
-- **依赖指向分支**：`pyproject.toml` 里 `dse-core` 暂指向 cordis-py 的
-  `p1-core-engine` 分支（P2 功能尚未发版）；**0.2.0 发布后改为 `dse-core>=0.2.0`**。
-- Node 侧文件（content/*.js、plugins/、lib/、cordis.yml、tests/*.mjs、scripts/*.mjs）
-  本分支保留未删——确认迁移无误后再分提交清理，git 历史里随时可回捞。
-
-## 复现迁移
+**架构**：本仓库是 **Python 内容工程**——`dse.yml` + `content/*.yml`；
+引擎 `dse-core`（cordis-py 的 PyPI 发行名）从 PyPI 安装，见 `requirements.txt`。
+游戏本身不打包、不发布，`pip install` 的对象只有引擎。
 
 ```bash
-node scripts/migrate/export-packs.mjs        # 1. ESM → JSON
-python scripts/migrate/json2yaml.py          # 2. JSON → YAML（含表达式转译）
-python scripts/migrate/port-manifest.py      # 3. cordis.yml → dse.yml
-dse check                                    # 4. 引擎校验
+pip install -r requirements.txt   # 装引擎 dse-core>=0.3.0
+dse play --root .                 # 开玩
 ```
 
-（python 用装有 PyYAML 的环境；dse 来自 pip install -e . 后的引擎包）
+**验收记录**（全部真实用户路径：全新 venv + PyPI 装引擎）：
 
-## 下一步
+| 项 | 结果 |
+|---|---|
+| `dse check` | ✅ 587 场景 / 135 结局，全部可达，exit 0 |
+| `dse doctor` | ✅ 五模式（battle/trade/diary/dialogue/normal）× 插件全就位 |
+| 主线试玩（demo.start） | ✅ 场景渲染 + 状态插值 + 正常收尾 |
+| 经营线（town.shop） | ✅ 进货/出货/过 5 天/收市结算全周期 |
+| 对话线（crossing.boatman） | ✅ 话题面板 + ask/end |
+| 日记线（hushi.diary） | ✅ 模式接管 + 可重读篇目 UI + back 返回 |
+| `pytest tests-py/` | ✅ 4 项冒烟全绿 |
 
-1. `pip install -e .` 后试玩 battle/normal 线（脚本模式冒烟）
-2. P3 移植 trade/diary/dialogue → 发布 dse-core 0.2.0 → pyproject 改版本约束
-3. 全量试玩确认后，清理 Node 侧文件、README 改写为 Python 版
+## 迁移过程（工具链可复跑，留存于 scripts/migrate/）
+
+1. `export-packs.mjs`：node 自身 import 全部 ESM 内容包 → JSON（39 包，数据保真）
+2. `json2yaml.py`：JSON → YAML，if/when 表达式 JS→Python 子集转译
+   （`===`→`==`、`&&`→`and`、`!x`→`not x`、`true/false/null`→`True/False/None`）
+3. `port-manifest.py`：cordis.yml → dse.yml（12 插件全挂载；logger/timer 丢弃）
+
+## 清理决策（2026-10-18）
+
+- **已删**（Node 实现，共 60 文件）：content/*.js（39）、plugins/、lib/、vendor/、
+  tests/*.mjs、scripts/*.mjs 与 scripts/ai/、cli.js、game.js、cordis.yml、
+  package.json、package-lock.json
+- **保留**：`docs/`（15 篇内容设计文档——M14~M22 设计、叙事账本、扩展计划，
+  是游戏设计资产不是 Node 代码，删除即不可逆损失）；`scripts/migrate/`（迁移工具链）；
+  `.gitattributes`（LF 规则对 Python 侧依然有效）
+- Node 版完整历史仍在 git 记录与 Gitee master，随时可回捞
+
+## 已知边界
+
+- 引擎侧：dse-core 0.3.0 = Node 版 47 个源文件对应能力的全量移植，无剩余缺口
+- 内容侧：转换后场景数逐一核对无偏差；`if/when` 表达式已转 Python 语法，
+  但**业务语义未经人工逐条校对**（结构性校验全过，玩法平衡以试玩为准）
+- 音效：sound 插件已挂载，默认静音策略与 Node 版一致（DSE_MUTE/config.mute）
