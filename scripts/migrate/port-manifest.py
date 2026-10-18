@@ -42,7 +42,7 @@ DROP = {"logger", "timer"}
 
 
 def port_packs(config: dict) -> dict:
-    """scenes.config.packs：./content/x.js → ./content-py/x.yml。"""
+    """scenes.config.packs：./content/x.js → ./content/x.yml（相对工程根）。"""
     packs = config.get("packs")
     if not isinstance(packs, list):
         return config
@@ -50,7 +50,7 @@ def port_packs(config: dict) -> dict:
     for p in packs:
         s = str(p)
         if s.startswith("./content/") and s.endswith(".js"):
-            new_packs.append(s.replace("./content/", "./content-py/").replace(".js", ".yml"))
+            new_packs.append(s.replace(".js", ".yml"))
         else:
             new_packs.append(s)
     return {**config, "packs": new_packs}
