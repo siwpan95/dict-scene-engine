@@ -1,7 +1,9 @@
 # cordis-py 迁移记录（分支 cordis-py-migration）
 
 > 本文档记录 dict-scene-engine 从 Node/Cordis 架构迁移到 Python（cordis-py）的全过程。
-> **master 分支不动**；本分支是迁移工作区，合并时机由全哥定。
+>
+> **这不是新旧更替，是两种并行的实现方法**：master 保留 Node/Cordis 实现；
+> 本分支是 Python（cordis-py）实现。两套实现各自独立成立、长期共存，**不合并**。
 
 ## 终态（2026-10-18，迁移完成）
 
