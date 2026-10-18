@@ -1,0 +1,9 @@
+# dict-scene-engine 的引擎依赖：dse-core（cordis-py 的 PyPI 发行名）
+#
+# 本仓库是**内容工程**（dse.yml + content/），引擎全部来自 PyPI：
+#   pip install -r requirements.txt    # 装引擎
+#   dse play --root .                  # 开玩（或 cd 进本目录直接 dse play）
+#
+# 版本约束说明：0.3.0 是引擎 P1-P4 齐备的首版（含 trade/diary/dialogue/
+# sound/hot-reload 全部能力）；内容若用到新版引擎能力，随版本上调。
+dse-core>=0.3.0

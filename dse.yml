@@ -1,14 +1,16 @@
 # 字典场景引擎（Python 版 / cordis-py）· 插件清单
 #
 # 本文件由 scripts/migrate/port-manifest.py 从 cordis.yml 移植生成。
+# dict-scene-engine 是**内容工程**（不是 Python 包）：引擎 dse-core 从 PyPI
+# 安装（见 requirements.txt），本文件 + content/ 就是全部内容。
 # 依赖注入由运行时按 inject 声明拓扑编排，全部就绪后才会 setup。
 #
 # 插件分层：
 #   内核层  scenes / state / io / engine     引擎不可拔的四个基础服务
-#   能力层  combat                           接管 scene.mode 的可选玩法
+#   能力层  combat / trade / diary / dialogue 各接管一种 scene.mode
 #   系统层  save / achievements              存档与成就
-#   待移植  trade / diary / dialogue（P3）/ sound / hot-reload（P4）
-#          —— 摘掉期间，用到这些模式的内容场景会响亮报错（dse doctor 可静态核对）
+#   表现层  sound   开发层  hot-reload
+#   （logger / timer 是 Cordis 基础设施，Python 运行时不需要，已丢弃）
 
 - id: scenes
   config:
@@ -346,3 +348,51 @@
         crit: 0.15
         drops:
           gold: 25
+- id: trade
+  config:
+    goods:
+      tea:
+        name: 茶
+        buy: 8
+      salt:
+        name: 盐
+        buy: 4
+      cloth:
+        name: 布
+        buy: 2
+    schedule:
+    - - 12
+      - 10
+      - 15
+      - 12
+      - 11
+    - - 5
+      - 7
+      - 5
+      - 6
+      - 5
+    - - 3
+      - 3
+      - 2
+      - 4
+      - 6
+- id: diary
+- id: dialogue
+- id: sound
+  config:
+    mute: false
+    sampleRate: 22050
+    sounds:
+      battle-crit:
+        notes:
+        - 330
+        - 440
+        - 587
+        ms: 70
+        wave: square
+        gain: 0.2
+- id: hot-reload
+  config:
+    paths:
+    - ./content
+    debounce: 200

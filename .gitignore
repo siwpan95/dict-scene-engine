@@ -1,10 +1,22 @@
-node_modules/
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test / tooling
+.pytest_cache/
+.coverage
+
+# 运行时产物
 saves/
 *.log
-# 逐线实跑转录产物（tests/playthrough.mjs 生成，供人工阅读留存，不入库）
-deliverables/
 
 # 第三方源码转储 + 临时工作区（2026-09-22 治理：不入库；第三方只留来源链接）
 run_and_run/
 .workbuddy/
+# 逐线实跑转录产物（人工阅读留存，不入库）
+deliverables/
+
+# Node 侧遗留（迁移过渡期保留，清理提交后整目录消失）
+node_modules/
 scripts/routes.generated.json

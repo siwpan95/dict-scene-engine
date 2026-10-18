@@ -19,24 +19,23 @@ REPO = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 from json2yaml import convert, translate_expr  # noqa: E402
 
-# Node 插件 id → Python 内置 id
+# Node 插件 id → Python 内置 id（dse-core 0.3.0 起全部内置）
 PLUGIN_MAP = {
     "scenes": "scenes",
     "state": "state",
     "io": "io",
     "engine": "engine",
     "combat": "combat",
+    "trade": "trade",
+    "diary": "diary",
+    "dialogue": "dialogue",
+    "sound": "sound",
+    "hot-reload": "hot-reload",
     "save": "save",
     "achievements": "achievements",
 }
-# P3/P4 待移植（摘掉并记录到 MIGRATION.md）
-DEFERRED = {
-    "trade": "P3 能力层",
-    "diary": "P3 能力层",
-    "dialogue": "P3 能力层",
-    "sound": "P4 表现层",
-    "hot-reload": "P4 开发层",
-}
+# P3/P4 移植完成后无 deferred（0.3.0 前曾摘掉 trade/diary/dialogue/sound/hot-reload）
+DEFERRED: dict[str, str] = {}
 # Cordis 基础设施，直接丢弃
 DROP = {"logger", "timer"}
 
@@ -91,14 +90,16 @@ def main() -> int:
     header = """# 字典场景引擎（Python 版 / cordis-py）· 插件清单
 #
 # 本文件由 scripts/migrate/port-manifest.py 从 cordis.yml 移植生成。
+# dict-scene-engine 是**内容工程**（不是 Python 包）：引擎 dse-core 从 PyPI
+# 安装（见 requirements.txt），本文件 + content/ 就是全部内容。
 # 依赖注入由运行时按 inject 声明拓扑编排，全部就绪后才会 setup。
 #
 # 插件分层：
 #   内核层  scenes / state / io / engine     引擎不可拔的四个基础服务
-#   能力层  combat                           接管 scene.mode 的可选玩法
+#   能力层  combat / trade / diary / dialogue 各接管一种 scene.mode
 #   系统层  save / achievements              存档与成就
-#   待移植  trade / diary / dialogue（P3）/ sound / hot-reload（P4）
-#          —— 摘掉期间，用到这些模式的内容场景会响亮报错（dse doctor 可静态核对）
+#   表现层  sound   开发层  hot-reload
+#   （logger / timer 是 Cordis 基础设施，Python 运行时不需要，已丢弃）
 
 """
     target = REPO / "dse.yml"
