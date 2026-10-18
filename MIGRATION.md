@@ -1,4 +1,4 @@
-# cordis-py 迁移记录（分支 cordis-py-migration）
+# cordis-py 迁移记录（分支 python）
 
 > 本文档记录 dict-scene-engine 从 Node/Cordis 架构迁移到 Python（cordis-py）的全过程。
 >
